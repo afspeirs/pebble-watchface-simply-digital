@@ -3,12 +3,12 @@
 static Window *s_main_window;
 static TextLayer *s_time_layerH, *s_time_layerM, *s_date_layerT, *s_date_layerB;
 static GFont s_time_font, s_date_font;
+static AppSync sync;
+static uint8_t sync_buffer[124];
 
 static void update_time() {
 time_t temp = time(NULL); 
 struct tm *tick_time = localtime(&temp);
-
-window_set_background_color(s_main_window, GColorBlack);	
 
 char *custom1[] = {"0803","Rocket League","Batmobile Day"};
 char *custom2[] = {"0101","Happy","New Year"};
@@ -23,7 +23,16 @@ char *custom9[] = {"","",""};
 static char date_current[16];
 strftime(date_current, 80, "%d%m", tick_time);
 
-
+enum {
+	COLOUR_BACKGROUND	= 0,
+	COLOUR_HOUR			= 1,
+	COLOUR_MINUTE		= 2,
+	CUSTOM1_DATE		= 3,
+	CUSTOM1_TOP			= 4,
+	CUSTOM1_BOTTOM		= 5
+};
+	
+	
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////// TIME ////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -119,7 +128,7 @@ static void main_window_load(Window *window) {
 // Minutes
 	s_time_layerM = text_layer_create(GRect(36, 37, 144, 100)); //35, 40, 144, 100
 	text_layer_set_background_color(s_time_layerM, GColorClear);
-	text_layer_set_text_color(s_time_layerM, GColorWhite);
+	text_layer_set_text_color(s_time_layerM, COLOUR_BACKGROUND);
 	text_layer_set_text(s_time_layerM, "00:00");
 	text_layer_set_font(s_time_layerM, s_time_font);
 	text_layer_set_text_alignment(s_time_layerM, GTextAlignmentCenter);
@@ -162,8 +171,10 @@ static void main_window_unload(Window *window) {
 
 static void init() {
 	s_main_window = window_create();
+	window_set_background_color(s_main_window, GColorBlack);
 	window_set_window_handlers(s_main_window, (WindowHandlers) { .load = main_window_load, .unload = main_window_unload	});
 	window_stack_push(s_main_window, true);
+	app_message_open(124, 124);
 	update_time();
 	tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
 }

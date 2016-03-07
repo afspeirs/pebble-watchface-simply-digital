@@ -1,6 +1,11 @@
 {
     "appKeys": {
-        "test": 0
+        "COLOUR_BACKGROUND": 0,
+        "COLOUR_HOUR": 1,
+        "COLOUR_MINUTE": 2,
+        "CUSTOM1_BOTTOM": 5,
+        "CUSTOM1_DATE": 3,
+        "CUSTOM1_TOP": 4
     },
     "capabilities": [
         "configurable"
@@ -28,9 +33,10 @@
     "sdkVersion": "3",
     "shortName": "Simply Digital",
     "targetPlatforms": [
+        "aplite",
         "basalt"
     ],
-    "uuid": "0e42012f-a502-4565-877c-fcd38baad3b7",
+    "uuid": "50d8a3e9-962e-4472-aef9-dc1a2f0f9e5e",
     "versionLabel": "0.14",
     "watchapp": {
         "watchface": true
