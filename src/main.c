@@ -91,6 +91,8 @@ strftime(date_current, 80, "%d%m", tick_time);
 	text_layer_set_text(s_date_layerB, date_bufferB);
 }
 
+
+
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 	update_time();
 }

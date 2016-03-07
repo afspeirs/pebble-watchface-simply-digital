@@ -16,25 +16,25 @@ module.exports = [
 				"defaultValue": "Colour Selection"
 			},
 			{
-			"type": "color",
-			"appKey": "background",
-			"defaultValue": "000000",
-			"label": "Background Colour",
-			"sunlight": true
+				"type": "color",
+				"appKey": "background",
+				"label": "Background Colour",
+				"defaultValue": "000000",
+				"sunlight": true
 			},
 			{
-			"type": "color",
-			"appKey": "background",
-			"defaultValue": "FF0000",
-			"label": "Hour Colour",
-			"sunlight": true
+				"type": "color",
+				"appKey": "hour",
+				"label": "Hour Colour",
+				"defaultValue": "FF0000",
+				"sunlight": true
 			},
 			{
-			"type": "color",
-			"appKey": "background",
-			"defaultValue": "FFFFFF",
-			"label": "Minute Colour",
-			"sunlight": true
+				"type": "color",
+				"appKey": "minute",
+				"label": "Minute Colour",
+				"defaultValue": "FFFFFF",
+				"sunlight": true
 			}
 		]
 	},
@@ -46,20 +46,33 @@ module.exports = [
 				"defaultValue": "Custom Date 1"
 			},
 			{
-			"type": "toggle",
-			"appKey": "enableAnimations",
-			"label": "Enable Animations"
+				"type": "input",
+				"appKey": "custom1_date",
+				"defaultValue": "",
+				"label": "Date",
+				"attributes": {
+					"placeholder": "eg: 2512",
+					"limit": 4,
+				}
 			},
 			{
 				"type": "input",
-				"appKey": "email",
+				"appKey": "custom1_top",
 				"defaultValue": "",
-				"label": "Email Address",
+				"label": "Top Text",
 				"attributes": {
-					"placeholder": "eg: name@domain.com",
-					"limit": 10,
-					"required": "required",
-					"type": "email"
+					"placeholder": "eg: Happy",
+					"limit": 16,
+				}
+			},
+			{
+				"type": "input",
+				"appKey": "custom1_bottom",
+				"defaultValue": "",
+				"label": "Bottom Text",
+				"attributes": {
+					"placeholder": "eg: Birthday",
+					"limit": 16,
 				}
 			}
 		]
