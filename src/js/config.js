@@ -17,22 +17,29 @@ module.exports = [
 			},
 			{
 				"type": "color",
-				"appKey": "COLOUR_BACKGROUND",
+				"appKey": "KEY_COLOUR_BACKGROUND",
 				"label": "Background Colour",
 				"defaultValue": "000000",
 				"sunlight": true
 			},
 			{
 				"type": "color",
-				"appKey": "COLOUR_HOUR",
+				"appKey": "KEY_COLOUR_HOUR",
 				"label": "Hour Colour",
 				"defaultValue": "FF0000",
 				"sunlight": true
 			},
 			{
 				"type": "color",
-				"appKey": "COLOUR_MINUTE",
+				"appKey": "KEY_COLOUR_MINUTE",
 				"label": "Minute Colour",
+				"defaultValue": "FFFFFF",
+				"sunlight": true
+			},
+			{
+				"type": "color",
+				"appKey": "KEY_COLOUR_DATE",
+				"label": "Date Colour",
 				"defaultValue": "FFFFFF",
 				"sunlight": true
 			}
@@ -47,7 +54,7 @@ module.exports = [
 			},
 			{
 				"type": "input",
-				"appKey": "CUSTOM1_DATE",
+				"appKey": "KEY_CUSTOM1_DATE",
 				"defaultValue": "",
 				"label": "Date",
 				"attributes": {
@@ -57,7 +64,7 @@ module.exports = [
 			},
 			{
 				"type": "input",
-				"appKey": "CUSTOM1_TOP",
+				"appKey": "KEY_CUSTOM1_TOP",
 				"defaultValue": "",
 				"label": "Top Text",
 				"attributes": {
@@ -67,7 +74,7 @@ module.exports = [
 			},
 			{
 				"type": "input",
-				"appKey": "CUSTOM1_BOTTOM",
+				"appKey": "KEY_CUSTOM1_BOTTOM",
 				"defaultValue": "",
 				"label": "Bottom Text",
 				"attributes": {

@@ -1,11 +1,12 @@
 {
     "appKeys": {
-        "COLOUR_BACKGROUND": 0,
-        "COLOUR_HOUR": 1,
-        "COLOUR_MINUTE": 2,
-        "CUSTOM1_BOTTOM": 5,
-        "CUSTOM1_DATE": 3,
-        "CUSTOM1_TOP": 4
+        "KEY_COLOUR_BACKGROUND": 0,
+        "KEY_COLOUR_DATE": 3,
+        "KEY_COLOUR_HOUR": 1,
+        "KEY_COLOUR_MINUTE": 2,
+        "KEY_CUSTOM1_BOTTOM": 6,
+        "KEY_CUSTOM1_DATE": 4,
+        "KEY_CUSTOM1_TOP": 5
     },
     "capabilities": [
         "configurable"
@@ -36,7 +37,7 @@
         "basalt"
     ],
     "uuid": "50d8a3e9-962e-4472-aef9-dc1a2f0f9e5e",
-    "versionLabel": "0.14",
+    "versionLabel": "0.16",
     "watchapp": {
         "watchface": true
     }
