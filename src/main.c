@@ -11,7 +11,7 @@ static Window *s_main_window;
 static TextLayer *s_time_layerH, *s_time_layerM, *s_date_layerT, *s_date_layerB;
 static GFont s_time_font, s_date_font;
 
-char *custom1[] = {"","Rocket League","Batmobile Day"};
+char *custom1[] = {"0803","Batmobile Day",""};
 char *custom2[] = {"0101","Happy","New Year"};
 char *custom3[] = {"3110","Happy","Halloween"};
 char *custom4[] = {"2512","Merry","Christmas"};
@@ -20,37 +20,6 @@ char *custom6[] = {"","",""};
 char *custom7[] = {"","",""};
 char *custom8[] = {"","",""};
 char *custom9[] = {"","",""};
-
-static void in_recv_handler(DictionaryIterator *iterator, void *context) {
-	Tuple *t = dict_read_first(iterator);
-	while (t != NULL){
-		switch (t -> key){
-			//++++++ COLOUR_BACKGROUND +++++++
-			case COLOUR_BACKGROUND:
-			persist_write_string(COLOUR_BACKGROUND, t->value->cstring);
-			break;
-			//++++++ time color ++++++
-			case COLOUR_HOUR:
-			persist_write_string(COLOUR_HOUR, t->value->cstring);
-			break;
-			//++++++ date color ++++++
-			case COLOUR_MINUTE:
-			persist_write_string(COLOUR_MINUTE, t->value->cstring);
-			break;
-/*			//++++++ weekday color ++++++
-			case weekdayColor:
-			persist_write_string(timeColor, t->value->cstring);
-			break;
-			//++++++ sunday color ++++++
-			case sundayColor:
-			persist_write_string(timeColor, t->value->cstring);
-			break;
-			*/
-		}
-		t = dict_read_next(iterator);
-	}    
-}
-
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -127,12 +96,27 @@ strftime(date_current, 80, "%d%m", tick_time);
 	text_layer_set_text(s_date_layerB, date_bufferB);
 }
 
-
-
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 	update_time();
 }
 
+static void inbox_received_handler(DictionaryIterator *iter, void *context) {
+	Tuple *colour_background_t = dict_find(iter, COLOUR_BACKGROUND);
+	Tuple *colour_hour_t = dict_find(iter, COLOUR_HOUR);
+	Tuple *color_minute_t = dict_find(iter, COLOUR_MINUTE);
+
+    int back = colour_background_t->value->int32;
+    int hour = colour_hour_t->value->int32;
+    int minute = color_minute_t->value->int32;
+
+    // Persist values
+    persist_write_int(COLOUR_BACKGROUND, back);
+    persist_write_int(COLOUR_HOUR, hour);
+    persist_write_int(COLOUR_MINUTE, minute);
+
+    GColor bg_color = GColorFromHEX(COLOUR_BACKGROUND);
+    window_set_background_color(s_main_window, bg_color);
+}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -205,6 +189,9 @@ static void init() {
 	});
 	
 	window_stack_push(s_main_window, true);
+	app_message_register_inbox_received(inbox_received_handler);
+	app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
+	
 	update_time();
 	tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
 	window_set_background_color(s_main_window, GColorBlack);
