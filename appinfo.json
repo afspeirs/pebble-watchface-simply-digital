@@ -33,7 +33,6 @@
     "sdkVersion": "3",
     "shortName": "Simply Digital",
     "targetPlatforms": [
-        "aplite",
         "basalt"
     ],
     "uuid": "50d8a3e9-962e-4472-aef9-dc1a2f0f9e5e",
