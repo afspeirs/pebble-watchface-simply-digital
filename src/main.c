@@ -11,6 +11,7 @@ static Window *s_main_window;
 static TextLayer *s_time_layerH, *s_time_layerM, *s_date_layerT, *s_date_layerB;
 static GFont s_time_font, s_date_font;
 
+
 char *custom1[] = {"0803","Batmobile Day",""};
 char *custom2[] = {"0101","Happy","New Year"};
 char *custom3[] = {"3110","Happy","Halloween"};
@@ -114,9 +115,18 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
     persist_write_int(COLOUR_HOUR, hour);
     persist_write_int(COLOUR_MINUTE, minute);
 
-    GColor bg_color = GColorFromHEX(COLOUR_BACKGROUND);
-    window_set_background_color(s_main_window, bg_color);
+    GColor bg_colour = GColorFromHEX(COLOUR_BACKGROUND);
+    window_set_background_color(s_main_window, bg_colour);
+	
+    GColor hr_colour = GColorFromHEX(COLOUR_HOUR);
+	text_layer_set_text_color(s_time_layerH, hr_colour);
+	
+	GColor mn_colour = GColorFromHEX(COLOUR_MINUTE);
+	text_layer_set_text_color(s_time_layerM, mn_colour);
+	
+	update_time();
 }
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -124,6 +134,14 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void main_window_load(Window *window) {
+	int back = persist_read_int(COLOUR_BACKGROUND);
+    int hour = persist_read_int(COLOUR_HOUR);
+    int minute = persist_read_int(COLOUR_MINUTE);
+	
+    GColor bg_colour = GColorFromHEX(back);
+	GColor hr_colour = GColorFromHEX(hour);
+	GColor mn_colour = GColorFromHEX(minute);
+
 // Fonts
 	s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_72));
 	s_date_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_28));
@@ -131,7 +149,7 @@ static void main_window_load(Window *window) {
 // Hour
 	s_time_layerH = text_layer_create(GRect(-35, 37, 144, 100)); //5, 52, 139, 50
 	text_layer_set_background_color(s_time_layerH, GColorClear);
-	text_layer_set_text_color(s_time_layerH, GColorChromeYellow);
+	text_layer_set_text_color(s_time_layerH, hr_colour);
 	text_layer_set_text(s_time_layerH, "00:00");
 	text_layer_set_font(s_time_layerH, s_time_font);
 	text_layer_set_text_alignment(s_time_layerH, GTextAlignmentCenter);
@@ -140,7 +158,7 @@ static void main_window_load(Window *window) {
 // Minutes
 	s_time_layerM = text_layer_create(GRect(36, 37, 144, 100)); //35, 40, 144, 100
 	text_layer_set_background_color(s_time_layerM, GColorClear);
-	text_layer_set_text_color(s_time_layerM, GColorWhite);
+	text_layer_set_text_color(s_time_layerM, mn_colour);
 	text_layer_set_text(s_time_layerM, "00:00");
 	text_layer_set_font(s_time_layerM, s_time_font);
 	text_layer_set_text_alignment(s_time_layerM, GTextAlignmentCenter);
@@ -164,6 +182,12 @@ static void main_window_load(Window *window) {
 	text_layer_set_font(s_date_layerB, s_date_font);
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_date_layerB));
 
+	
+
+
+    window_set_background_color(s_main_window, bg_colour);
+	
+	
 	update_time();
 }
 
@@ -194,7 +218,6 @@ static void init() {
 	
 	update_time();
 	tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
-	window_set_background_color(s_main_window, GColorBlack);
 }
 
 static void deinit() {
