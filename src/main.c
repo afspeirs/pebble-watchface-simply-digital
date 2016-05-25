@@ -4,15 +4,13 @@ static Window *s_main_window;
 static TextLayer *s_time_layerH, *s_time_layerM, *s_date_layerT, *s_date_layerB;
 static GFont s_time_font, s_date_font;
 
-char *custom1[] = {"0104","","April  Fools"};
-char *custom2[] = {"0101","Happy","New Year"};
-char *custom3[] = {"3110","Happy","Halloween"};
-char *custom4[] = {"2512","Merry","Christmas"};
-char *custom5[] = {"1611","Happy","Birthday"};
-char *custom6[] = {"","",""};
-char *custom7[] = {"","",""};
-char *custom8[] = {"","",""};
-char *custom9[] = {"","",""};
+char *dates[]	= {"0101","Happy","New Year",
+				   "0901","","Ailsa's Bday",
+				   "0104","","April  Fools",
+				   "2705","","Mum's Bday",
+				   "3110","Happy","Halloween",
+				   "1611","","My Birthday",
+				   "2512","Merry","Christmas"};
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////// TIME ////////////////////////////////////////////////////////////////////////////////////
@@ -25,65 +23,33 @@ struct tm *tick_time = localtime(&temp);
 static char date_current[16];
 strftime(date_current, 80, "%d%m", tick_time);
 
-// Hour
-	static char bufferH[] = "00:00";
+// Time
+	static char bufferH[] = "00";
+	static char bufferM[] = "00";
 	if(clock_is_24h_style()) {
 		strftime(bufferH, sizeof(bufferH), "%H", tick_time);	//%H
 	} else {
 		strftime(bufferH, sizeof(bufferH), "%I", tick_time);	//%I
 	}
-	text_layer_set_text(s_time_layerH, bufferH);
-
-// Minutes	
-	static char bufferM[] = "00:00";
 	strftime(bufferM, sizeof(bufferM), "%M", tick_time);		//%M
+	text_layer_set_text(s_time_layerH, bufferH);
 	text_layer_set_text(s_time_layerM, bufferM);
 
 // Date
 	static char date_bufferT[16];
-	static char date_bufferB[16];
-	
-	if(strcmp(date_current,custom1[0]) == 0 && strcmp(custom1[1],"") != 0) {		// Top
-		strcpy(date_bufferT,custom1[1]);
-	} else if(strcmp(date_current,custom2[0]) == 0 && strcmp(custom2[1],"") != 0) {
-		strcpy(date_bufferT,custom2[1]);
-	} else if(strcmp(date_current,custom3[0]) == 0 && strcmp(custom3[1],"") != 0) {
-		strcpy(date_bufferT,custom3[1]);
-	} else if(strcmp(date_current,custom4[0]) == 0 && strcmp(custom4[1],"") != 0) {
-		strcpy(date_bufferT,custom4[1]);
-	} else if(strcmp(date_current,custom5[0]) == 0 && strcmp(custom5[1],"") != 0) {
-		strcpy(date_bufferT,custom5[1]);
-	} else if(strcmp(date_current,custom6[0]) == 0 && strcmp(custom6[1],"") != 0) {
-		strcpy(date_bufferT,custom6[1]);
-	} else if(strcmp(date_current,custom7[0]) == 0 && strcmp(custom7[1],"") != 0) {
-		strcpy(date_bufferT,custom7[1]);
-	} else if(strcmp(date_current,custom8[0]) == 0 && strcmp(custom8[1],"") != 0) {
-		strcpy(date_bufferT,custom8[1]);
-	} else if(strcmp(date_current,custom9[0]) == 0 && strcmp(custom9[1],"") != 0) {
-		strcpy(date_bufferT,custom9[1]);
-	} else {
-		strftime(date_bufferT, sizeof(date_bufferT), "%A", tick_time);		// %A
+	static char date_bufferB[16];	
+	int len = sizeof(dates)/sizeof(dates[0]);
+
+// Top
+	for(int i = 0; i < len; ++i) {
+		if(!strcmp(dates[i], date_current)) {
+			strftime(date_bufferT, sizeof(date_bufferT), dates[i+1], tick_time);
+			strftime(date_bufferB, sizeof(date_bufferB), dates[i+2], tick_time);
+		}
 	}
-	
-	if(strcmp(date_current,custom1[0]) == 0 && strcmp(custom1[2],"") != 0) {		// Bottom
-		strcpy(date_bufferB, custom1[2]);
-	} else if(strcmp(date_current,custom2[0]) == 0 && strcmp(custom2[2],"") != 0) {
-		strcpy(date_bufferB, custom2[2]);
-	} else if(strcmp(date_current,custom3[0]) == 0 && strcmp(custom3[2],"") != 0) {
-		strcpy(date_bufferB, custom3[2]);
-	} else if(strcmp(date_current,custom4[0]) == 0 && strcmp(custom4[2],"") != 0) {
-		strcpy(date_bufferB, custom4[2]);
-	} else if(strcmp(date_current,custom5[0]) == 0 && strcmp(custom5[2],"") != 0) {
-		strcpy(date_bufferB, custom5[2]);
-	} else if(strcmp(date_current,custom6[0]) == 0 && strcmp(custom6[2],"") != 0) {
-		strcpy(date_bufferB, custom6[2]);
-	} else if(strcmp(date_current,custom7[0]) == 0 && strcmp(custom7[2],"") != 0) {
-		strcpy(date_bufferB, custom7[2]);
-	} else if(strcmp(date_current,custom8[0]) == 0 && strcmp(custom8[2],"") != 0) {
-		strcpy(date_bufferB, custom8[2]);
-	} else if(strcmp(date_current,custom9[0]) == 0 && strcmp(custom9[2],"") != 0) {
-		strcpy(date_bufferB, custom9[2]);
-	} else {
+	if(!strcmp(date_bufferT,"\0")) {
+		strftime(date_bufferT, sizeof(date_bufferT), "%A", tick_time);		// %A
+	} if(!strcmp(date_bufferB,"\0")) {
 		strftime(date_bufferB, sizeof(date_bufferB), "%e  %B", tick_time);	// %e  %B
 	}
 	text_layer_set_text(s_date_layerT, date_bufferT);
@@ -93,6 +59,10 @@ strftime(date_current, 80, "%d%m", tick_time);
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 	update_time();
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////// DISPLAY /////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void bluetooth_callback(bool connected) {
 	if(!connected) {
@@ -104,10 +74,6 @@ static void bluetooth_callback(bool connected) {
 		text_layer_set_text_color(s_time_layerM, GColorWhite);
 	}
 }
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////// DISPLAY /////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void main_window_load(Window *window) {
 // Fonts
@@ -188,3 +154,4 @@ int main(void) {
 	app_event_loop();
 	deinit();
 }
+
