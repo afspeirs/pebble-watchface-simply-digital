@@ -4,13 +4,51 @@ static Window *s_main_window;
 static TextLayer *s_time_layerH, *s_time_layerM, *s_date_layerT, *s_date_layerB;
 static GFont s_time_font, s_date_font;
 
+#define KEY_COLOUR_BACKGROUND 0
+#define KEY_COLOUR_HOUR 1
+#define KEY_COLOUR_MINUTE 2
+#define KEY_COLOUR_DATE 3
+
 char *dates[]	= {"0101","Happy","New Year",
-				   "0901","","Ailsa's Bday",
+				   "0901","","Ailsa's  Bday",
 				   "0104","","April  Fools",
-				   "2705","","Mum's Bday",
+				   "2705","","Mum's  Bday",
+				   "1408","","Dad's  Bday",
 				   "3110","Happy","Halloween",
-				   "1611","","My Birthday",
-				   "2512","Merry","Christmas"};
+				   "1611","","My  Birthday",
+				   "2512","Merry","Christmas",
+				   "2612","Boxing","Day",
+				   "3112","New Years","Eve"};
+
+static void inbox_received_handler(DictionaryIterator *iter, void *context) {
+// Color scheme?
+	Tuple *colour_background_t = dict_find(iter, KEY_COLOUR_BACKGROUND);
+	Tuple *colour_hour_t = dict_find(iter, KEY_COLOUR_HOUR);
+	Tuple *colour_minute_t = dict_find(iter, KEY_COLOUR_MINUTE);
+	Tuple *colour_date_t = dict_find(iter, KEY_COLOUR_DATE);
+
+    int background = colour_background_t->value->int32;
+	int hour = colour_hour_t->value->int32;
+	int minute = colour_minute_t->value->int32;
+	int date = colour_date_t->value->int32;
+
+// Persist values
+	persist_write_int(KEY_COLOUR_BACKGROUND, background);
+	persist_write_int(KEY_COLOUR_HOUR, hour);
+	persist_write_int(KEY_COLOUR_MINUTE, minute);
+	persist_write_int(KEY_COLOUR_DATE, date);
+
+	GColor bg_colour = GColorFromHEX(background);
+	window_set_background_color(s_main_window, bg_colour);
+	GColor hr_colour = GColorFromHEX(hour);
+	text_layer_set_text_color(s_time_layerH, hr_colour);
+	GColor mn_colour = GColorFromHEX(minute);
+	text_layer_set_text_color(s_time_layerM, mn_colour);
+	
+	GColor dt_colour = GColorFromHEX(date);
+	text_layer_set_text_color(s_date_layerT, dt_colour);
+	text_layer_set_text_color(s_date_layerB, dt_colour);
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////// TIME ////////////////////////////////////////////////////////////////////////////////////
@@ -61,19 +99,28 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////// DISPLAY /////////////////////////////////////////////////////////////////////////////////
+//////////// BLUETOOTH ///////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void bluetooth_callback(bool connected) {
+	int hour = persist_read_int(KEY_COLOUR_HOUR);
+	GColor hr_colour = GColorFromHEX(hour);
+	int minute = persist_read_int(KEY_COLOUR_MINUTE);
+	GColor mn_colour = GColorFromHEX(minute);
+	
 	if(!connected) {
 		text_layer_set_text_color(s_time_layerH, GColorRed);
 		text_layer_set_text_color(s_time_layerM, GColorRed);
 		vibes_long_pulse();
 	} else {
-		text_layer_set_text_color(s_time_layerH, GColorChromeYellow);
-		text_layer_set_text_color(s_time_layerM, GColorWhite);
+		text_layer_set_text_color(s_time_layerH, hr_colour);
+		text_layer_set_text_color(s_time_layerM, mn_colour);
 	}
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////// DISPLAY /////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void main_window_load(Window *window) {
 // Fonts
@@ -98,7 +145,7 @@ static void main_window_load(Window *window) {
 	s_date_layerT = text_layer_create(GRect(0, 11, 144, 30)); //0, 11, 144, 30
 	text_layer_set_font(s_date_layerT, s_date_font);
 	text_layer_set_text_alignment(s_date_layerT, GTextAlignmentCenter);
-	text_layer_set_text_color(s_date_layerT, GColorWhite);
+//	text_layer_set_text_color(s_date_layerT, GColorWhite);
 	text_layer_set_background_color(s_date_layerT, GColorClear);
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_date_layerT));
 
@@ -106,10 +153,20 @@ static void main_window_load(Window *window) {
 	s_date_layerB = text_layer_create(GRect(0, 121, 144, 30)); //0, 121, 144, 30
 	text_layer_set_font(s_date_layerB, s_date_font);
 	text_layer_set_text_alignment(s_date_layerB, GTextAlignmentCenter);
-	text_layer_set_text_color(s_date_layerB, GColorWhite);
+//	text_layer_set_text_color(s_date_layerB, GColorWhite);
 	text_layer_set_background_color(s_date_layerB, GColorClear);
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_date_layerB));
 
+// Colours
+	int background = persist_read_int(KEY_COLOUR_BACKGROUND);
+	GColor bg_color = GColorFromHEX(background);
+	window_set_background_color(s_main_window, bg_color);
+	
+	int date = persist_read_int(KEY_COLOUR_DATE);
+	GColor dt_colour = GColorFromHEX(date);
+	text_layer_set_text_color(s_date_layerT, dt_colour);
+	text_layer_set_text_color(s_date_layerB, dt_colour);
+	
 	bluetooth_callback(connection_service_peek_pebble_app_connection());
 	update_time();
 }
@@ -134,15 +191,20 @@ static void init() {
 		.load = main_window_load,
 		.unload = main_window_unload
 	});
+	window_stack_push(s_main_window, true);
 	
 	connection_service_subscribe((ConnectionHandlers) {
   		.pebble_app_connection_handler = bluetooth_callback
 	});
 	
-	window_stack_push(s_main_window, true);
+// Open AppMessage
+	const int inbox_size = 128;
+	const int outbox_size = 128;
+	app_message_register_inbox_received(inbox_received_handler);
+	app_message_open(inbox_size, outbox_size);
+	
 	update_time();
 	tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
-	window_set_background_color(s_main_window, GColorBlack);
 }
 
 static void deinit() {

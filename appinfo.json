@@ -1,7 +1,12 @@
 {
-    "appKeys": {},
+    "appKeys": {
+        "KEY_COLOUR_BACKGROUND": 0,
+        "KEY_COLOUR_DATE": 3,
+        "KEY_COLOUR_HOUR": 1,
+        "KEY_COLOUR_MINUTE": 2
+    },
     "capabilities": [
-        ""
+        "configurable"
     ],
     "companyName": "AFSpeirs",
     "enableMultiJS": true,
@@ -11,13 +16,13 @@
         "media": [
             {
                 "file": "fonts/BebasNeue.otf",
-                "name": "FONT_BEBAS_NEUE_28",
+                "name": "FONT_BEBAS_NEUE_72",
                 "targetPlatforms": null,
                 "type": "font"
             },
             {
                 "file": "fonts/BebasNeue.otf",
-                "name": "FONT_BEBAS_NEUE_72",
+                "name": "FONT_BEBAS_NEUE_28",
                 "targetPlatforms": null,
                 "type": "font"
             }
@@ -28,8 +33,8 @@
     "targetPlatforms": [
         "basalt"
     ],
-    "uuid": "5e5530d4-dbc2-48a6-9119-fd0055f62eaa",
-    "versionLabel": "0.19",
+    "uuid": "51c897b8-5ca6-4412-82db-11a4cf304ae1",
+    "versionLabel": "0.21",
     "watchapp": {
         "watchface": true
     }
