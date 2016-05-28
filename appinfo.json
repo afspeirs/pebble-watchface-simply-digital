@@ -16,13 +16,13 @@
         "media": [
             {
                 "file": "fonts/BebasNeue.otf",
-                "name": "FONT_BEBAS_NEUE_72",
+                "name": "FONT_BEBAS_NEUE_28",
                 "targetPlatforms": null,
                 "type": "font"
             },
             {
                 "file": "fonts/BebasNeue.otf",
-                "name": "FONT_BEBAS_NEUE_28",
+                "name": "FONT_BEBAS_NEUE_72",
                 "targetPlatforms": null,
                 "type": "font"
             }

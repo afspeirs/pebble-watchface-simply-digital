@@ -21,7 +21,7 @@ char *dates[]	= {"0101","Happy","New Year",
 				   "3112","New Years","Eve"};
 
 static void inbox_received_handler(DictionaryIterator *iter, void *context) {
-// Color scheme?
+// Colours
 	Tuple *colour_background_t = dict_find(iter, KEY_COLOUR_BACKGROUND);
 	Tuple *colour_hour_t = dict_find(iter, KEY_COLOUR_HOUR);
 	Tuple *colour_minute_t = dict_find(iter, KEY_COLOUR_MINUTE);
@@ -32,7 +32,6 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	int minute = colour_minute_t->value->int32;
 	int date = colour_date_t->value->int32;
 
-// Persist values
 	persist_write_int(KEY_COLOUR_BACKGROUND, background);
 	persist_write_int(KEY_COLOUR_HOUR, hour);
 	persist_write_int(KEY_COLOUR_MINUTE, minute);
@@ -170,7 +169,6 @@ static void main_window_load(Window *window) {
 	bluetooth_callback(connection_service_peek_pebble_app_connection());
 	update_time();
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////// Other ///////////////////////////////////////////////////////////////////////////////////
