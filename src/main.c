@@ -4,21 +4,14 @@ static Window *s_main_window;
 static TextLayer *s_time_layerH, *s_time_layerM, *s_date_layerT, *s_date_layerB;
 static GFont s_time_font, s_date_font;
 
-#define KEY_COLOUR_BACKGROUND 0
-#define KEY_COLOUR_HOUR 1
-#define KEY_COLOUR_MINUTE 2
-#define KEY_COLOUR_DATE 3
+enum {
+	KEY_COLOUR_BACKGROUND = 0,	// Key: 0
+	KEY_COLOUR_DATE,        	// Key: 1
+	KEY_COLOUR_HOUR,			// Key: 2
+	KEY_COLOUR_MINUTE			// Key: 3
+};
 
-char *dates[]	= {"0101","Happy","New Year",
-				   "0901","","Ailsa's  Bday",
-				   "0104","","April  Fools",
-				   "2705","","Mum's  Bday",
-				   "1408","","Dad's  Bday",
-				   "3110","Happy","Halloween",
-				   "1611","","My  Birthday",
-				   "2512","Merry","Christmas",
-				   "2612","Boxing","Day",
-				   "3112","New Years","Eve"};
+char *dates[]	= {"0104","","April  Fools"};
 
 static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 // Colours
@@ -39,14 +32,13 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 
 	GColor bg_colour = GColorFromHEX(background);
 	window_set_background_color(s_main_window, bg_colour);
+	GColor dt_colour = GColorFromHEX(date);
+	text_layer_set_text_color(s_date_layerT, dt_colour);
+	text_layer_set_text_color(s_date_layerB, dt_colour);
 	GColor hr_colour = GColorFromHEX(hour);
 	text_layer_set_text_color(s_time_layerH, hr_colour);
 	GColor mn_colour = GColorFromHEX(minute);
 	text_layer_set_text_color(s_time_layerM, mn_colour);
-	
-	GColor dt_colour = GColorFromHEX(date);
-	text_layer_set_text_color(s_date_layerT, dt_colour);
-	text_layer_set_text_color(s_date_layerB, dt_colour);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -74,20 +66,27 @@ strftime(date_current, 80, "%d%m", tick_time);
 
 // Date
 	static char date_bufferT[16];
-	static char date_bufferB[16];	
+	static char date_bufferB[16];
 	int len = sizeof(dates)/sizeof(dates[0]);
 
 // Top
 	for(int i = 0; i < len; ++i) {
 		if(!strcmp(dates[i], date_current)) {
-			strftime(date_bufferT, sizeof(date_bufferT), dates[i+1], tick_time);
-			strftime(date_bufferB, sizeof(date_bufferB), dates[i+2], tick_time);
+			if(strcmp(dates[i+1], "\0") == 0) {
+				strftime(date_bufferT, sizeof(date_bufferT), "%A", tick_time);		// %A
+			} else {
+				strftime(date_bufferT, sizeof(date_bufferT), dates[i+1], tick_time);
+			}
+			if(strcmp(dates[i+2], "\0") == 0) {
+				strftime(date_bufferB, sizeof(date_bufferB), "%e  %B", tick_time);	// %e  %B
+			} else {
+				strftime(date_bufferB, sizeof(date_bufferB), dates[i+2], tick_time);
+			}	
+			break;
+		} else {
+			strftime(date_bufferT, sizeof(date_bufferT), "%A", tick_time);		// %A
+			strftime(date_bufferB, sizeof(date_bufferB), "%e  %B", tick_time);	// %e  %B
 		}
-	}
-	if(!strcmp(date_bufferT,"\0")) {
-		strftime(date_bufferT, sizeof(date_bufferT), "%A", tick_time);		// %A
-	} if(!strcmp(date_bufferB,"\0")) {
-		strftime(date_bufferB, sizeof(date_bufferB), "%e  %B", tick_time);	// %e  %B
 	}
 	text_layer_set_text(s_date_layerT, date_bufferT);
 	text_layer_set_text(s_date_layerB, date_bufferB);
@@ -112,8 +111,13 @@ static void bluetooth_callback(bool connected) {
 		text_layer_set_text_color(s_time_layerM, GColorRed);
 		vibes_long_pulse();
 	} else {
-		text_layer_set_text_color(s_time_layerH, hr_colour);
-		text_layer_set_text_color(s_time_layerM, mn_colour);
+		if(hour && minute) {
+			text_layer_set_text_color(s_time_layerH, hr_colour);
+			text_layer_set_text_color(s_time_layerM, mn_colour);
+		} else {
+			text_layer_set_text_color(s_time_layerH, GColorWhite);
+			text_layer_set_text_color(s_time_layerM, GColorWhite);
+		}
 	}
 }
 
@@ -144,7 +148,6 @@ static void main_window_load(Window *window) {
 	s_date_layerT = text_layer_create(GRect(0, 11, 144, 30)); //0, 11, 144, 30
 	text_layer_set_font(s_date_layerT, s_date_font);
 	text_layer_set_text_alignment(s_date_layerT, GTextAlignmentCenter);
-//	text_layer_set_text_color(s_date_layerT, GColorWhite);
 	text_layer_set_background_color(s_date_layerT, GColorClear);
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_date_layerT));
 
@@ -152,19 +155,24 @@ static void main_window_load(Window *window) {
 	s_date_layerB = text_layer_create(GRect(0, 121, 144, 30)); //0, 121, 144, 30
 	text_layer_set_font(s_date_layerB, s_date_font);
 	text_layer_set_text_alignment(s_date_layerB, GTextAlignmentCenter);
-//	text_layer_set_text_color(s_date_layerB, GColorWhite);
 	text_layer_set_background_color(s_date_layerB, GColorClear);
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_date_layerB));
 
 // Colours
 	int background = persist_read_int(KEY_COLOUR_BACKGROUND);
-	GColor bg_color = GColorFromHEX(background);
-	window_set_background_color(s_main_window, bg_color);
-	
 	int date = persist_read_int(KEY_COLOUR_DATE);
-	GColor dt_colour = GColorFromHEX(date);
-	text_layer_set_text_color(s_date_layerT, dt_colour);
-	text_layer_set_text_color(s_date_layerB, dt_colour);
+	
+	if(background && date) {
+		GColor bg_color = GColorFromHEX(background);
+		window_set_background_color(s_main_window, bg_color);
+		GColor dt_colour = GColorFromHEX(date);
+		text_layer_set_text_color(s_date_layerT, dt_colour);
+		text_layer_set_text_color(s_date_layerB, dt_colour);
+	} else {
+		window_set_background_color(s_main_window, GColorBlack);
+		text_layer_set_text_color(s_date_layerT, GColorWhite);
+		text_layer_set_text_color(s_date_layerB, GColorWhite);
+	}
 	
 	bluetooth_callback(connection_service_peek_pebble_app_connection());
 	update_time();
@@ -194,8 +202,7 @@ static void init() {
 	connection_service_subscribe((ConnectionHandlers) {
   		.pebble_app_connection_handler = bluetooth_callback
 	});
-	
-// Open AppMessage
+
 	const int inbox_size = 128;
 	const int outbox_size = 128;
 	app_message_register_inbox_received(inbox_received_handler);

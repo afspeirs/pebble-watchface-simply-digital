@@ -15,24 +15,28 @@ module.exports = [
 				"type": "color",
 				"appKey": "KEY_COLOUR_BACKGROUND",
 				"label": "Background Colour",
+				"defaultValue": "000000",
 				"sunlight": true
 			},
 			{
 				"type": "color",
 				"appKey": "KEY_COLOUR_DATE",
 				"label": "Date Colour",
+				"defaultValue": "FFFFFF",
 				"sunlight": true
 			},
 			{
 				"type": "color",
 				"appKey": "KEY_COLOUR_HOUR",
 				"label": "Hour Colour",
+				"defaultValue": "FFAA00",
 				"sunlight": true
 			},
 			{
 				"type": "color",
 				"appKey": "KEY_COLOUR_MINUTE",
 				"label": "Minute Colour",
+				"defaultValue": "FFFFFF",
 				"sunlight": true
 			}
 		]
