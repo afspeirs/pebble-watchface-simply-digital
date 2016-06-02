@@ -31,11 +31,10 @@
     "sdkVersion": "3",
     "shortName": "Simply Digital",
     "targetPlatforms": [
-        "aplite",
         "basalt"
     ],
     "uuid": "51c897b8-5ca6-4412-82db-11a4cf304ae1",
-    "versionLabel": "0.24",
+    "versionLabel": "0.25",
     "watchapp": {
         "watchface": true
     }

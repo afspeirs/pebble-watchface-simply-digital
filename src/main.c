@@ -85,7 +85,16 @@ strftime(date_current, 80, "%d%m", tick_time);
 			break;
 		} else {
 			strftime(date_bufferT, sizeof(date_bufferT), "%A", tick_time);		// %A
-			strftime(date_bufferB, sizeof(date_bufferB), "%e  %B", tick_time);	// %e  %B
+			if (strncmp(date_current, "01", 2) == 0 || strncmp(date_current, "21", 2) == 0 || strncmp(date_current,"31",2) == 0) { 
+				strftime(date_bufferB, sizeof(date_bufferB), "%est  %B", tick_time);
+			} else if (strncmp(date_current, "02", 2) == 0 || strncmp(date_current, "22", 2) == 0) { 
+				strftime(date_bufferB, sizeof(date_bufferB), "%end  %B", tick_time);
+			} else if (strncmp(date_current, "03", 2) == 0 || strncmp(date_current, "23", 2) == 0) { 
+				strftime(date_bufferB, sizeof(date_bufferB), "%erd  %B", tick_time);
+			} else {
+				strftime(date_bufferB, sizeof(date_bufferB), "%eth  %B", tick_time);	// %e  %B
+			}
+			
 		}
 	}
 	text_layer_set_text(s_date_layerT, date_bufferT);
