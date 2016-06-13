@@ -1,0 +1,52 @@
+{
+    "author": "AFSpeirs",
+    "dependencies": {},
+    "keywords": [],
+    "name": "simply-digital",
+    "pebble": {
+        "capabilities": [
+            "configurable"
+        ],
+        "displayName": "Simply Digital",
+        "enableMultiJS": true,
+        "messageKeys": [
+            "COLOUR_BACKGROUND",
+            "COLOUR_DATE",
+            "COLOUR_HOUR",
+            "COLOUR_MINUTE",
+            "SUFFIX"
+        ],
+        "projectType": "native",
+        "resources": {
+            "media": [
+                {
+                    "file": "fonts/Bebas Neue Regular",
+                    "name": "FONT_BEBAS_NEUE_REGULAR_28",
+                    "targetPlatforms": null,
+                    "type": "font"
+                },
+                {
+                    "file": "fonts/Bebas Neue Bold",
+                    "name": "FONT_BEBAS_NEUE_BOLD_72",
+                    "targetPlatforms": null,
+                    "type": "font"
+                },
+                {
+                    "file": "fonts/Bebas Neue Bold",
+                    "name": "FONT_BEBAS_NEUE_BOLD_28",
+                    "targetPlatforms": null,
+                    "type": "font"
+                }
+            ]
+        },
+        "sdkVersion": "3",
+        "targetPlatforms": [
+            "basalt"
+        ],
+        "uuid": "51c897b8-5ca6-4412-82db-11a4cf304ae1",
+        "watchapp": {
+            "watchface": true
+        }
+    },
+    "version": "0.28.0"
+}

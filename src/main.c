@@ -4,31 +4,30 @@ static Window *s_main_window;
 static TextLayer *s_time_layerH, *s_time_layerM, *s_date_layerT, *s_date_layerB;
 static GFont s_time_font, s_date_font;
 
-enum {
-	KEY_COLOUR_BACKGROUND = 0,	// Key: 0
-	KEY_COLOUR_DATE,        	// Key: 1
-	KEY_COLOUR_HOUR,			// Key: 2
-	KEY_COLOUR_MINUTE			// Key: 3
-};
-
 char *dates[]	= {"0104","","April  Fools"};
 
-static void inbox_received_handler(DictionaryIterator *iter, void *context) {
-// Colours
-	Tuple *colour_background_t = dict_find(iter, KEY_COLOUR_BACKGROUND);
-	Tuple *colour_hour_t = dict_find(iter, KEY_COLOUR_HOUR);
-	Tuple *colour_minute_t = dict_find(iter, KEY_COLOUR_MINUTE);
-	Tuple *colour_date_t = dict_find(iter, KEY_COLOUR_DATE);
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////// Configuration ///////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 
+static void inbox_received_handler(DictionaryIterator *iter, void *context) {
+	Tuple *colour_background_t = dict_find(iter, MESSAGE_KEY_COLOUR_BACKGROUND);
+	Tuple *colour_hour_t = dict_find(iter, MESSAGE_KEY_COLOUR_HOUR);
+	Tuple *colour_minute_t = dict_find(iter, MESSAGE_KEY_COLOUR_MINUTE);
+	Tuple *colour_date_t = dict_find(iter, MESSAGE_KEY_COLOUR_DATE);
+	Tuple *toggle_suffix_t = dict_find(iter, MESSAGE_KEY_SUFFIX);
+	
     int background = colour_background_t->value->int32;
 	int hour = colour_hour_t->value->int32;
 	int minute = colour_minute_t->value->int32;
 	int date = colour_date_t->value->int32;
+	int suffix = toggle_suffix_t->value->int32;
 
-	persist_write_int(KEY_COLOUR_BACKGROUND, background);
-	persist_write_int(KEY_COLOUR_HOUR, hour);
-	persist_write_int(KEY_COLOUR_MINUTE, minute);
-	persist_write_int(KEY_COLOUR_DATE, date);
+	persist_write_int(MESSAGE_KEY_COLOUR_BACKGROUND, background);
+	persist_write_int(MESSAGE_KEY_COLOUR_HOUR, hour);
+	persist_write_int(MESSAGE_KEY_COLOUR_MINUTE, minute);
+	persist_write_int(MESSAGE_KEY_COLOUR_DATE, date);
+	persist_write_int(MESSAGE_KEY_SUFFIX, suffix);
 
 	GColor bg_colour = GColorFromHEX(background);
 	window_set_background_color(s_main_window, bg_colour);
@@ -46,11 +45,11 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void update_time() {
-time_t temp = time(NULL); 
-struct tm *tick_time = localtime(&temp);
+	time_t temp = time(NULL); 
+	struct tm *tick_time = localtime(&temp);
 		
-static char date_current[16];
-strftime(date_current, 80, "%d%m", tick_time);
+	static char date_current[16];
+	strftime(date_current, 80, "%d%m", tick_time);
 
 // Time
 	static char bufferH[] = "00";
@@ -67,24 +66,25 @@ strftime(date_current, 80, "%d%m", tick_time);
 // Date
 	static char date_bufferT[16];
 	static char date_bufferB[16];
-	int len = sizeof(dates)/sizeof(dates[0]);
 
-// Top
+	int len = sizeof(dates)/sizeof(dates[0]);
+	
 	for(int i = 0; i < len; ++i) {
 		if(!strcmp(dates[i], date_current)) {
 			if(strcmp(dates[i+1], "\0") == 0) {
 				strftime(date_bufferT, sizeof(date_bufferT), "%A", tick_time);		// %A
-			} else {
-				strftime(date_bufferT, sizeof(date_bufferT), dates[i+1], tick_time);
-			}
+			} else { strftime(date_bufferT, sizeof(date_bufferT), dates[i+1], tick_time); }
 			if(strcmp(dates[i+2], "\0") == 0) {
 				strftime(date_bufferB, sizeof(date_bufferB), "%e  %B", tick_time);	// %e  %B
-			} else {
-				strftime(date_bufferB, sizeof(date_bufferB), dates[i+2], tick_time);
-			}	
+			} else { strftime(date_bufferB, sizeof(date_bufferB), dates[i+2], tick_time); }	
 			break;
-		} else {
-			strftime(date_bufferT, sizeof(date_bufferT), "%A", tick_time);		// %A
+		} 
+	}
+	if(strcmp(date_bufferT, "\0") == 0) {
+		strftime(date_bufferT, sizeof(date_bufferT), "%A", tick_time);		// %A
+	} if(strcmp(date_bufferB, "\0") == 0) {
+		int suffix = persist_read_int(MESSAGE_KEY_SUFFIX);
+		if(suffix == 1) { //on
 			if (strncmp(date_current, "01", 2) == 0 || strncmp(date_current, "21", 2) == 0 || strncmp(date_current,"31",2) == 0) { 
 				strftime(date_bufferB, sizeof(date_bufferB), "%est  %B", tick_time);
 			} else if (strncmp(date_current, "02", 2) == 0 || strncmp(date_current, "22", 2) == 0) { 
@@ -92,13 +92,14 @@ strftime(date_current, 80, "%d%m", tick_time);
 			} else if (strncmp(date_current, "03", 2) == 0 || strncmp(date_current, "23", 2) == 0) { 
 				strftime(date_bufferB, sizeof(date_bufferB), "%erd  %B", tick_time);
 			} else {
-				strftime(date_bufferB, sizeof(date_bufferB), "%eth  %B", tick_time);	// %e  %B
+				strftime(date_bufferB, sizeof(date_bufferB), "%eth  %B", tick_time);	// %e  %B	ᵗʰ
 			}
-			
+		} else { 		//	if(suffix == 0) { //off
+			strftime(date_bufferB, sizeof(date_bufferB), "%e  %B", tick_time);	// %e  %B	ᵗʰ
 		}
 	}
 	text_layer_set_text(s_date_layerT, date_bufferT);
-	text_layer_set_text(s_date_layerB, date_bufferB);
+	text_layer_set_text(s_date_layerB, date_bufferB); //date_bufferB
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -110,14 +111,19 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void bluetooth_callback(bool connected) {
-	int hour = persist_read_int(KEY_COLOUR_HOUR);
+	int hour = persist_read_int(MESSAGE_KEY_COLOUR_HOUR);
 	GColor hr_colour = GColorFromHEX(hour);
-	int minute = persist_read_int(KEY_COLOUR_MINUTE);
+	int minute = persist_read_int(MESSAGE_KEY_COLOUR_MINUTE);
 	GColor mn_colour = GColorFromHEX(minute);
 	
 	if(!connected) {
-		text_layer_set_text_color(s_time_layerH, GColorRed);
-		text_layer_set_text_color(s_time_layerM, GColorRed);
+		#if defined(PBL_COLOR)
+			text_layer_set_text_color(s_time_layerH, GColorRed);
+			text_layer_set_text_color(s_time_layerM, GColorRed);
+		#elif defined(PBL_BW)
+			text_layer_set_text_color(s_time_layerH, GColorWhite);
+			text_layer_set_background_color(s_time_layerM, GColorBlack);
+		#endif
 		vibes_long_pulse();
 	} else {
 		if(hour && minute) {
@@ -136,9 +142,9 @@ static void bluetooth_callback(bool connected) {
 
 static void main_window_load(Window *window) {
 // Fonts
-	s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_72));
-	s_date_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_28));
-  	
+	s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_72));
+	s_date_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_28));
+	
 // Hour
 	s_time_layerH = text_layer_create(GRect(0, 37, 72, 100)); //0, 37, 72, 100
 	text_layer_set_font(s_time_layerH, s_time_font);
@@ -168,8 +174,8 @@ static void main_window_load(Window *window) {
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_date_layerB));
 
 // Colours
-	int background = persist_read_int(KEY_COLOUR_BACKGROUND);
-	int date = persist_read_int(KEY_COLOUR_DATE);
+	int background = persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND);
+	int date = persist_read_int(MESSAGE_KEY_COLOUR_DATE);
 	
 	if(background && date) {
 		GColor bg_color = GColorFromHEX(background);
@@ -216,7 +222,7 @@ static void init() {
 	const int outbox_size = 128;
 	app_message_register_inbox_received(inbox_received_handler);
 	app_message_open(inbox_size, outbox_size);
-	
+
 	update_time();
 	tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
 }
