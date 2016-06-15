@@ -38,45 +38,16 @@ module.exports = [
 				"label": "Minute Colour",
 				"defaultValue": "FFFFFF",
 				"sunlight": true
+			},
+			{
+				"type": "color",
+				"appKey": "COLOUR_BLUETOOTH",
+				"label": "Blutooth Disconnect Colour",
+				"defaultValue": "FF0000",
+				"sunlight": true
 			}
 		]
-	},
-// 	{
-// 		"type": "section",
-// 		"items": [
-// 			{
-// 				"type": "heading",
-// 				"defaultValue": "Custom Date 1"
-// 			},
-// 			{
-// 				"type": "input",
-// 				"appKey": "CUSTOM1_DATE",
-// 				"defaultValue": "",
-// 				"label": "Date",
-// 				"attributes": {
-// 					"placeholder": "eg: 2512 (25th December)",
-// 				}
-// 			},
-// 			{
-// 				"type": "input",
-// 				"appKey": "CUSTOM1_TOP",
-// 				"defaultValue": "",
-// 				"label": "Top Text",
-// 				"attributes": {
-// 					"placeholder": "eg: Happy",
-// 				}
-// 			},
-// 			{
-// 				"type": "input",
-// 				"appKey": "CUSTOM1_BOTTOM",
-// 				"defaultValue": "",
-// 				"label": "Bottom Text",
-// 				"attributes": {
-// 					"placeholder": "eg: Birthday",
-// 				}
-// 			}
-// 		]
-// 	},	
+	},	
 	{
 		"type": "section",
 		"items": [

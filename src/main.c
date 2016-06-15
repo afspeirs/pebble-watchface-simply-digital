@@ -4,8 +4,6 @@ static Window *s_main_window;
 static TextLayer *s_time_layerH, *s_time_layerM, *s_date_layerT, *s_date_layerB;
 static GFont s_time_font, s_date_font;
 
-char *dates[]	= {"0104","","April  Fools"};
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////// Configuration ///////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -15,18 +13,21 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	Tuple *colour_hour_t = dict_find(iter, MESSAGE_KEY_COLOUR_HOUR);
 	Tuple *colour_minute_t = dict_find(iter, MESSAGE_KEY_COLOUR_MINUTE);
 	Tuple *colour_date_t = dict_find(iter, MESSAGE_KEY_COLOUR_DATE);
+	Tuple *colour_bluetooth_t = dict_find(iter, MESSAGE_KEY_COLOUR_BLUETOOTH);
 	Tuple *toggle_suffix_t = dict_find(iter, MESSAGE_KEY_SUFFIX);
 	
     int background = colour_background_t->value->int32;
 	int hour = colour_hour_t->value->int32;
 	int minute = colour_minute_t->value->int32;
 	int date = colour_date_t->value->int32;
+	int bluetooth = colour_bluetooth_t->value->int32;
 	int suffix = toggle_suffix_t->value->int32;
 
 	persist_write_int(MESSAGE_KEY_COLOUR_BACKGROUND, background);
 	persist_write_int(MESSAGE_KEY_COLOUR_HOUR, hour);
 	persist_write_int(MESSAGE_KEY_COLOUR_MINUTE, minute);
 	persist_write_int(MESSAGE_KEY_COLOUR_DATE, date);
+	persist_write_int(MESSAGE_KEY_COLOUR_BLUETOOTH, bluetooth);
 	persist_write_int(MESSAGE_KEY_SUFFIX, suffix);
 
 	GColor bg_colour = GColorFromHEX(background);
@@ -67,19 +68,13 @@ static void update_time() {
 	static char date_bufferT[16];
 	static char date_bufferB[16];
 
-	int len = sizeof(dates)/sizeof(dates[0]);
-	
-	for(int i = 0; i < len; ++i) {
-		if(!strcmp(dates[i], date_current)) {
-			if(strcmp(dates[i+1], "\0") == 0) {
-				strftime(date_bufferT, sizeof(date_bufferT), "%A", tick_time);		// %A
-			} else { strftime(date_bufferT, sizeof(date_bufferT), dates[i+1], tick_time); }
-			if(strcmp(dates[i+2], "\0") == 0) {
-				strftime(date_bufferB, sizeof(date_bufferB), "%e  %B", tick_time);	// %e  %B
-			} else { strftime(date_bufferB, sizeof(date_bufferB), dates[i+2], tick_time); }	
-			break;
-		} 
+	if(strcmp("0104", date_current) == 0) {		// If date is 1st April, Display "April Fools" on bottom
+		strcpy(date_bufferB, "April  Fools");
+	} else {
+		strcpy(date_bufferT, "\0");
+		strcpy(date_bufferB, "\0");
 	}
+	
 	if(strcmp(date_bufferT, "\0") == 0) {
 		strftime(date_bufferT, sizeof(date_bufferT), "%A", tick_time);		// %A
 	} if(strcmp(date_bufferB, "\0") == 0) {
@@ -115,15 +110,24 @@ static void bluetooth_callback(bool connected) {
 	GColor hr_colour = GColorFromHEX(hour);
 	int minute = persist_read_int(MESSAGE_KEY_COLOUR_MINUTE);
 	GColor mn_colour = GColorFromHEX(minute);
+	int bluetooth = persist_read_int(MESSAGE_KEY_COLOUR_BLUETOOTH);
+	GColor bt_colour = GColorFromHEX(bluetooth);
 	
 	if(!connected) {
-		#if defined(PBL_COLOR)
-			text_layer_set_text_color(s_time_layerH, GColorRed);
-			text_layer_set_text_color(s_time_layerM, GColorRed);
-		#elif defined(PBL_BW)
-			text_layer_set_text_color(s_time_layerH, GColorWhite);
-			text_layer_set_background_color(s_time_layerM, GColorBlack);
-		#endif
+		if(bluetooth) {
+			text_layer_set_text_color(s_time_layerH, bt_colour);
+			text_layer_set_text_color(s_time_layerM, bt_colour);
+		} else {
+			#if defined(PBL_COLOR)
+				text_layer_set_text_color(s_time_layerH, GColorRed);
+				text_layer_set_text_color(s_time_layerM, GColorRed);	
+			#elif defined(PBL_BW)
+				text_layer_set_text_color(s_time_layerH, GColorWhite);
+				text_layer_set_text_color(s_time_layerM, GColorWhite);
+				text_layer_set_text_color(s_date_layerT, GColorBlack);
+				text_layer_set_text_color(s_date_layerB, GColorBlack);
+			#endif
+		}
 		vibes_long_pulse();
 	} else {
 		if(hour && minute) {
