@@ -13,41 +13,41 @@ module.exports = [
 			},
 			{
 				"type": "color",
-				"appKey": "COLOUR_BACKGROUND",
+				"messageKey": "COLOUR_BACKGROUND",
 				"label": "Background Colour",
 				"defaultValue": "000000",
 				"sunlight": true
 			},
 			{
 				"type": "color",
-				"appKey": "COLOUR_DATE",
+				"messageKey": "COLOUR_DATE",
 				"label": "Date Colour",
 				"defaultValue": "FFFFFF",
 				"sunlight": true
 			},
 			{
 				"type": "color",
-				"appKey": "COLOUR_HOUR",
+				"messageKey": "COLOUR_HOUR",
 				"label": "Hour Colour",
 				"defaultValue": "FFAA00",
 				"sunlight": true
 			},
 			{
 				"type": "color",
-				"appKey": "COLOUR_MINUTE",
+				"messageKey": "COLOUR_MINUTE",
 				"label": "Minute Colour",
 				"defaultValue": "FFFFFF",
 				"sunlight": true
 			},
 			{
 				"type": "color",
-				"appKey": "COLOUR_BLUETOOTH",
+				"messageKey": "COLOUR_BLUETOOTH",
 				"label": "Blutooth Disconnect Colour",
 				"defaultValue": "FF0000",
 				"sunlight": true
 			}
 		]
-	},	
+	},
 	{
 		"type": "section",
 		"items": [

@@ -1,6 +1,8 @@
 {
     "author": "AFSpeirs",
-    "dependencies": {},
+    "dependencies": {
+        "pebble-clay": "^1.0.0"
+    },
     "keywords": [],
     "name": "simply-digital",
     "pebble": {
@@ -44,7 +46,7 @@
         "targetPlatforms": [
             "basalt"
         ],
-        "uuid": "51c897b8-5ca6-4412-82db-11a4cf304ae1",
+        "uuid": "557a4ab4-94a7-4315-ab67-34aa3810ffc2",
         "watchapp": {
             "watchface": true
         }
