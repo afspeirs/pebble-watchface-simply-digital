@@ -149,29 +149,37 @@ static void main_window_load(Window *window) {
 	s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_72));
 	s_date_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_28));
 	
+	#if defined(PBL_RECT)
+		s_time_layerH = text_layer_create(GRect(0, 37, 72, 100)); //0, 37, 72, 100
+		s_time_layerM = text_layer_create(GRect(73, 37, 72, 100)); //73, 37, 72, 100
+		s_date_layerT = text_layer_create(GRect(0, 11, 144, 30)); //0, 11, 144, 30
+		s_date_layerB = text_layer_create(GRect(0, 121, 144, 30)); //0, 121, 144, 30
+	#elif defined(PBL_ROUND)
+		s_time_layerH = text_layer_create(GRect(19, 37+7, 72, 100)); //x, y, h, w
+		s_time_layerM = text_layer_create(GRect(73+19, 37+7, 72, 100));
+		s_date_layerT = text_layer_create(GRect(19, 11+7, 144, 30));
+		s_date_layerB = text_layer_create(GRect(19, 121+7, 144, 30));
+	#endif
+	
 // Hour
-	s_time_layerH = text_layer_create(GRect(0, 37, 72, 100)); //0, 37, 72, 100
 	text_layer_set_font(s_time_layerH, s_time_font);
 	text_layer_set_text_alignment(s_time_layerH, GTextAlignmentCenter);
 	text_layer_set_background_color(s_time_layerH, GColorClear);
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_time_layerH));
 	
 // Minutes
-	s_time_layerM = text_layer_create(GRect(73, 37, 72, 100)); //73, 37, 72, 100
 	text_layer_set_font(s_time_layerM, s_time_font);
 	text_layer_set_text_alignment(s_time_layerM, GTextAlignmentCenter);
 	text_layer_set_background_color(s_time_layerM, GColorClear);
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_time_layerM));
 
 // Top
-	s_date_layerT = text_layer_create(GRect(0, 11, 144, 30)); //0, 11, 144, 30
 	text_layer_set_font(s_date_layerT, s_date_font);
 	text_layer_set_text_alignment(s_date_layerT, GTextAlignmentCenter);
 	text_layer_set_background_color(s_date_layerT, GColorClear);
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_date_layerT));
 
 // Bottom
-	s_date_layerB = text_layer_create(GRect(0, 121, 144, 30)); //0, 121, 144, 30
 	text_layer_set_font(s_date_layerB, s_date_font);
 	text_layer_set_text_alignment(s_date_layerB, GTextAlignmentCenter);
 	text_layer_set_background_color(s_date_layerB, GColorClear);

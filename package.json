@@ -44,12 +44,13 @@
         },
         "sdkVersion": "3",
         "targetPlatforms": [
-            "basalt"
+            "basalt",
+            "chalk"
         ],
-        "uuid": "557a4ab4-94a7-4315-ab67-34aa3810ffc2",
+        "uuid": "51c897b8-5ca6-4412-82db-11a4cf304ae1",
         "watchapp": {
             "watchface": true
         }
     },
-    "version": "0.29.0"
+    "version": "0.31.0"
 }

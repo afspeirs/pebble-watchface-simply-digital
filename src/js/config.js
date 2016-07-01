@@ -53,7 +53,7 @@ module.exports = [
 		"items": [
 			{
 				"type": "toggle",
-				"appKey": "SUFFIX",
+				"messageKey": "SUFFIX",
 				"label": "Enable suffix for date",
 				"description": "You will need to wait a minute for the change to occur",
 				"defaultValue": false,
