@@ -23,28 +23,32 @@ module.exports = [
 				"messageKey": "COLOUR_DATE",
 				"label": "Date Colour",
 				"defaultValue": "FFFFFF",
-				"sunlight": true
+				"sunlight": true,
+				"capabilities": ["NOT_BW"],
 			},
 			{
 				"type": "color",
 				"messageKey": "COLOUR_HOUR",
 				"label": "Hour Colour",
 				"defaultValue": "FFAA00",
-				"sunlight": true
+				"sunlight": true,
+				"capabilities": ["NOT_BW"],
 			},
 			{
 				"type": "color",
 				"messageKey": "COLOUR_MINUTE",
 				"label": "Minute Colour",
 				"defaultValue": "FFFFFF",
-				"sunlight": true
+				"sunlight": true,
+				"capabilities": ["NOT_BW"],
 			},
 			{
 				"type": "color",
 				"messageKey": "COLOUR_BLUETOOTH",
 				"label": "Blutooth Disconnect Colour",
 				"defaultValue": "FF0000",
-				"sunlight": true
+				"sunlight": true,
+				"capabilities": ["NOT_BW"],
 			}
 		]
 	},

@@ -32,13 +32,21 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 
 	GColor bg_colour = GColorFromHEX(background);
 	window_set_background_color(s_main_window, bg_colour);
-	GColor dt_colour = GColorFromHEX(date);
-	text_layer_set_text_color(s_date_layerT, dt_colour);
-	text_layer_set_text_color(s_date_layerB, dt_colour);
-	GColor hr_colour = GColorFromHEX(hour);
-	text_layer_set_text_color(s_time_layerH, hr_colour);
-	GColor mn_colour = GColorFromHEX(minute);
-	text_layer_set_text_color(s_time_layerM, mn_colour);
+	
+	#if defined(PBL_COLOR)
+		GColor dt_colour = GColorFromHEX(date);
+		text_layer_set_text_color(s_date_layerT, dt_colour);
+		text_layer_set_text_color(s_date_layerB, dt_colour);
+		GColor hr_colour = GColorFromHEX(hour);
+		text_layer_set_text_color(s_time_layerH, hr_colour);
+		GColor mn_colour = GColorFromHEX(minute);
+		text_layer_set_text_color(s_time_layerM, mn_colour);
+	#elif defined(PBL_BW)	
+		text_layer_set_text_color(s_date_layerT, gcolor_legible_over(bg_colour));
+		text_layer_set_text_color(s_date_layerB, gcolor_legible_over(bg_colour));
+		text_layer_set_text_color(s_time_layerH, gcolor_legible_over(bg_colour));
+		text_layer_set_text_color(s_time_layerM, gcolor_legible_over(bg_colour));
+	#endif
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -94,7 +102,7 @@ static void update_time() {
 		}
 	}
 	text_layer_set_text(s_date_layerT, date_bufferT);
-	text_layer_set_text(s_date_layerB, date_bufferB); //date_bufferB
+	text_layer_set_text(s_date_layerB, date_bufferB);
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -114,20 +122,22 @@ static void bluetooth_callback(bool connected) {
 	GColor bt_colour = GColorFromHEX(bluetooth);
 	
 	if(!connected) {
-		if(bluetooth) {
-			text_layer_set_text_color(s_time_layerH, bt_colour);
-			text_layer_set_text_color(s_time_layerM, bt_colour);
-		} else {
-			#if defined(PBL_COLOR)
+		#if defined(PBL_COLOR)
+			if(bluetooth) {
+				text_layer_set_text_color(s_time_layerH, bt_colour);
+				text_layer_set_text_color(s_time_layerM, bt_colour);
+			} else {
 				text_layer_set_text_color(s_time_layerH, GColorRed);
-				text_layer_set_text_color(s_time_layerM, GColorRed);	
-			#elif defined(PBL_BW)
-				text_layer_set_text_color(s_time_layerH, GColorWhite);
-				text_layer_set_text_color(s_time_layerM, GColorWhite);
-				text_layer_set_text_color(s_date_layerT, GColorBlack);
-				text_layer_set_text_color(s_date_layerB, GColorBlack);
-			#endif
-		}
+				text_layer_set_text_color(s_time_layerM, GColorRed);
+			}	
+		#elif defined(PBL_BW)
+			int background = persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND);
+			GColor bg_colour = GColorFromHEX(background);
+			text_layer_set_text_color(s_time_layerH, gcolor_legible_over(bg_colour));
+			text_layer_set_text_color(s_time_layerM, gcolor_legible_over(bg_colour));
+			text_layer_set_text_color(s_date_layerT, bg_colour);
+			text_layer_set_text_color(s_date_layerB, bg_colour);
+		#endif
 		vibes_long_pulse();
 	} else {
 		if(hour && minute) {
@@ -148,12 +158,12 @@ static void main_window_load(Window *window) {
 // Fonts
 	s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_72));
 	s_date_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_28));
-	
+
 	#if defined(PBL_RECT)
-		s_time_layerH = text_layer_create(GRect(0, 37, 72, 100)); //0, 37, 72, 100
-		s_time_layerM = text_layer_create(GRect(73, 37, 72, 100)); //73, 37, 72, 100
-		s_date_layerT = text_layer_create(GRect(0, 11, 144, 30)); //0, 11, 144, 30
-		s_date_layerB = text_layer_create(GRect(0, 121, 144, 30)); //0, 121, 144, 30
+		s_time_layerH = text_layer_create(GRect(0, 37, 72, 100)); //x, y, h, w
+		s_time_layerM = text_layer_create(GRect(73, 37, 72, 100));
+		s_date_layerT = text_layer_create(GRect(0, 11, 144, 30));
+		s_date_layerB = text_layer_create(GRect(0, 121, 144, 30));
 	#elif defined(PBL_ROUND)
 		s_time_layerH = text_layer_create(GRect(19, 37+7, 72, 100)); //x, y, h, w
 		s_time_layerM = text_layer_create(GRect(73+19, 37+7, 72, 100));
@@ -190,11 +200,16 @@ static void main_window_load(Window *window) {
 	int date = persist_read_int(MESSAGE_KEY_COLOUR_DATE);
 	
 	if(background && date) {
-		GColor bg_color = GColorFromHEX(background);
-		window_set_background_color(s_main_window, bg_color);
-		GColor dt_colour = GColorFromHEX(date);
-		text_layer_set_text_color(s_date_layerT, dt_colour);
-		text_layer_set_text_color(s_date_layerB, dt_colour);
+		GColor bg_colour = GColorFromHEX(background);
+		window_set_background_color(s_main_window, bg_colour);
+		#if defined(PBL_COLOR)
+			GColor dt_colour = GColorFromHEX(date);
+			text_layer_set_text_color(s_date_layerT, dt_colour);
+			text_layer_set_text_color(s_date_layerB, dt_colour);
+		#elif defined(PBL_BW)	
+			text_layer_set_text_color(s_date_layerT, gcolor_legible_over(bg_colour));
+			text_layer_set_text_color(s_date_layerB, gcolor_legible_over(bg_colour));
+		#endif
 	} else {
 		window_set_background_color(s_main_window, GColorBlack);
 		text_layer_set_text_color(s_date_layerT, GColorWhite);

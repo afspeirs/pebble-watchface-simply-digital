@@ -44,6 +44,7 @@
         },
         "sdkVersion": "3",
         "targetPlatforms": [
+            "aplite",
             "basalt",
             "chalk"
         ],
@@ -52,5 +53,5 @@
             "watchface": true
         }
     },
-    "version": "0.31.0"
+    "version": "0.32.0"
 }
