@@ -2,7 +2,7 @@ module.exports = [
 	{ 
     	"type": "heading", 
     	"defaultValue": "Simply Digital",
-		"size": 1
+		"size": 1,
 	},
 	{
 		"type": "section",
@@ -56,12 +56,73 @@ module.exports = [
 		"type": "section",
 		"items": [
 			{
+				"type": "heading",
+				"defaultValue": "Battery"
+			},
+			{
 				"type": "toggle",
-				"messageKey": "SUFFIX",
-				"label": "Enable suffix for date",
-				"description": "You will need to wait a minute for the change to occur",
+				"messageKey": "TOGGLE_BATTERY",
+				"label": "Toggle battery icon",
+				"description": "Displays a symbol when the batery is 20% or less",
 				"defaultValue": false,
-			}
+			},
+// 			{
+// 				"type": "select",
+// 				"messageKey": "SELECT_BATTERY_PERCENT",
+// 				"defaultValue": "20",
+// 				"label": "Low battery:",
+// 				"options": [
+// 					{ 
+// 						"label": "10%",
+// 						"value": "10" 
+// 					},
+// 					{ 
+// 						"label": "20%",
+// 						"value": "20" 
+// 					},
+// 					{ 
+// 						"label": "30%",
+// 						"value": "30" 
+// 					},
+// 					{ 
+// 						"label": "40%",
+// 						"value": "40" 
+// 					},
+// 					{ 
+// 						"label": "50%",
+// 						"value": "50" 
+// 					},
+// 				]
+// 			},
+// 			{
+//  				"type": "select",
+//  				"messageKey": "SELECT_BATTERY_COLOUR",
+//  				"defaultValue": "white",
+//  				"label": "Low battery colour:",
+//  				"options": [
+//  					{ 
+//  						"label": "white",
+//  						"value": "white" 
+// 					},
+// 					{ 
+// 						"label": "black",
+// 						"value": "black" 
+// 					},
+// 				]
+// 			},
+		]
+ 	},
+ 	{
+ 		"type": "section",
+ 		"items": [
+			{
+				"type": "toggle",
+				"messageKey": "TOGGLE_SUFFIX",
+				"label": "Toggle suffix for date",
+				"description": "You may need to wait a minute for the change to occur",
+				"defaultValue": false,
+			},
+
 		]
 	},
 	{

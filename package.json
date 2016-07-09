@@ -17,11 +17,19 @@
             "COLOUR_HOUR",
             "COLOUR_MINUTE",
             "COLOUR_BLUETOOTH",
-            "SUFFIX"
+            "TOGGLE_BATTERY",
+            "TOGGLE_SUFFIX"
         ],
         "projectType": "native",
         "resources": {
             "media": [
+                {
+                    "file": "images/battery_white",
+                    "name": "IMAGE_BATTERY_WHITE",
+                    "storageFormat": "pbi",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
                 {
                     "file": "fonts/Bebas Neue Regular",
                     "name": "FONT_BEBAS_NEUE_REGULAR_28",
@@ -53,5 +61,5 @@
             "watchface": true
         }
     },
-    "version": "0.32.0"
+    "version": "0.33.0"
 }

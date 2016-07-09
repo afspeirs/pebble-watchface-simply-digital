@@ -3,10 +3,75 @@
 static Window *s_main_window;
 static TextLayer *s_time_layerH, *s_time_layerM, *s_date_layerT, *s_date_layerB;
 static GFont s_time_font, s_date_font;
+static BitmapLayer *s_battery_layer;
+static GBitmap *s_battery_bitmap;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////// Configuration ///////////////////////////////////////////////////////////////////////////
+//////////// Callbacks ///////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
+
+static void battery_callback(BatteryChargeState state) {
+	int battery = persist_read_int(MESSAGE_KEY_TOGGLE_BATTERY);
+	if(battery == 1) { //on
+		if(state.charge_percent < 20) {
+			layer_set_hidden(bitmap_layer_get_layer(s_battery_layer), false); // Visible
+		} else {
+			layer_set_hidden(bitmap_layer_get_layer(s_battery_layer), true);  // Hidden
+		}
+	} else {
+		layer_set_hidden(bitmap_layer_get_layer(s_battery_layer), true);
+	}
+}
+
+static void bluetooth_callback(bool connected) {
+	int background = persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND);
+	int hour = persist_read_int(MESSAGE_KEY_COLOUR_HOUR);
+	int bluetooth = persist_read_int(MESSAGE_KEY_COLOUR_BLUETOOTH);
+	
+	if(!connected) {		// Disconected
+		if(bluetooth) {
+			#if defined(PBL_COLOR)
+				GColor bt_colour = GColorFromHEX(bluetooth);
+				text_layer_set_text_color(s_time_layerH, bt_colour);
+				text_layer_set_text_color(s_time_layerM, bt_colour);
+			#elif defined(PBL_BW)
+				GColor bg_colour = GColorFromHEX(background);
+				text_layer_set_text_color(s_time_layerH, gcolor_legible_over(bg_colour));
+				text_layer_set_text_color(s_time_layerM, gcolor_legible_over(bg_colour));
+				text_layer_set_text_color(s_date_layerT, bg_colour);
+				text_layer_set_text_color(s_date_layerB, bg_colour);
+			#endif
+		} else {
+			#if defined(PBL_COLOR)
+				text_layer_set_text_color(s_time_layerH, GColorRed);
+				text_layer_set_text_color(s_time_layerM, GColorRed);
+			#elif defined(PBL_BW)
+				text_layer_set_text_color(s_time_layerH, GColorWhite);
+				text_layer_set_text_color(s_time_layerM, GColorWhite);
+				text_layer_set_text_color(s_date_layerT, GColorBlack);
+				text_layer_set_text_color(s_date_layerB, GColorBlack);
+			#endif
+		}
+		vibes_long_pulse();
+	} else {				// Connected
+		if(background || hour) {
+			#if defined(PBL_COLOR)
+				GColor hr_colour = GColorFromHEX(hour);
+				int minute = persist_read_int(MESSAGE_KEY_COLOUR_MINUTE);
+				GColor mn_colour = GColorFromHEX(minute);
+				text_layer_set_text_color(s_time_layerH, hr_colour);
+				text_layer_set_text_color(s_time_layerM, mn_colour);	
+			#elif defined(PBL_BW)
+				GColor bg_colour = GColorFromHEX(background);
+				text_layer_set_text_color(s_time_layerH, gcolor_legible_over(bg_colour));
+				text_layer_set_text_color(s_time_layerM, gcolor_legible_over(bg_colour));	
+			#endif
+		} else {	
+			text_layer_set_text_color(s_time_layerH, GColorWhite);
+			text_layer_set_text_color(s_time_layerM, GColorWhite);
+		}
+	}
+}
 
 static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	Tuple *colour_background_t = dict_find(iter, MESSAGE_KEY_COLOUR_BACKGROUND);
@@ -14,13 +79,15 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	Tuple *colour_minute_t = dict_find(iter, MESSAGE_KEY_COLOUR_MINUTE);
 	Tuple *colour_date_t = dict_find(iter, MESSAGE_KEY_COLOUR_DATE);
 	Tuple *colour_bluetooth_t = dict_find(iter, MESSAGE_KEY_COLOUR_BLUETOOTH);
-	Tuple *toggle_suffix_t = dict_find(iter, MESSAGE_KEY_SUFFIX);
+	Tuple *toggle_battery_t = dict_find(iter, MESSAGE_KEY_TOGGLE_BATTERY);
+	Tuple *toggle_suffix_t = dict_find(iter, MESSAGE_KEY_TOGGLE_SUFFIX);
 	
     int background = colour_background_t->value->int32;
 	int hour = colour_hour_t->value->int32;
 	int minute = colour_minute_t->value->int32;
 	int date = colour_date_t->value->int32;
 	int bluetooth = colour_bluetooth_t->value->int32;
+	int battery = toggle_battery_t->value->int32;
 	int suffix = toggle_suffix_t->value->int32;
 
 	persist_write_int(MESSAGE_KEY_COLOUR_BACKGROUND, background);
@@ -28,7 +95,8 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	persist_write_int(MESSAGE_KEY_COLOUR_MINUTE, minute);
 	persist_write_int(MESSAGE_KEY_COLOUR_DATE, date);
 	persist_write_int(MESSAGE_KEY_COLOUR_BLUETOOTH, bluetooth);
-	persist_write_int(MESSAGE_KEY_SUFFIX, suffix);
+	persist_write_int(MESSAGE_KEY_TOGGLE_BATTERY, battery);
+	persist_write_int(MESSAGE_KEY_TOGGLE_SUFFIX, suffix);
 
 	GColor bg_colour = GColorFromHEX(background);
 	window_set_background_color(s_main_window, bg_colour);
@@ -46,7 +114,8 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 		text_layer_set_text_color(s_date_layerB, gcolor_legible_over(bg_colour));
 		text_layer_set_text_color(s_time_layerH, gcolor_legible_over(bg_colour));
 		text_layer_set_text_color(s_time_layerM, gcolor_legible_over(bg_colour));
-	#endif
+	#endif	
+	battery_callback(battery_state_service_peek());
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -86,7 +155,7 @@ static void update_time() {
 	if(strcmp(date_bufferT, "\0") == 0) {
 		strftime(date_bufferT, sizeof(date_bufferT), "%A", tick_time);		// %A
 	} if(strcmp(date_bufferB, "\0") == 0) {
-		int suffix = persist_read_int(MESSAGE_KEY_SUFFIX);
+		int suffix = persist_read_int(MESSAGE_KEY_TOGGLE_SUFFIX);
 		if(suffix == 1) { //on
 			if (strncmp(date_current, "01", 2) == 0 || strncmp(date_current, "21", 2) == 0 || strncmp(date_current,"31",2) == 0) { 
 				strftime(date_bufferB, sizeof(date_bufferB), "%est  %B", tick_time);
@@ -110,47 +179,6 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////// BLUETOOTH ///////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-
-static void bluetooth_callback(bool connected) {
-	int hour = persist_read_int(MESSAGE_KEY_COLOUR_HOUR);
-	GColor hr_colour = GColorFromHEX(hour);
-	int minute = persist_read_int(MESSAGE_KEY_COLOUR_MINUTE);
-	GColor mn_colour = GColorFromHEX(minute);
-	int bluetooth = persist_read_int(MESSAGE_KEY_COLOUR_BLUETOOTH);
-	GColor bt_colour = GColorFromHEX(bluetooth);
-	
-	if(!connected) {
-		#if defined(PBL_COLOR)
-			if(bluetooth) {
-				text_layer_set_text_color(s_time_layerH, bt_colour);
-				text_layer_set_text_color(s_time_layerM, bt_colour);
-			} else {
-				text_layer_set_text_color(s_time_layerH, GColorRed);
-				text_layer_set_text_color(s_time_layerM, GColorRed);
-			}	
-		#elif defined(PBL_BW)
-			int background = persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND);
-			GColor bg_colour = GColorFromHEX(background);
-			text_layer_set_text_color(s_time_layerH, gcolor_legible_over(bg_colour));
-			text_layer_set_text_color(s_time_layerM, gcolor_legible_over(bg_colour));
-			text_layer_set_text_color(s_date_layerT, bg_colour);
-			text_layer_set_text_color(s_date_layerB, bg_colour);
-		#endif
-		vibes_long_pulse();
-	} else {
-		if(hour && minute) {
-			text_layer_set_text_color(s_time_layerH, hr_colour);
-			text_layer_set_text_color(s_time_layerM, mn_colour);
-		} else {
-			text_layer_set_text_color(s_time_layerH, GColorWhite);
-			text_layer_set_text_color(s_time_layerM, GColorWhite);
-		}
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////// DISPLAY /////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -158,19 +186,27 @@ static void main_window_load(Window *window) {
 // Fonts
 	s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_72));
 	s_date_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_28));
-
+	
+// Locations
 	#if defined(PBL_RECT)
 		s_time_layerH = text_layer_create(GRect(0, 37, 72, 100)); //x, y, h, w
 		s_time_layerM = text_layer_create(GRect(73, 37, 72, 100));
 		s_date_layerT = text_layer_create(GRect(0, 11, 144, 30));
 		s_date_layerB = text_layer_create(GRect(0, 121, 144, 30));
+		s_battery_layer = bitmap_layer_create(GRect(4, 2, 12, 12)); // battery
 	#elif defined(PBL_ROUND)
 		s_time_layerH = text_layer_create(GRect(19, 37+7, 72, 100)); //x, y, h, w
 		s_time_layerM = text_layer_create(GRect(73+19, 37+7, 72, 100));
 		s_date_layerT = text_layer_create(GRect(19, 11+7, 144, 30));
 		s_date_layerB = text_layer_create(GRect(19, 121+7, 144, 30));
+		s_battery_layer = bitmap_layer_create(GRect(84, 2, 12, 12)); // battery
 	#endif
-	
+
+// Battery Image
+	s_battery_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATTERY_WHITE);
+	bitmap_layer_set_bitmap(s_battery_layer, s_battery_bitmap);
+	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_battery_layer));
+		
 // Hour
 	text_layer_set_font(s_time_layerH, s_time_font);
 	text_layer_set_text_alignment(s_time_layerH, GTextAlignmentCenter);
@@ -215,7 +251,7 @@ static void main_window_load(Window *window) {
 		text_layer_set_text_color(s_date_layerT, GColorWhite);
 		text_layer_set_text_color(s_date_layerB, GColorWhite);
 	}
-	
+		
 	bluetooth_callback(connection_service_peek_pebble_app_connection());
 	update_time();
 }
@@ -250,11 +286,16 @@ static void init() {
 	app_message_register_inbox_received(inbox_received_handler);
 	app_message_open(inbox_size, outbox_size);
 
+	battery_state_service_subscribe(battery_callback);
+	battery_callback(battery_state_service_peek());
+
 	update_time();
 	tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
 }
 
 static void deinit() {
+	gbitmap_destroy(s_battery_bitmap);
+	bitmap_layer_destroy(s_battery_layer);
 	window_destroy(s_main_window);
 }
 
