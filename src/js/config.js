@@ -63,37 +63,37 @@ module.exports = [
 				"type": "toggle",
 				"messageKey": "TOGGLE_BATTERY",
 				"label": "Toggle battery icon",
-				"description": "Displays a symbol when the batery is 20% or less",
+//				"description": "Displays a symbol when the batery is 20% or less",
 				"defaultValue": false,
 			},
-// 			{
-// 				"type": "select",
-// 				"messageKey": "SELECT_BATTERY_PERCENT",
-// 				"defaultValue": "20",
-// 				"label": "Low battery:",
-// 				"options": [
-// 					{ 
-// 						"label": "10%",
-// 						"value": "10" 
-// 					},
-// 					{ 
-// 						"label": "20%",
-// 						"value": "20" 
-// 					},
-// 					{ 
-// 						"label": "30%",
-// 						"value": "30" 
-// 					},
-// 					{ 
-// 						"label": "40%",
-// 						"value": "40" 
-// 					},
-// 					{ 
-// 						"label": "50%",
-// 						"value": "50" 
-// 					},
-// 				]
-// 			},
+			{
+				"type": "select",
+				"messageKey": "SELECT_BATTERY_PERCENT",
+				"defaultValue": "20",
+				"label": "Low battery percent",
+				"options": [
+					{ 
+						"label": "10%",
+						"value": "10" 
+					},
+					{ 
+						"label": "20%",
+						"value": "20" 
+					},
+					{ 
+						"label": "30%",
+						"value": "30" 
+					},
+					{ 
+						"label": "40%",
+						"value": "40" 
+					},
+					{ 
+						"label": "50%",
+						"value": "50" 
+					},
+				]
+			},
 // 			{
 //  				"type": "select",
 //  				"messageKey": "SELECT_BATTERY_COLOUR",
