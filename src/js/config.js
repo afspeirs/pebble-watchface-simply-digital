@@ -115,16 +115,43 @@ module.exports = [
  	{
  		"type": "section",
  		"items": [
+// 			{
+// 				"type": "select",
+// 				"messageKey": "SELECT_DATE_BOTTOM",
+// 				"defaultValue": "0",
+// 				"label": "Date layout",
+// 				"options": [
+// 					{ 
+// 						"label": "Day Month",
+// 						"value": "0" 
+// 					},
+// 					{ 
+// 						"label": "Month Day",
+// 						"value": "1" 
+// 					},
+// 				]
+// 			},
 			{
 				"type": "toggle",
 				"messageKey": "TOGGLE_SUFFIX",
 				"label": "Toggle suffix for date",
-				"description": "You may need to wait a minute for the change to occur",
+//				"description": "You may need to wait a minute for the change to occur",
 				"defaultValue": false,
 			},
-
 		]
 	},
+// 	{
+// 		"type": "section",
+// 		"items": [		
+// 			{
+// 				"type": "checkboxgroup",
+// 				"messageKey": "CHECK_DATE",
+// 				"label": "Dates to display",
+// 				"defaultValue": [false, false, false],
+// 				"options": ["New Years Day", "Christmas", "Halloween"]
+// 			}
+// 		]
+// 	},			
 	{
 		"type": "submit",
 		"defaultValue": "Save"

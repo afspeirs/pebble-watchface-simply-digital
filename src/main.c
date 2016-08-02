@@ -6,6 +6,43 @@ static GFont s_time_font, s_date_font;
 static BitmapLayer *s_battery_layer;
 static GBitmap *s_battery_bitmap;
 
+void getMonth(char *input, struct tm *tick_time) {		
+	char month_current[16];
+	strftime(month_current, sizeof(month_current), "  %B", tick_time);
+ 	
+	#if defined(PBL_RECT)
+		if(strlen(month_current) > 9) {
+			strcat(input,"  %b");
+			//strftime(month_current, sizeof(month_current), "  %b", tick_time);
+		} else {
+			strcat(input,"  %B");
+		}
+	#elif defined(PBL_ROUND)
+		if(strlen(month_current) > 7) {
+			strcat(input,"  %b");
+ 			//strftime(month_current, sizeof(month_current), "  %b", tick_time);
+	 	} else {
+			strcat(input,"  %B");
+		}
+	#endif
+}
+
+void getDateBottom(char * input, struct tm *tick_time, char date_current[5]) {
+	int toggle_suffix = persist_read_int(MESSAGE_KEY_TOGGLE_SUFFIX);
+	if(toggle_suffix == 1) {		// On
+		if (strncmp(date_current, "01", 2) == 0 || strncmp(date_current, "21", 2) == 0 || strncmp(date_current,"31",2) == 0) { 
+			strcat(input,"st");
+		} else if (strncmp(date_current, "02", 2) == 0 || strncmp(date_current, "22", 2) == 0) {
+			strcat(input,"nd");
+		} else if (strncmp(date_current, "03", 2) == 0 || strncmp(date_current, "23", 2) == 0) { 
+			strcat(input,"rd");
+		} else {
+			strcat(input,"th");
+		}
+	} 
+	getMonth(input, tick_time);
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////// Callbacks ///////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -15,8 +52,8 @@ static void battery_callback(BatteryChargeState state) {
  	persist_read_string(MESSAGE_KEY_SELECT_BATTERY_PERCENT,select_battery_percent,5);
 	int select_battery_percent_int = atoi(select_battery_percent);
 	
-	int battery = persist_read_int(MESSAGE_KEY_TOGGLE_BATTERY);
-	if(battery == 1) { //on
+	int toggle_battery = persist_read_int(MESSAGE_KEY_TOGGLE_BATTERY);
+	if(toggle_battery == 1) { //on
 		if(state.charge_percent < select_battery_percent_int) {
 			layer_set_hidden(bitmap_layer_get_layer(s_battery_layer), false); // Visible
 		} else {
@@ -28,18 +65,18 @@ static void battery_callback(BatteryChargeState state) {
 }
 
 static void bluetooth_callback(bool connected) {
-	int background = persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND);
-	int hour = persist_read_int(MESSAGE_KEY_COLOUR_HOUR);
-	int bluetooth = persist_read_int(MESSAGE_KEY_COLOUR_BLUETOOTH);
+	int colour_background = persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND);
+	int colour_hour = persist_read_int(MESSAGE_KEY_COLOUR_HOUR);
+	int colour_bluetooth = persist_read_int(MESSAGE_KEY_COLOUR_BLUETOOTH);
 	
 	if(!connected) {		// Disconected
-		if(bluetooth) {
+		if(colour_bluetooth) {
 			#if defined(PBL_COLOR)
-				GColor bt_colour = GColorFromHEX(bluetooth);
+				GColor bt_colour = GColorFromHEX(colour_bluetooth);
 				text_layer_set_text_color(s_time_layerH, bt_colour);
 				text_layer_set_text_color(s_time_layerM, bt_colour);
 			#elif defined(PBL_BW)
-				GColor bg_colour = GColorFromHEX(background);
+				GColor bg_colour = GColorFromHEX(colour_bluetooth);
 				text_layer_set_text_color(s_time_layerH, gcolor_legible_over(bg_colour));
 				text_layer_set_text_color(s_time_layerM, gcolor_legible_over(bg_colour));
 				text_layer_set_text_color(s_date_layerT, bg_colour);
@@ -58,15 +95,15 @@ static void bluetooth_callback(bool connected) {
 		}
 		vibes_long_pulse();
 	} else {				// Connected
-		if(background || hour) {
+		if(colour_background || colour_hour) {
 			#if defined(PBL_COLOR)
-				GColor hr_colour = GColorFromHEX(hour);
-				int minute = persist_read_int(MESSAGE_KEY_COLOUR_MINUTE);
-				GColor mn_colour = GColorFromHEX(minute);
+				GColor hr_colour = GColorFromHEX(colour_hour);
+				int colour_minute = persist_read_int(MESSAGE_KEY_COLOUR_MINUTE);
+				GColor mn_colour = GColorFromHEX(colour_minute);
 				text_layer_set_text_color(s_time_layerH, hr_colour);
 				text_layer_set_text_color(s_time_layerM, mn_colour);	
 			#elif defined(PBL_BW)
-				GColor bg_colour = GColorFromHEX(background);
+				GColor bg_colour = GColorFromHEX(colour_background);
 				text_layer_set_text_color(s_time_layerH, gcolor_legible_over(bg_colour));
 				text_layer_set_text_color(s_time_layerM, gcolor_legible_over(bg_colour));	
 			#endif
@@ -78,43 +115,45 @@ static void bluetooth_callback(bool connected) {
 }
 
 static void inbox_received_handler(DictionaryIterator *iter, void *context) {
+// Colours
 	Tuple *colour_background_t = dict_find(iter, MESSAGE_KEY_COLOUR_BACKGROUND);
 	Tuple *colour_hour_t = dict_find(iter, MESSAGE_KEY_COLOUR_HOUR);
 	Tuple *colour_minute_t = dict_find(iter, MESSAGE_KEY_COLOUR_MINUTE);
 	Tuple *colour_date_t = dict_find(iter, MESSAGE_KEY_COLOUR_DATE);
 	Tuple *colour_bluetooth_t = dict_find(iter, MESSAGE_KEY_COLOUR_BLUETOOTH);
+    int colour_background = colour_background_t->value->int32;
+	int colour_hour = colour_hour_t->value->int32;
+	int colour_minute = colour_minute_t->value->int32;
+	int colour_date = colour_date_t->value->int32;
+	int colour_bluetooth = colour_bluetooth_t->value->int32;
+	persist_write_int(MESSAGE_KEY_COLOUR_BACKGROUND, colour_background);
+	persist_write_int(MESSAGE_KEY_COLOUR_HOUR, colour_hour);
+	persist_write_int(MESSAGE_KEY_COLOUR_MINUTE, colour_minute);
+	persist_write_int(MESSAGE_KEY_COLOUR_DATE, colour_date);
+	persist_write_int(MESSAGE_KEY_COLOUR_BLUETOOTH, colour_bluetooth);	
+// Battery
 	Tuple *toggle_battery_t = dict_find(iter, MESSAGE_KEY_TOGGLE_BATTERY);
-	Tuple *toggle_suffix_t = dict_find(iter, MESSAGE_KEY_TOGGLE_SUFFIX);
 	Tuple *select_battery_percent_t = dict_find(iter, MESSAGE_KEY_SELECT_BATTERY_PERCENT);
-	
-    int background = colour_background_t->value->int32;
-	int hour = colour_hour_t->value->int32;
-	int minute = colour_minute_t->value->int32;
-	int date = colour_date_t->value->int32;
-	int bluetooth = colour_bluetooth_t->value->int32;
-	int battery = toggle_battery_t->value->int32;
-	int suffix = toggle_suffix_t->value->int32;
+	int toggle_battery = toggle_battery_t->value->int32;
 	char *select_battery_percent = select_battery_percent_t->value->cstring;
-
-	persist_write_int(MESSAGE_KEY_COLOUR_BACKGROUND, background);
-	persist_write_int(MESSAGE_KEY_COLOUR_HOUR, hour);
-	persist_write_int(MESSAGE_KEY_COLOUR_MINUTE, minute);
-	persist_write_int(MESSAGE_KEY_COLOUR_DATE, date);
-	persist_write_int(MESSAGE_KEY_COLOUR_BLUETOOTH, bluetooth);
-	persist_write_int(MESSAGE_KEY_TOGGLE_BATTERY, battery);
-	persist_write_int(MESSAGE_KEY_TOGGLE_SUFFIX, suffix);
+	persist_write_int(MESSAGE_KEY_TOGGLE_BATTERY, toggle_battery);
 	persist_write_string(MESSAGE_KEY_SELECT_BATTERY_PERCENT, select_battery_percent);
+// Date	
+	Tuple *toggle_suffix_t = dict_find(iter, MESSAGE_KEY_TOGGLE_SUFFIX);
+	int toggle_suffix = toggle_suffix_t->value->int32;
+	persist_write_int(MESSAGE_KEY_TOGGLE_SUFFIX, toggle_suffix);
 
-	GColor bg_colour = GColorFromHEX(background);
+// Set Colours
+	GColor bg_colour = GColorFromHEX(colour_background);
 	window_set_background_color(s_main_window, bg_colour);
 	
 	#if defined(PBL_COLOR)
-		GColor dt_colour = GColorFromHEX(date);
+		GColor dt_colour = GColorFromHEX(colour_date);
 		text_layer_set_text_color(s_date_layerT, dt_colour);
 		text_layer_set_text_color(s_date_layerB, dt_colour);
-		GColor hr_colour = GColorFromHEX(hour);
+		GColor hr_colour = GColorFromHEX(colour_hour);
 		text_layer_set_text_color(s_time_layerH, hr_colour);
-		GColor mn_colour = GColorFromHEX(minute);
+		GColor mn_colour = GColorFromHEX(colour_minute);
 		text_layer_set_text_color(s_time_layerM, mn_colour);
 	#elif defined(PBL_BW)	
 		text_layer_set_text_color(s_date_layerT, gcolor_legible_over(bg_colour));
@@ -123,53 +162,24 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 		text_layer_set_text_color(s_time_layerM, gcolor_legible_over(bg_colour));
 	#endif	
 	battery_callback(battery_state_service_peek());
+	
+	static char date_bufferB[16];
+
+	time_t temp = time(NULL); 
+	struct tm *tick_time = localtime(&temp);
 		
-	if(strcmp("10", select_battery_percent) == 0) {
-		text_layer_set_text(s_date_layerT, "10");
-	}
+	static char date_current[16];
+	strftime(date_current, 80, "%d%m", tick_time);
+	
+	char char_suffix[32] = "%e";
+	getDateBottom(char_suffix, tick_time, date_current);
+	strftime(date_bufferB, sizeof(char_suffix), char_suffix, tick_time);	// ᵗʰ
+	text_layer_set_text(s_date_layerB, date_bufferB);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////// TIME ////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-
-char *getSuffix() {
-	time_t temp = time(NULL); 
-	struct tm *tick_time = localtime(&temp);
-		
-	static char date_current[5];
-	strftime(date_current, 80, "%d%m", tick_time);
-
-	if (strncmp(date_current, "01", 2) || strncmp(date_current, "21", 2) || strncmp(date_current,"31",2)) { 
-		return "st";
-	} else if (strncmp(date_current, "02", 2) || strncmp(date_current, "22", 2)) {
-		return "nd";
-	} else if (strncmp(date_current, "03", 2) || strncmp(date_current, "23", 2)) { 
-		return "st";
-	} else {
-		return "th";
-	}
-}
-
-char *getMonth() {
-	time_t temp = time(NULL); 
-	struct tm *tick_time = localtime(&temp);
-		
-	static char month_current[16];
-	strftime(month_current, sizeof(month_current), "  %B", tick_time);
- 	
-	#if defined(PBL_RECT)
-		if(strlen(month_current) > 9) {
-			strftime(month_current, sizeof(month_current), "  %b", tick_time);
-		}
-	#elif defined(PBL_ROUND)
-		if(strlen(month_current) > 7) {
- 			strftime(month_current, sizeof(month_current), "  %b", tick_time);
-	 	}
-	#endif
-	
-	return month_current;
-}
 
 static void update_time() {
 	time_t temp = time(NULL); 
@@ -204,14 +214,14 @@ static void update_time() {
 	if(strcmp(date_bufferT, "\0") == 0) {		// If Top is empty, write current weekday
 		strftime(date_bufferT, sizeof(date_bufferT), "%A", tick_time);		// %A
 	} if(strcmp(date_bufferB, "\0") == 0) {		// If Bottom is empty, write current date
-		int suffix = persist_read_int(MESSAGE_KEY_TOGGLE_SUFFIX);
-		char char_suffix[16] = "%e";
-		if(suffix == 1) {		 // On
-			strcat(char_suffix,getSuffix());
-			strcat(char_suffix,getMonth());
-		} else { 		//	if(suffix == 0) { // Off
-			strcat(char_suffix,getMonth());
-		}
+// 		int toggle_suffix = persist_read_int(MESSAGE_KEY_TOGGLE_SUFFIX);
+		
+ 		char char_suffix[32] = "%e";
+// 		if(toggle_suffix == 1) {		 // On
+// 			strcat(char_suffix,getSuffix(date_current));
+// 		} 
+// 		strcat(char_suffix,getMonth(tick_time));
+		getDateBottom(char_suffix, tick_time, date_current);
 		strftime(date_bufferB, sizeof(char_suffix), char_suffix, tick_time);	// ᵗʰ
 	}
 	text_layer_set_text(s_date_layerT, date_bufferT);
@@ -276,14 +286,14 @@ static void main_window_load(Window *window) {
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_date_layerB));
 
 // Colours
-	int background = persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND);
-	int date = persist_read_int(MESSAGE_KEY_COLOUR_DATE);
+	int colour_background = persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND);
+	int colour_date = persist_read_int(MESSAGE_KEY_COLOUR_DATE);
 	
-	if(background && date) {
-		GColor bg_colour = GColorFromHEX(background);
+	if(colour_background && colour_date) {
+		GColor bg_colour = GColorFromHEX(colour_background);
 		window_set_background_color(s_main_window, bg_colour);
 		#if defined(PBL_COLOR)
-			GColor dt_colour = GColorFromHEX(date);
+			GColor dt_colour = GColorFromHEX(colour_date);
 			text_layer_set_text_color(s_date_layerT, dt_colour);
 			text_layer_set_text_color(s_date_layerB, dt_colour);
 		#elif defined(PBL_BW)	
@@ -295,7 +305,6 @@ static void main_window_load(Window *window) {
 		text_layer_set_text_color(s_date_layerT, GColorWhite);
 		text_layer_set_text_color(s_date_layerB, GColorWhite);
 	}
-		
 	bluetooth_callback(connection_service_peek_pebble_app_connection());
 	update_time();
 }
