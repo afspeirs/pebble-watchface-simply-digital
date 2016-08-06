@@ -3,6 +3,8 @@ A simple digital watchface
 
 Designed to not be overly complex and give you access to the information you need (time and date). 
 
+
+
 Features:
 
 • Bluetooth disconnection alert - Will notify you when you are no longer connected to your phone (via a vibration) and the hour and minutes will change colour (configurable in the settings).
