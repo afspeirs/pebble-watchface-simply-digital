@@ -14,14 +14,14 @@ module.exports = [
 			{
 				"type": "color",
 				"messageKey": "COLOUR_BACKGROUND",
-				"label": "Background Colour",
+				"label": "Background",
 				"defaultValue": "000000",
 				"sunlight": true
 			},
 			{
 				"type": "color",
 				"messageKey": "COLOUR_DATE",
-				"label": "Date Colour",
+				"label": "Date",
 				"defaultValue": "FFFFFF",
 				"sunlight": true,
 				"capabilities": ["NOT_BW"],
@@ -29,7 +29,7 @@ module.exports = [
 			{
 				"type": "color",
 				"messageKey": "COLOUR_HOUR",
-				"label": "Hour Colour",
+				"label": "Hour",
 				"defaultValue": "FFAA00",
 				"sunlight": true,
 				"capabilities": ["NOT_BW"],
@@ -37,7 +37,7 @@ module.exports = [
 			{
 				"type": "color",
 				"messageKey": "COLOUR_MINUTE",
-				"label": "Minute Colour",
+				"label": "Minute",
 				"defaultValue": "FFFFFF",
 				"sunlight": true,
 				"capabilities": ["NOT_BW"],
@@ -45,7 +45,7 @@ module.exports = [
 			{
 				"type": "color",
 				"messageKey": "COLOUR_BLUETOOTH",
-				"label": "Blutooth Disconnect Colour",
+				"label": "Blutooth Disconnect",
 				"defaultValue": "FF0000",
 				"sunlight": true,
 				"capabilities": ["NOT_BW"],
@@ -63,7 +63,6 @@ module.exports = [
 				"type": "toggle",
 				"messageKey": "TOGGLE_BATTERY",
 				"label": "Toggle battery icon",
-//				"description": "Displays a symbol when the batery is 20% or less",
 				"defaultValue": false,
 			},
 			{
@@ -100,7 +99,7 @@ module.exports = [
 //  				"defaultValue": "white",
 //  				"label": "Low battery colour:",
 //  				"options": [
-//  					{ 
+//  				{ 
 //  						"label": "white",
 //  						"value": "white" 
 // 					},
@@ -115,43 +114,67 @@ module.exports = [
  	{
  		"type": "section",
  		"items": [
-// 			{
-// 				"type": "select",
-// 				"messageKey": "SELECT_DATE_BOTTOM",
-// 				"defaultValue": "0",
-// 				"label": "Date layout",
-// 				"options": [
-// 					{ 
-// 						"label": "Day Month",
-// 						"value": "0" 
-// 					},
-// 					{ 
-// 						"label": "Month Day",
-// 						"value": "1" 
-// 					},
-// 				]
-// 			},
+			{
+				"type": "heading",
+				"defaultValue": "Date"
+			},	
+			{
+				"type": "select",
+				"messageKey": "SELECT_DATE_BOTTOM",
+				"defaultValue": "0",
+				"label": "Date layout",
+				"options": [
+					{ 
+						"label": "Day Month",
+						"value": "0" 
+					},
+					{ 
+						"label": "Month Day",
+						"value": "1" 
+					},
+				]
+			},
 			{
 				"type": "toggle",
 				"messageKey": "TOGGLE_SUFFIX",
-				"label": "Toggle suffix for date",
-//				"description": "You may need to wait a minute for the change to occur",
+				"label": "Toggle suffix",
 				"defaultValue": false,
 			},
 		]
 	},
-// 	{
-// 		"type": "section",
-// 		"items": [		
-// 			{
-// 				"type": "checkboxgroup",
-// 				"messageKey": "CHECK_DATE",
-// 				"label": "Dates to display",
-// 				"defaultValue": [false, false, false],
-// 				"options": ["New Years Day", "Christmas", "Halloween"]
-// 			}
-// 		]
-// 	},			
+	{
+		"type": "section",
+		"items": [
+			{
+				"type": "heading",
+				"defaultValue": "Custom Text"
+			},
+			{
+				"type": "checkboxgroup",
+				"messageKey": "CHECK_DATE",
+				"label": "Select events to be displayed:",
+				"defaultValue": [false, false, false],
+				"options": ["New Years Day", "Halloween", "Christmas Day"]
+			}
+		]
+	},
+	{
+		"type": "section",
+		"items": [
+			{
+				"type": "heading",
+				"defaultValue": "Custom Date"
+			},
+			{
+				"type": "input",
+				"messageKey": "Custon date",
+				"label": "Test date thing",
+				"attributes": {
+					"type": "date"
+				}
+			}
+		]
+	},
 	{
 		"type": "submit",
 		"defaultValue": "Save"

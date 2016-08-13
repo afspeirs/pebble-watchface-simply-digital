@@ -19,14 +19,22 @@
             "COLOUR_BLUETOOTH",
             "TOGGLE_BATTERY",
             "TOGGLE_SUFFIX",
-            "SELECT_BATTERY_PERCENT"
+            "SELECT_BATTERY_PERCENT",
+            "CHECK_DATE[3]",
+            "SELECT_DATE_BOTTOM"
         ],
         "projectType": "native",
         "resources": {
             "media": [
                 {
-                    "file": "fonts/Bebas Neue Regular",
-                    "name": "FONT_BEBAS_NEUE_REGULAR_28",
+                    "file": "images/battery white",
+                    "name": "IMAGE_BATTERY_WHITE",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "fonts/Bebas Neue Bold",
+                    "name": "FONT_BEBAS_NEUE_BOLD_28",
                     "targetPlatforms": null,
                     "type": "font"
                 },
@@ -37,16 +45,10 @@
                     "type": "font"
                 },
                 {
-                    "file": "fonts/Bebas Neue Bold",
-                    "name": "FONT_BEBAS_NEUE_BOLD_28",
+                    "file": "fonts/Bebas Neue Regular",
+                    "name": "FONT_BEBAS_NEUE_REGULAR_28",
                     "targetPlatforms": null,
                     "type": "font"
-                },
-                {
-                    "file": "images/battery white",
-                    "name": "IMAGE_BATTERY_WHITE",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
                 }
             ]
         },
@@ -61,5 +63,5 @@
             "watchface": true
         }
     },
-    "version": "0.36.0"
+    "version": "0.38.0"
 }
