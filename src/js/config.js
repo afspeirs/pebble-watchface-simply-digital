@@ -158,23 +158,23 @@ module.exports = [
 			}
 		]
 	},
-	{
-		"type": "section",
-		"items": [
-			{
-				"type": "heading",
-				"defaultValue": "Custom Date"
-			},
-			{
-				"type": "input",
-				"messageKey": "Custon date",
-				"label": "Test date thing",
-				"attributes": {
-					"type": "date"
-				}
-			}
-		]
-	},
+// 	{
+// 		"type": "section",
+// 		"items": [
+// 			{
+// 				"type": "heading",
+// 				"defaultValue": "Custom Date"
+// 			},
+// 			{
+// 				"type": "input",
+// 				"messageKey": "Custon date",
+// 				"label": "Test date thing",
+// 				"attributes": {
+// 					"type": "date"
+// 				}
+// 			}
+// 		]
+// 	},
 	{
 		"type": "submit",
 		"defaultValue": "Save"

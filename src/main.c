@@ -315,6 +315,7 @@ static void main_window_load(Window *window) {
 // Battery Image
 	s_battery_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATTERY_WHITE);
 	bitmap_layer_set_bitmap(s_battery_layer, s_battery_bitmap);
+	bitmap_layer_set_compositing_mode(s_battery_layer, GCompOpSet);
 	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_battery_layer));
 		
 // Hour
