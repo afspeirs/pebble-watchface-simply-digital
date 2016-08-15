@@ -10,6 +10,17 @@ static GBitmap *s_battery_bitmap;
 //////////// Methods /////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void getBatteryIcon(int colour_background) {
+ 	if(colour_background) {
+ 		GColor bg_colour = GColorFromHEX(colour_background);
+		if (gcolor_equal(gcolor_legible_over(bg_colour), GColorBlack)) { s_battery_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATTERY_BLACK); }
+		else { s_battery_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATTERY_WHITE); }
+	} else {
+		s_battery_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATTERY_WHITE);
+	}
+	bitmap_layer_set_bitmap(s_battery_layer, s_battery_bitmap);
+}
+
 void getMonth(char *input, int location, struct tm *tick_time) {		// 0 is before, 1 is after
 	char month_current[16];
 	strftime(month_current, sizeof(month_current), "%B", tick_time);
@@ -242,7 +253,11 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	text_layer_set_text(s_date_layerT, date_bufferT);
 	text_layer_set_text(s_date_layerB, date_bufferB);
 	
-	battery_callback(battery_state_service_peek());
+	if(toggle_battery == 1) { //on
+		gbitmap_destroy(s_battery_bitmap);
+		getBatteryIcon(colour_background);
+		battery_callback(battery_state_service_peek());
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -312,10 +327,14 @@ static void main_window_load(Window *window) {
 		s_battery_layer = bitmap_layer_create(GRect(84, 2, 12, 12)); // battery
 	#endif
 
+	int colour_background = persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND);
+	
 // Battery Image
-	s_battery_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATTERY_WHITE);
-	bitmap_layer_set_bitmap(s_battery_layer, s_battery_bitmap);
-	bitmap_layer_set_compositing_mode(s_battery_layer, GCompOpSet);
+	getBatteryIcon(colour_background);
+	layer_mark_dirty(bitmap_layer_get_layer(s_battery_layer));
+	#if defined(PBL_COLOR)
+		bitmap_layer_set_compositing_mode(s_battery_layer, GCompOpSet);	
+	#endif
 	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_battery_layer));
 		
 // Hour
@@ -343,7 +362,7 @@ static void main_window_load(Window *window) {
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_date_layerB));
 
 // Colours
-	int colour_background = persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND);
+//	int colour_background = persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND);
 	int colour_date = persist_read_int(MESSAGE_KEY_COLOUR_DATE);
 	
 	if(colour_background && colour_date) {

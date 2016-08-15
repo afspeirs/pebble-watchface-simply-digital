@@ -91,24 +91,12 @@ module.exports = [
 						"label": "50%",
 						"value": "50" 
 					},
+					{ 
+						"label": "60%",
+						"value": "60" 
+					},
 				]
 			},
-// 			{
-//  				"type": "select",
-//  				"messageKey": "SELECT_BATTERY_COLOUR",
-//  				"defaultValue": "white",
-//  				"label": "Low battery colour:",
-//  				"options": [
-//  				{ 
-//  						"label": "white",
-//  						"value": "white" 
-// 					},
-// 					{ 
-// 						"label": "black",
-// 						"value": "black" 
-// 					},
-// 				]
-// 			},
 		]
  	},
  	{
