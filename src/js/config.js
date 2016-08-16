@@ -62,7 +62,7 @@ module.exports = [
 			{
 				"type": "toggle",
 				"messageKey": "TOGGLE_BATTERY",
-				"label": "Toggle battery icon",
+				"label": "Show battery icon",
 				"defaultValue": false,
 			},
 			{
@@ -110,7 +110,7 @@ module.exports = [
 				"type": "select",
 				"messageKey": "SELECT_DATE_BOTTOM",
 				"defaultValue": "0",
-				"label": "Date layout",
+				"label": "Date format",
 				"options": [
 					{ 
 						"label": "Day Month",
@@ -125,7 +125,7 @@ module.exports = [
 			{
 				"type": "toggle",
 				"messageKey": "TOGGLE_SUFFIX",
-				"label": "Toggle suffix",
+				"label": "Show suffix",
 				"defaultValue": false,
 			},
 		]
