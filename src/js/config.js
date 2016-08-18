@@ -45,7 +45,7 @@ module.exports = [
 			{
 				"type": "color",
 				"messageKey": "COLOUR_BLUETOOTH",
-				"label": "Blutooth Disconnect",
+				"label": "Blutooth Disconnection",
 				"defaultValue": "FF0000",
 				"sunlight": true,
 				"capabilities": ["NOT_BW"],

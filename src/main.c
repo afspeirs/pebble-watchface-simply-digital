@@ -308,28 +308,30 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void main_window_load(Window *window) {
+	Layer *window_layer = window_get_root_layer(window);
+	GRect bounds = layer_get_frame(window_layer);
+	
 // Fonts
 	s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_72));
 	s_date_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_28));
 	
 // Locations
 	#if defined(PBL_RECT)
-		s_time_layerH = text_layer_create(GRect(0, 37, 72, 100)); //x, y, h, w
-		s_time_layerM = text_layer_create(GRect(73, 37, 72, 100));
-		s_date_layerT = text_layer_create(GRect(0, 11, 144, 30));
-		s_date_layerB = text_layer_create(GRect(0, 121, 144, 30));
+		s_time_layerH = text_layer_create(GRect( 0,  37, bounds.size.w / 2, 100)); //x, y, w, h
+		s_time_layerM = text_layer_create(GRect(73,  37, bounds.size.w / 2, 100));
+		s_date_layerT = text_layer_create(GRect( 0,  11, bounds.size.w,      30));
+		s_date_layerB = text_layer_create(GRect( 0, 121, bounds.size.w,      30));
 		s_battery_layer = bitmap_layer_create(GRect(4, 2, 12, 12)); // battery
 	#elif defined(PBL_ROUND)
-		s_time_layerH = text_layer_create(GRect(19, 37+7, 72, 100)); //x, y, h, w
-		s_time_layerM = text_layer_create(GRect(73+19, 37+7, 72, 100));
-		s_date_layerT = text_layer_create(GRect(19, 11+7, 144, 30));
-		s_date_layerB = text_layer_create(GRect(19, 121+7, 144, 30));
+		s_time_layerH = text_layer_create(GRect(   10,  37+7, bounds.size.w / 2, 100)); //x, y, w, h
+		s_time_layerM = text_layer_create(GRect(73+10,  37+7, bounds.size.w / 2, 100));
+		s_date_layerT = text_layer_create(GRect(    0,  11+7, bounds.size.w,      30));
+		s_date_layerB = text_layer_create(GRect(    0, 121+7, bounds.size.w,      30));
 		s_battery_layer = bitmap_layer_create(GRect(84, 2, 12, 12)); // battery
 	#endif
-
-	int colour_background = persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND);
 	
 // Battery Image
+	int colour_background = persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND);
 	getBatteryIcon(colour_background);
 	layer_mark_dirty(bitmap_layer_get_layer(s_battery_layer));
 	#if defined(PBL_COLOR)
@@ -433,4 +435,3 @@ int main(void) {
 	app_event_loop();
 	deinit();
 }
-
