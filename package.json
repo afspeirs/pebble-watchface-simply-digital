@@ -29,14 +29,12 @@
                 {
                     "file": "images/battery_black",
                     "name": "IMAGE_BATTERY_BLACK",
-                    "storageFormat": "png",
                     "targetPlatforms": null,
                     "type": "bitmap"
                 },
                 {
                     "file": "images/battery_white",
                     "name": "IMAGE_BATTERY_WHITE",
-                    "storageFormat": "png",
                     "targetPlatforms": null,
                     "type": "bitmap"
                 },
