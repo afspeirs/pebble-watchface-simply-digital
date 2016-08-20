@@ -29,6 +29,7 @@
                 {
                     "file": "images/battery_black",
                     "name": "IMAGE_BATTERY_BLACK",
+                    "storageFormat": "png",
                     "targetPlatforms": null,
                     "type": "bitmap"
                 },
