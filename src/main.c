@@ -367,7 +367,7 @@ static void main_window_load(Window *window) {
 //	int colour_background = persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND);
 	int colour_date = persist_read_int(MESSAGE_KEY_COLOUR_DATE);
 	
-	if(colour_background && colour_date) {
+	if(colour_background || colour_date) {
 		GColor bg_colour = GColorFromHEX(colour_background);
 		window_set_background_color(s_main_window, bg_colour);
 		#if defined(PBL_COLOR)
