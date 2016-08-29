@@ -103,6 +103,49 @@ void customText(char date_bufferT[16], char date_bufferB[16], char date_current[
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////// TIME ////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+static void update_time() {
+	time_t temp = time(NULL); 
+	struct tm *tick_time = localtime(&temp);
+		
+	static char date_current[16];
+	strftime(date_current, 80, "%d%m", tick_time);
+
+// Time
+	static char bufferH[] = "00";
+	static char bufferM[] = "00";
+	if(clock_is_24h_style()) {
+		strftime(bufferH, sizeof(bufferH), "%H", tick_time);	//%H
+	} else {
+		strftime(bufferH, sizeof(bufferH), "%I", tick_time);	//%I
+	}
+	strftime(bufferM, sizeof(bufferM), "%M", tick_time);		//%M
+	text_layer_set_text(s_time_layerH, bufferH);
+	text_layer_set_text(s_time_layerM, bufferM);
+
+// Date
+	static char date_bufferT[16];
+	static char date_bufferB[16];
+
+	customText(date_bufferT, date_bufferB, date_current);	
+	if(strcmp(date_bufferT, "\0") == 0) {		// If Top is empty, write current weekday
+		strftime(date_bufferT, sizeof(date_bufferT), "%A", tick_time);		// %A
+	} if(strcmp(date_bufferB, "\0") == 0) {		// If Bottom is empty, write current date		
+ 		char char_suffix[32] = "";
+		getDateBottom(char_suffix, date_current, tick_time);
+		strftime(date_bufferB, sizeof(char_suffix), char_suffix, tick_time);	// ᵗʰ
+	}
+	text_layer_set_text(s_date_layerT, date_bufferT);
+	text_layer_set_text(s_date_layerB, date_bufferB);
+}
+
+static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+	update_time();
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////// Callbacks ///////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -232,79 +275,19 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 		text_layer_set_text_color(s_date_layerB, gcolor_legible_over(bg_colour));
 		text_layer_set_text_color(s_time_layerH, gcolor_legible_over(bg_colour));
 		text_layer_set_text_color(s_time_layerM, gcolor_legible_over(bg_colour));
-	#endif	
-
-// Update Text
-	time_t temp = time(NULL);
-	struct tm *tick_time = localtime(&temp);
-	static char date_current[16];
-	strftime(date_current, 80, "%d%m", tick_time);
-	static char date_bufferT[16];
-	static char date_bufferB[16];
-
-	customText(date_bufferT, date_bufferB, date_current);
-	if(strcmp(date_bufferT, "\0") == 0) {		// If Top is empty, write current weekday
-		strftime(date_bufferT, sizeof(date_bufferT), "%A", tick_time);		// %A
-	} if(strcmp(date_bufferB, "\0") == 0) {		// If Bottom is empty, write current date		
- 		char char_suffix[32] = "";
-		getDateBottom(char_suffix, date_current, tick_time);
-		strftime(date_bufferB, sizeof(char_suffix), char_suffix, tick_time);	// ᵗʰ
-	}
-	text_layer_set_text(s_date_layerT, date_bufferT);
-	text_layer_set_text(s_date_layerB, date_bufferB);
+	#endif
 	
 	if(toggle_battery == 1) { //on
 		gbitmap_destroy(s_battery_bitmap);
 		getBatteryIcon(colour_background);
 		battery_callback(battery_state_service_peek());
 	}
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////// TIME ////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-
-static void update_time() {
-	time_t temp = time(NULL); 
-	struct tm *tick_time = localtime(&temp);
-		
-	static char date_current[16];
-	strftime(date_current, 80, "%d%m", tick_time);
-
-// Time
-	static char bufferH[] = "00";
-	static char bufferM[] = "00";
-	if(clock_is_24h_style()) {
-		strftime(bufferH, sizeof(bufferH), "%H", tick_time);	//%H
-	} else {
-		strftime(bufferH, sizeof(bufferH), "%I", tick_time);	//%I
-	}
-	strftime(bufferM, sizeof(bufferM), "%M", tick_time);		//%M
-	text_layer_set_text(s_time_layerH, bufferH);
-	text_layer_set_text(s_time_layerM, bufferM);
-
-// Date
-	static char date_bufferT[16];
-	static char date_bufferB[16];
-
-	customText(date_bufferT, date_bufferB, date_current);	
-	if(strcmp(date_bufferT, "\0") == 0) {		// If Top is empty, write current weekday
-		strftime(date_bufferT, sizeof(date_bufferT), "%A", tick_time);		// %A
-	} if(strcmp(date_bufferB, "\0") == 0) {		// If Bottom is empty, write current date		
- 		char char_suffix[32] = "";
-		getDateBottom(char_suffix, date_current, tick_time);
-		strftime(date_bufferB, sizeof(char_suffix), char_suffix, tick_time);	// ᵗʰ
-	}
-	text_layer_set_text(s_date_layerT, date_bufferT);
-	text_layer_set_text(s_date_layerB, date_bufferB);
-}
-
-static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+	bluetooth_callback(connection_service_peek_pebble_app_connection());
 	update_time();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////// Load ////////////////////////////////////////////////////////////////////////////////////
+//////////// Window //////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void main_window_load(Window *window) {
@@ -387,10 +370,6 @@ static void main_window_load(Window *window) {
 	update_time();
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////// Other ///////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-
 static void main_window_unload(Window *window) {
 	text_layer_destroy(s_time_layerH);
 	text_layer_destroy(s_time_layerM);
@@ -399,6 +378,10 @@ static void main_window_unload(Window *window) {
 	fonts_unload_custom_font(s_time_font);
 	fonts_unload_custom_font(s_date_font);
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////// Other ///////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void init() {
 	s_main_window = window_create();
