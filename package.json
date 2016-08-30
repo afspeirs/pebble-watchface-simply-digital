@@ -27,10 +27,8 @@
         "resources": {
             "media": [
                 {
-                    "file": "images/MenuImage.png",
-                    "menuIcon": true,
-                    "name": "IMAGE_MENU_IMAGE",
-                    "storageFormat": "png",
+                    "file": "images/battery_white",
+                    "name": "IMAGE_BATTERY_WHITE",
                     "targetPlatforms": null,
                     "type": "bitmap"
                 },
@@ -42,20 +40,23 @@
                     "type": "bitmap"
                 },
                 {
-                    "file": "images/battery_white",
-                    "name": "IMAGE_BATTERY_WHITE",
+                    "file": "images/MenuImage.png",
+                    "menuIcon": true,
+                    "name": "IMAGE_MENU_IMAGE",
+                    "storageFormat": "png",
                     "targetPlatforms": null,
                     "type": "bitmap"
                 },
                 {
-                    "file": "fonts/Bebas Neue Bold",
-                    "name": "FONT_BEBAS_NEUE_BOLD_72",
+                    "file": "fonts/Bebas Neue Regular",
+                    "name": "FONT_BEBAS_NEUE_REGULAR_28",
                     "targetPlatforms": null,
                     "type": "font"
                 },
                 {
-                    "file": "fonts/Bebas Neue Regular",
-                    "name": "FONT_BEBAS_NEUE_REGULAR_28",
+                    "characterRegex": "[0-9]",
+                    "file": "fonts/Bebas Neue Bold",
+                    "name": "FONT_BEBAS_NEUE_BOLD_72",
                     "targetPlatforms": null,
                     "type": "font"
                 }
@@ -63,7 +64,6 @@
         },
         "sdkVersion": "3",
         "targetPlatforms": [
-            "aplite",
             "basalt",
             "chalk"
         ],
@@ -72,5 +72,5 @@
             "watchface": true
         }
     },
-    "version": "0.43.0"
+    "version": "0.44.0"
 }
