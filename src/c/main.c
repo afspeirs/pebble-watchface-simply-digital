@@ -292,7 +292,8 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 
 static void main_window_load(Window *window) {
 	Layer *window_layer = window_get_root_layer(window);
-	GRect bounds = layer_get_unobstructed_bounds(window_layer);
+	GRect bounds = layer_get_frame(window_layer);
+// 	GRect bounds = layer_get_unobstructed_bounds(window_layer);
 	
 // Fonts
 	s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_72));
@@ -300,19 +301,27 @@ static void main_window_load(Window *window) {
 	
 // Locations
 	#if defined(PBL_RECT)
-		s_time_layerH = text_layer_create(GRect( 0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
-		s_time_layerM = text_layer_create(GRect(73, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
-		s_date_layerT = text_layer_create(GRect( 0, bounds.size.h / 13 - 1, bounds.size.w,   30));
-		s_date_layerB = text_layer_create(GRect( 0,	bounds.size.h * 3/4 -5, bounds.size.w,   30));
+		s_time_layerH = text_layer_create(GRect( 0,  37, bounds.size.w / 2, 100));
+		s_time_layerM = text_layer_create(GRect(72,  37, bounds.size.w / 2, 100));
+		s_date_layerT = text_layer_create(GRect( 0,  11, bounds.size.w,      30));
+		s_date_layerB = text_layer_create(GRect( 0, 121, bounds.size.w,      30));
+// 		s_time_layerH = text_layer_create(GRect( 0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
+// 		s_time_layerM = text_layer_create(GRect(73, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
+// 		s_date_layerT = text_layer_create(GRect( 0, bounds.size.h / 13 - 1, bounds.size.w,   30));
+// 		s_date_layerB = text_layer_create(GRect( 0,	bounds.size.h * 3/4 -5, bounds.size.w,   30));
 		s_battery_layer = bitmap_layer_create(GRect(4, 2, 12, 12)); // battery
 	#elif defined(PBL_ROUND)
-		s_time_layerH = text_layer_create(GRect(   10, bounds.size.h / 2 - 47 + 1, bounds.size.w/2, 75));
-		s_time_layerM = text_layer_create(GRect(73+10, bounds.size.h / 2 - 47 + 1, bounds.size.w/2, 75));
-		s_date_layerT = text_layer_create(GRect(    0, bounds.size.h / 12 + 3, bounds.size.w,   30));
-		s_date_layerB = text_layer_create(GRect(    0, bounds.size.h * 3/4 -5-2, bounds.size.w,   30));
+		s_time_layerH = text_layer_create(GRect(   10,  37+7, bounds.size.w / 2, 100));
+		s_time_layerM = text_layer_create(GRect(72+10,  37+7, bounds.size.w / 2, 100));
+		s_date_layerT = text_layer_create(GRect(    0,  11+7, bounds.size.w,      30));
+		s_date_layerB = text_layer_create(GRect(    0, 121+7, bounds.size.w,      30));	
+// 		s_time_layerH = text_layer_create(GRect(   10, bounds.size.h / 2 - 47 + 1, bounds.size.w/2, 75));
+// 		s_time_layerM = text_layer_create(GRect(73+10, bounds.size.h / 2 - 47 + 1, bounds.size.w/2, 75));
+// 		s_date_layerT = text_layer_create(GRect(    0, bounds.size.h / 12 + 3, bounds.size.w,   30));
+// 		s_date_layerB = text_layer_create(GRect(    0, bounds.size.h * 3/4 -5-2, bounds.size.w,   30));
  		s_battery_layer = bitmap_layer_create(GRect(84, 2, 12, 12)); // battery
 	#endif
-	
+
 // Battery Image
 	int colour_background = persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND);
 	getBatteryIcon(colour_background);
