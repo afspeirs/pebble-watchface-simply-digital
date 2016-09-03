@@ -149,6 +149,15 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 //////////// Callbacks ///////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void unobstructed_change(AnimationProgress progress, void* data) {
+	GRect bounds = layer_get_unobstructed_bounds(window_get_root_layer(s_main_window));
+
+	layer_set_frame(text_layer_get_layer(s_time_layerH),GRect( 0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
+	layer_set_frame(text_layer_get_layer(s_time_layerM),GRect(73, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
+	layer_set_frame(text_layer_get_layer(s_date_layerT),GRect( 0, bounds.size.h / 4 - 31, bounds.size.w,   30));
+	layer_set_frame(text_layer_get_layer(s_date_layerB),GRect( 0, bounds.size.h * 3/4 -5, bounds.size.w,   30));
+}
+
 static void battery_callback(BatteryChargeState state) {
 	char *select_battery_percent = "";
  	persist_read_string(MESSAGE_KEY_SELECT_BATTERY_PERCENT,select_battery_percent,5);
@@ -291,9 +300,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void main_window_load(Window *window) {
-	Layer *window_layer = window_get_root_layer(window);
-	GRect bounds = layer_get_frame(window_layer);
-// 	GRect bounds = layer_get_unobstructed_bounds(window_layer);
+	GRect bounds = layer_get_unobstructed_bounds(window_get_root_layer(window));
 	
 // Fonts
 	s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_72));
@@ -301,24 +308,16 @@ static void main_window_load(Window *window) {
 	
 // Locations
 	#if defined(PBL_RECT)
-		s_time_layerH = text_layer_create(GRect( 0,  37, bounds.size.w / 2, 100));
-		s_time_layerM = text_layer_create(GRect(72,  37, bounds.size.w / 2, 100));
-		s_date_layerT = text_layer_create(GRect( 0,  11, bounds.size.w,      30));
-		s_date_layerB = text_layer_create(GRect( 0, 121, bounds.size.w,      30));
-// 		s_time_layerH = text_layer_create(GRect( 0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
-// 		s_time_layerM = text_layer_create(GRect(73, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
-// 		s_date_layerT = text_layer_create(GRect( 0, bounds.size.h / 13 - 1, bounds.size.w,   30));
-// 		s_date_layerB = text_layer_create(GRect( 0,	bounds.size.h * 3/4 -5, bounds.size.w,   30));
+		s_time_layerH = text_layer_create(GRect( 0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
+ 		s_time_layerM = text_layer_create(GRect(73, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
+		s_date_layerT = text_layer_create(GRect( 0, bounds.size.h / 4 - 31, bounds.size.w,   30));
+ 		s_date_layerB = text_layer_create(GRect( 0,	bounds.size.h * 3/4 -5, bounds.size.w,   30));
 		s_battery_layer = bitmap_layer_create(GRect(4, 2, 12, 12)); // battery
 	#elif defined(PBL_ROUND)
-		s_time_layerH = text_layer_create(GRect(   10,  37+7, bounds.size.w / 2, 100));
-		s_time_layerM = text_layer_create(GRect(72+10,  37+7, bounds.size.w / 2, 100));
-		s_date_layerT = text_layer_create(GRect(    0,  11+7, bounds.size.w,      30));
-		s_date_layerB = text_layer_create(GRect(    0, 121+7, bounds.size.w,      30));	
-// 		s_time_layerH = text_layer_create(GRect(   10, bounds.size.h / 2 - 47 + 1, bounds.size.w/2, 75));
-// 		s_time_layerM = text_layer_create(GRect(73+10, bounds.size.h / 2 - 47 + 1, bounds.size.w/2, 75));
-// 		s_date_layerT = text_layer_create(GRect(    0, bounds.size.h / 12 + 3, bounds.size.w,   30));
-// 		s_date_layerB = text_layer_create(GRect(    0, bounds.size.h * 3/4 -5-2, bounds.size.w,   30));
+		s_time_layerH = text_layer_create(GRect(   10, bounds.size.h / 2 - 47 + 1, bounds.size.w/2, 75));
+		s_time_layerM = text_layer_create(GRect(73+10, bounds.size.h / 2 - 47 + 1, bounds.size.w/2, 75));
+		s_date_layerT = text_layer_create(GRect(    0, bounds.size.h / 12 + 3, bounds.size.w,   30));
+		s_date_layerB = text_layer_create(GRect(    0, bounds.size.h * 3/4 -5-2, bounds.size.w,   30));
  		s_battery_layer = bitmap_layer_create(GRect(84, 2, 12, 12)); // battery
 	#endif
 
@@ -355,7 +354,7 @@ static void main_window_load(Window *window) {
 	text_layer_set_background_color(s_date_layerB, GColorClear);
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_date_layerB));
 
-// Colours
+// Colours																									// This should be the same code as in the inbox_reciever
 //	int colour_background = persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND);
 	int colour_date = persist_read_int(MESSAGE_KEY_COLOUR_DATE);
 	
@@ -399,6 +398,11 @@ static void init() {
 		.unload = main_window_unload
 	});
 	window_stack_push(s_main_window, true);
+	
+	UnobstructedAreaHandlers handlers = {
+		.change = unobstructed_change,
+	};
+	unobstructed_area_service_subscribe(handlers, NULL);
 	
 	connection_service_subscribe((ConnectionHandlers) {
   		.pebble_app_connection_handler = bluetooth_callback
