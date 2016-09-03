@@ -27,6 +27,14 @@
         "resources": {
             "media": [
                 {
+                    "file": "images/Menu Image",
+                    "menuIcon": true,
+                    "name": "IMAGE_MENU_IMAGE",
+                    "storageFormat": "png",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
                     "file": "images/battery_white",
                     "name": "IMAGE_BATTERY_WHITE",
                     "targetPlatforms": null,
@@ -35,14 +43,6 @@
                 {
                     "file": "images/battery_black",
                     "name": "IMAGE_BATTERY_BLACK",
-                    "storageFormat": "png",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/MenuImage.png",
-                    "menuIcon": true,
-                    "name": "IMAGE_MENU_IMAGE",
                     "storageFormat": "png",
                     "targetPlatforms": null,
                     "type": "bitmap"
@@ -66,12 +66,13 @@
         "targetPlatforms": [
             "aplite",
             "basalt",
-            "chalk"
+            "chalk",
+            "diorite"
         ],
         "uuid": "51c897b8-5ca6-4412-82db-11a4cf304ae1",
         "watchapp": {
             "watchface": true
         }
     },
-    "version": "0.45.0"
+    "version": "0.46.0"
 }
