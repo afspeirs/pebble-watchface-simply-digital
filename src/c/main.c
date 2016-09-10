@@ -5,6 +5,7 @@ static TextLayer *s_hour_layer, *s_minute_layer, *s_top_layer, *s_bottom_layer;
 static GFont s_time_font, s_date_font;
 static BitmapLayer *s_battery_layer;
 static GBitmap *s_battery_bitmap;
+char date_current[5], month_current[16];
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////// Methods /////////////////////////////////////////////////////////////////////////////////
@@ -25,7 +26,6 @@ void getBatteryIcon(int colour_background) {
 }
 
 void getMonth(char *input, int location, struct tm *tick_time) {		// 0 is before, 1 is after
-	char month_current[16];
 	strftime(month_current, sizeof(month_current), "%B", tick_time);
  	
 	#if defined(PBL_RECT)
@@ -47,7 +47,7 @@ void getMonth(char *input, int location, struct tm *tick_time) {		// 0 is before
 	#endif
 }
 
-void getSuffix(char *input, char date_current[5], struct tm *tick_time) {
+void getSuffix(char *input, struct tm *tick_time) {
 	if (strncmp(date_current, "01", 2) == 0 || strncmp(date_current, "21", 2) == 0 || strncmp(date_current,"31",2) == 0) { 
 		strcat(input,"st");
 	} else if (strncmp(date_current, "02", 2) == 0 || strncmp(date_current, "22", 2) == 0) {
@@ -59,49 +59,28 @@ void getSuffix(char *input, char date_current[5], struct tm *tick_time) {
 	}
 }
 
-void getDateBottom(char *input, char date_current[5], struct tm *tick_time) {
-	char *select_date_bottom = "";
-	persist_read_string(MESSAGE_KEY_SELECT_DATE_BOTTOM,select_date_bottom,5);
-	int select_date_bottom_int = atoi(select_date_bottom);
-	int toggle_suffix = persist_read_int(MESSAGE_KEY_TOGGLE_SUFFIX);	
-
-	if(select_date_bottom_int == 1) { 		// Month Day
-		getMonth(input, 1, tick_time);
-		strcat(input," %e");
-		if(toggle_suffix == 1) {
-			getSuffix(input,date_current,tick_time);
-		}
-	} else {								// Default (Day Month)
-		strcat(input,"%e");
-		if(toggle_suffix == 1) {
-			getSuffix(input,date_current,tick_time);
-		}	
-		getMonth(input, 0, tick_time);
-	}
-}
-
-void customText(char date_bufferT[16], char date_bufferB[16], char date_current[5]) {
+void customText(char t_buffer[16], char b_buffer[16]) {
 	int check_date_0 = persist_read_int(MESSAGE_KEY_CHECK_DATE);
 	int check_date_1 = persist_read_int(MESSAGE_KEY_CHECK_DATE+1);
 	int check_date_2 = persist_read_int(MESSAGE_KEY_CHECK_DATE+2);
 
 	if(strcmp("0104", date_current) == 0) {		// If date is 1st April, Display "April Fools" on bottom
-		strcpy(date_bufferT, "\0");
-		strcpy(date_bufferB, "April  Fools");
+		strcpy(t_buffer, "\0");
+		strcpy(b_buffer, "April  Fools");
 	} else if(check_date_0 == 1 && strcmp("0101", date_current) == 0) {  // New Years
-		strcpy(date_bufferT, "Happy");
-		strcpy(date_bufferB, "New  Year");
+		strcpy(t_buffer, "Happy");
+		strcpy(b_buffer, "New  Year");
 	} else if(check_date_1 == 1 && strcmp("3110", date_current) == 0) {  // Christmas
-		strcpy(date_bufferT, "\0");
-		strcpy(date_bufferB, "Halloween");
+		strcpy(t_buffer, "\0");
+		strcpy(b_buffer, "Halloween");
 	} else if(check_date_2 == 1 && strcmp("2512", date_current) == 0) {  // Halloween
-		strcpy(date_bufferT, "Merry");
-		strcpy(date_bufferB, "Christmas");
+		strcpy(t_buffer, "Merry");
+		strcpy(b_buffer, "Christmas");
 	}
 	// rememberence sunday could be from the 8th to the 14th november
 	else {
-		strcpy(date_bufferT, "\0");
-		strcpy(date_bufferB, "\0");
+		strcpy(t_buffer, "\0");
+		strcpy(b_buffer, "\0");
 	}
 }
 
@@ -109,39 +88,56 @@ void customText(char date_bufferT[16], char date_bufferB[16], char date_current[
 //////////// TIME ////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
 static void update_time() {
 	time_t temp = time(NULL); 
 	struct tm *tick_time = localtime(&temp);
-		
-	static char date_current[16];
-	strftime(date_current, 80, "%d%m", tick_time);
+	strftime(date_current, 8, "%d%m", tick_time);
 
 // Time
-	static char bufferHour[] = "00";
-	static char bufferMinute[] = "00";
+	static char h_buffer[3];
+	static char m_buffer[3];
+	
 	if(clock_is_24h_style()) {
-		strftime(bufferHour, sizeof(bufferHour), "%H", tick_time);	//%H
+		strftime(h_buffer, sizeof(h_buffer), "%H", tick_time);	//%H
 	} else {
-		strftime(bufferHour, sizeof(bufferHour), "%I", tick_time);	//%I
+		strftime(h_buffer, sizeof(h_buffer), "%I", tick_time);	//%I
 	}
-	strftime(bufferMinute, sizeof(bufferMinute), "%M", tick_time);		//%M
-	text_layer_set_text(s_hour_layer, bufferHour);
-	text_layer_set_text(s_minute_layer, bufferMinute);
+	strftime(m_buffer, sizeof(m_buffer), "%M", tick_time);		//%M
+	text_layer_set_text(s_hour_layer, h_buffer);
+	text_layer_set_text(s_minute_layer, m_buffer);
 
 // Date
-	static char top_buffer[16];
-	static char bottom_buffer[16];
+	static char t_buffer[16];
+	static char b_buffer[16];
 
-	customText(top_buffer, bottom_buffer, date_current);	
-	if(strcmp(top_buffer, "\0") == 0) {				// If Top is empty, write current weekday
-		strftime(top_buffer, sizeof(top_buffer), "%A", tick_time);		// %A
-	} if(strcmp(bottom_buffer, "\0") == 0) {		// If Bottom is empty, write current date		
- 		char char_suffix[32] = "";
-		getDateBottom(char_suffix, date_current, tick_time);
-		strftime(bottom_buffer, sizeof(char_suffix), char_suffix, tick_time);	// ᵗʰ
+	customText(t_buffer, b_buffer);	
+	if(strcmp(t_buffer, "\0") == 0) {				// If Top is empty, write current weekday
+		strftime(t_buffer, sizeof(t_buffer), "%A", tick_time);		// %A
+	} if(strcmp(b_buffer, "\0") == 0) {		// If Bottom is empty, write current date		
+ 		char char_suffix[16] = "";
+		char *select_date_bottom = "";
+		persist_read_string(MESSAGE_KEY_SELECT_DATE_BOTTOM,select_date_bottom,5);
+		int select_date_bottom_int = atoi(select_date_bottom);
+		int toggle_suffix = persist_read_int(MESSAGE_KEY_TOGGLE_SUFFIX);	
+
+		if(select_date_bottom_int == 1) { 		// Month Day
+			getMonth(char_suffix, 1, tick_time);
+			strcat(char_suffix," %e");
+			if(toggle_suffix == 1) {
+				getSuffix(char_suffix,tick_time);
+			}
+		} else {								// Default (Day Month)
+			strcat(char_suffix,"%e");
+			if(toggle_suffix == 1) {
+				getSuffix(char_suffix,tick_time);
+			}	
+			getMonth(char_suffix, 0, tick_time);
+		}
+		strftime(b_buffer, sizeof(char_suffix), char_suffix, tick_time);	// áµ—Ê°
 	}
-	text_layer_set_text(s_top_layer, top_buffer);
-	text_layer_set_text(s_bottom_layer, bottom_buffer);
+	text_layer_set_text(s_top_layer, t_buffer);
+	text_layer_set_text(s_bottom_layer, b_buffer);
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
