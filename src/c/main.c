@@ -77,6 +77,7 @@ void customText(char t_buffer[16], char b_buffer[16]) {
 		strcpy(t_buffer, "Merry");
 		strcpy(b_buffer, "Christmas");
 	}
+	// burns night is on the 25th January
 	// rememberence sunday could be from the 8th to the 14th november
 	else {
 		strcpy(t_buffer, "\0");
@@ -87,7 +88,6 @@ void customText(char t_buffer[16], char b_buffer[16]) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////// TIME ////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 static void update_time() {
 	time_t temp = time(NULL); 
@@ -112,9 +112,9 @@ static void update_time() {
 	static char b_buffer[16];
 
 	customText(t_buffer, b_buffer);	
-	if(strcmp(t_buffer, "\0") == 0) {				// If Top is empty, write current weekday
+	if(strcmp(t_buffer, "\0") == 0) {			// If Top is empty, write current weekday
 		strftime(t_buffer, sizeof(t_buffer), "%A", tick_time);		// %A
-	} if(strcmp(b_buffer, "\0") == 0) {		// If Bottom is empty, write current date		
+	} if(strcmp(b_buffer, "\0") == 0) {			// If Bottom is empty, write current date		
  		char char_suffix[16] = "";
 		char *select_date_bottom = "";
 		persist_read_string(MESSAGE_KEY_SELECT_DATE_BOTTOM,select_date_bottom,5);
@@ -123,7 +123,7 @@ static void update_time() {
 
 		if(select_date_bottom_int == 1) { 		// Month Day
 			getMonth(char_suffix, 1, tick_time);
-			strcat(char_suffix," %e");
+			strcat(char_suffix,"%e");
 			if(toggle_suffix == 1) {
 				getSuffix(char_suffix,tick_time);
 			}
@@ -151,10 +151,10 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 void unobstructed_change(AnimationProgress progress, void* data) {
 	GRect bounds = layer_get_unobstructed_bounds(window_get_root_layer(s_window));
 
-	layer_set_frame(text_layer_get_layer(s_hour_layer),GRect(   0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
-	layer_set_frame(text_layer_get_layer(s_minute_layer),GRect(73, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
-	layer_set_frame(text_layer_get_layer(s_top_layer),GRect(    0, bounds.size.h / 4 - 31, bounds.size.w,   30));
-	layer_set_frame(text_layer_get_layer(s_bottom_layer),GRect( 0, bounds.size.h * 3/4 -5, bounds.size.w,   30));
+	layer_set_frame(text_layer_get_layer(s_hour_layer),GRect(				 0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
+	layer_set_frame(text_layer_get_layer(s_minute_layer),GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
+	layer_set_frame(text_layer_get_layer(s_top_layer),GRect(				 0, bounds.size.h / 4 - 31, bounds.size.w,   30));
+	layer_set_frame(text_layer_get_layer(s_bottom_layer),GRect(				 0, bounds.size.h * 3/4 -5, bounds.size.w,   30));
 }
 
 static void battery_callback(BatteryChargeState state) {
