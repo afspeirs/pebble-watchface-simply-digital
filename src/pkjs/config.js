@@ -106,22 +106,22 @@ module.exports = [
 				"type": "heading",
 				"defaultValue": "Date"
 			},	
-			{
-				"type": "select",
-				"messageKey": "SELECT_DATE_BOTTOM",
-				"defaultValue": "0",
-				"label": "Date format",
-				"options": [
-					{ 
-						"label": "Day Month",
-						"value": "0" 
-					},
-					{ 
-						"label": "Month Day",
-						"value": "1" 
-					},
-				]
-			},
+// 			{
+// 				"type": "select",
+// 				"messageKey": "SELECT_DATE_BOTTOM",
+// 				"defaultValue": "0",
+// 				"label": "Date format",
+// 				"options": [
+// 					{ 
+// 						"label": "Day Month",
+// 						"value": "0" 
+// 					},
+// 					{ 
+// 						"label": "Month Day",
+// 						"value": "1" 
+// 					},
+// 				]
+// 			},
 			{
 				"type": "toggle",
 				"messageKey": "TOGGLE_SUFFIX",

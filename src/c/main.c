@@ -116,24 +116,24 @@ static void update_time() {
 		strftime(t_buffer, sizeof(t_buffer), "%A", tick_time);		// %A
 	} if(strcmp(b_buffer, "\0") == 0) {			// If Bottom is empty, write current date		
  		char char_suffix[16] = "";
-		char *select_date_bottom = "";
-		persist_read_string(MESSAGE_KEY_SELECT_DATE_BOTTOM,select_date_bottom,5);
-		int select_date_bottom_int = atoi(select_date_bottom);
+// 		char *select_date_bottom = "";
+// 		persist_read_string(MESSAGE_KEY_SELECT_DATE_BOTTOM,select_date_bottom,5);
+// 		int select_date_bottom_int = atoi(select_date_bottom);
 		int toggle_suffix = persist_read_int(MESSAGE_KEY_TOGGLE_SUFFIX);	
 
-		if(select_date_bottom_int == 1) { 		// Month Day
-			getMonth(char_suffix, 1, tick_time);
-			strcat(char_suffix,"%e");
-			if(toggle_suffix == 1) {
-				getSuffix(char_suffix,tick_time);
-			}
-		} else {								// Default (Day Month)
+// 		if(select_date_bottom_int == 1) { 		// Month Day
+// 			getMonth(char_suffix, 1, tick_time);
+// 			strcat(char_suffix,"%e");
+// 			if(toggle_suffix == 1) {
+// 				getSuffix(char_suffix,tick_time);
+// 			}
+// 		} else {								// Default (Day Month)
 			strcat(char_suffix,"%e");
 			if(toggle_suffix == 1) {
 				getSuffix(char_suffix,tick_time);
 			}	
 			getMonth(char_suffix, 0, tick_time);
-		}
+// 		}
 		strftime(b_buffer, sizeof(char_suffix), char_suffix, tick_time);	// áµ—Ê°
 	}
 	text_layer_set_text(s_top_layer, t_buffer);
@@ -245,11 +245,11 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	persist_write_int(MESSAGE_KEY_TOGGLE_BATTERY, toggle_battery);
 	persist_write_string(MESSAGE_KEY_SELECT_BATTERY_PERCENT, select_battery_percent);
 // Date	
-	Tuple *select_date_bottom_t = dict_find(iter, MESSAGE_KEY_SELECT_DATE_BOTTOM);
+// 	Tuple *select_date_bottom_t = dict_find(iter, MESSAGE_KEY_SELECT_DATE_BOTTOM);
 	Tuple *toggle_suffix_t = dict_find(iter, MESSAGE_KEY_TOGGLE_SUFFIX);
-	char *select_date_bottom = select_date_bottom_t->value->cstring;
+// 	char *select_date_bottom = select_date_bottom_t->value->cstring;
 	int toggle_suffix = toggle_suffix_t->value->int32;
-	persist_write_string(MESSAGE_KEY_SELECT_DATE_BOTTOM, select_date_bottom);
+// 	persist_write_string(MESSAGE_KEY_SELECT_DATE_BOTTOM, select_date_bottom);
 	persist_write_int(MESSAGE_KEY_TOGGLE_SUFFIX, toggle_suffix);
 // Custom Text
 	Tuple *check_date_0_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE);
@@ -303,10 +303,10 @@ static void window_load(Window *window) {
 	
 // Locations
 	#if defined(PBL_RECT)
-		s_hour_layer	= text_layer_create(GRect( 0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
- 		s_minute_layer	= text_layer_create(GRect(73, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
-		s_top_layer		= text_layer_create(GRect( 0, bounds.size.h / 4 - 31, bounds.size.w,   30));
- 		s_bottom_layer	= text_layer_create(GRect( 0,	bounds.size.h * 3/4 -5, bounds.size.w,   30));
+		s_hour_layer	= text_layer_create(GRect(				0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
+ 		s_minute_layer	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
+		s_top_layer		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31, bounds.size.w,   30));
+ 		s_bottom_layer	= text_layer_create(GRect(				0, bounds.size.h * 3/4 -5, bounds.size.w,   30));
 		s_battery_layer	= bitmap_layer_create(GRect(4, 2, 12, 12)); // battery
 	#elif defined(PBL_ROUND)
 		s_hour_layer	= text_layer_create(GRect(   10, bounds.size.h / 2 - 47 + 1, bounds.size.w/2, 75));
