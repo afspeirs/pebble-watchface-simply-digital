@@ -180,50 +180,44 @@ static void battery_callback(BatteryChargeState state) {
 
 static void bluetooth_callback(bool connected) {
 	int colour_background = persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND);
-	int colour_hour = persist_read_int(MESSAGE_KEY_COLOUR_HOUR);
+	int colour_date = persist_read_int(MESSAGE_KEY_COLOUR_DATE);
 	int colour_bluetooth = persist_read_int(MESSAGE_KEY_COLOUR_BLUETOOTH);
 	
 	if(!connected) {		// Disconected
 		if(colour_bluetooth) {
 			#if defined(PBL_COLOR)
 				GColor bt_colour = GColorFromHEX(colour_bluetooth);
-				text_layer_set_text_color(s_hour_layer, bt_colour);
-				text_layer_set_text_color(s_minute_layer, bt_colour);
+				text_layer_set_text_color(s_top_layer, bt_colour);
+				text_layer_set_text_color(s_bottom_layer, bt_colour);
 			#elif defined(PBL_BW)
 				GColor bg_colour = GColorFromHEX(colour_bluetooth);
-				text_layer_set_text_color(s_hour_layer, gcolor_legible_over(bg_colour));
-				text_layer_set_text_color(s_minute_layer, gcolor_legible_over(bg_colour));
 				text_layer_set_text_color(s_top_layer, bg_colour);
 				text_layer_set_text_color(s_bottom_layer, bg_colour);
 			#endif
 		} else {
 			#if defined(PBL_COLOR)
-				text_layer_set_text_color(s_hour_layer, GColorRed);
-				text_layer_set_text_color(s_minute_layer, GColorRed);
+				text_layer_set_text_color(s_top_layer, GColorRed);
+				text_layer_set_text_color(s_bottom_layer, GColorRed);
 			#elif defined(PBL_BW)
-				text_layer_set_text_color(s_hour_layer, GColorWhite);
-				text_layer_set_text_color(s_minute_layer, GColorWhite);
 				text_layer_set_text_color(s_top_layer, GColorBlack);
 				text_layer_set_text_color(s_bottom_layer, GColorBlack);
 			#endif
 		}
 		vibes_long_pulse();
 	} else {				// Connected
-		if(colour_background || colour_hour) {
+		if(colour_background || colour_date) {
 			#if defined(PBL_COLOR)
-				GColor hr_colour = GColorFromHEX(colour_hour);
-				int colour_minute = persist_read_int(MESSAGE_KEY_COLOUR_MINUTE);
-				GColor mn_colour = GColorFromHEX(colour_minute);
-				text_layer_set_text_color(s_hour_layer, hr_colour);
-				text_layer_set_text_color(s_minute_layer, mn_colour);	
+				GColor dt_colour = GColorFromHEX(colour_date);
+				text_layer_set_text_color(s_top_layer, dt_colour);
+				text_layer_set_text_color(s_bottom_layer, dt_colour);	
 			#elif defined(PBL_BW)
 				GColor bg_colour = GColorFromHEX(colour_background);
-				text_layer_set_text_color(s_hour_layer, gcolor_legible_over(bg_colour));
-				text_layer_set_text_color(s_minute_layer, gcolor_legible_over(bg_colour));	
+				text_layer_set_text_color(s_top_layer, bg_colour);
+				text_layer_set_text_color(s_bottom_layer, bg_colour);
 			#endif
 		} else {	
-			text_layer_set_text_color(s_hour_layer, GColorWhite);
-			text_layer_set_text_color(s_minute_layer, GColorWhite);
+			text_layer_set_text_color(s_top_layer, GColorWhite);
+			text_layer_set_text_color(s_bottom_layer, GColorWhite);
 		}
 	}
 }
@@ -361,22 +355,25 @@ static void window_load(Window *window) {
 
 // Colours
 //	int colour_background = persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND);
-	if(colour_background) {
+	int colour_hour = persist_read_int(MESSAGE_KEY_COLOUR_HOUR);
+	if(colour_background || colour_hour) {
 		GColor bg_colour = GColorFromHEX(colour_background);
 		window_set_background_color(s_window, bg_colour);
 		#if defined(PBL_COLOR)
-			int colour_date = persist_read_int(MESSAGE_KEY_COLOUR_DATE);
-			GColor dt_colour = GColorFromHEX(colour_date);
-			text_layer_set_text_color(s_top_layer, dt_colour);
-			text_layer_set_text_color(s_bottom_layer, dt_colour);
+// 			int colour_hour = persist_read_int(MESSAGE_KEY_COLOUR_HOUR);
+			GColor hr_colour = GColorFromHEX(colour_hour);
+			text_layer_set_text_color(s_hour_layer, hr_colour);
+			int colour_minute = persist_read_int(MESSAGE_KEY_COLOUR_MINUTE);
+			GColor mn_colour = GColorFromHEX(colour_minute);
+			text_layer_set_text_color(s_minute_layer, mn_colour);
 		#elif defined(PBL_BW)	
-			text_layer_set_text_color(s_top_layer, gcolor_legible_over(bg_colour));
-			text_layer_set_text_color(s_bottom_layer, gcolor_legible_over(bg_colour));
+			text_layer_set_text_color(s_hour_layer, gcolor_legible_over(bg_colour));
+			text_layer_set_text_color(s_minute_layer, gcolor_legible_over(bg_colour));
 		#endif
 	} else {
 		window_set_background_color(s_window, GColorBlack);
-		text_layer_set_text_color(s_top_layer, GColorWhite);
-		text_layer_set_text_color(s_bottom_layer, GColorWhite);
+		text_layer_set_text_color(s_hour_layer, GColorWhite);
+		text_layer_set_text_color(s_minute_layer, GColorWhite);
 	}
 	bluetooth_callback(connection_service_peek_pebble_app_connection());
 	update_time();
