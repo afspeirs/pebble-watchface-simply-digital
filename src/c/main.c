@@ -25,40 +25,6 @@ void getBatteryIcon(int colour_background) {
 	bitmap_layer_set_bitmap(s_battery_layer, s_battery_bitmap);
 }
 
-void getMonth(char *input, int location, struct tm *tick_time) {		// 0 is before, 1 is after
-	strftime(month_current, sizeof(month_current), "%B", tick_time);
- 	
-	#if defined(PBL_RECT)
-		if(strlen(month_current) > 7) {
-			if(location == 0) { strcat(input,"  %b"); }
-			if(location == 1) { strcat(input,"%b"); }
-		} else {
-			if(location == 0) { strcat(input,"  %B"); }
-			if(location == 1) { strcat(input,"%B"); }
-		}
-	#elif defined(PBL_ROUND)
-		if(strlen(month_current) > 5) {
-			if(location == 0) { strcat(input,"  %b"); }
-			if(location == 1) { strcat(input,"%b"); }
-	 	} else {
-			if(location == 0) { strcat(input,"  %B"); }
-			if(location == 1) { strcat(input,"%B"); }
-		}
-	#endif
-}
-
-void getSuffix(char *input, struct tm *tick_time) {
-	if (strncmp(date_current, "01", 2) == 0 || strncmp(date_current, "21", 2) == 0 || strncmp(date_current,"31",2) == 0) { 
-		strcat(input,"st");
-	} else if (strncmp(date_current, "02", 2) == 0 || strncmp(date_current, "22", 2) == 0) {
-		strcat(input,"nd");
-	} else if (strncmp(date_current, "03", 2) == 0 || strncmp(date_current, "23", 2) == 0) { 
-		strcat(input,"rd");
-	} else {
-		strcat(input,"th");
-	}
-}
-
 void customText(char t_buffer[16], char b_buffer[16]) {
 	int check_date_0 = persist_read_int(MESSAGE_KEY_CHECK_DATE);
 	int check_date_1 = persist_read_int(MESSAGE_KEY_CHECK_DATE+1);
@@ -92,7 +58,6 @@ void customText(char t_buffer[16], char b_buffer[16]) {
 static void update_time() {
 	time_t temp = time(NULL); 
 	struct tm *tick_time = localtime(&temp);
-	strftime(date_current, 8, "%d%m", tick_time);
 
 // Time
 	static char h_buffer[3];
@@ -115,26 +80,37 @@ static void update_time() {
 	if(strcmp(t_buffer, "\0") == 0) {			// If Top is empty, write current weekday
 		strftime(t_buffer, sizeof(t_buffer), "%A", tick_time);		// %A
 	} if(strcmp(b_buffer, "\0") == 0) {			// If Bottom is empty, write current date		
- 		char char_suffix[16] = "";
-// 		char *select_date_bottom = "";
-// 		persist_read_string(MESSAGE_KEY_SELECT_DATE_BOTTOM,select_date_bottom,5);
-// 		int select_date_bottom_int = atoi(select_date_bottom);
-		int toggle_suffix = persist_read_int(MESSAGE_KEY_TOGGLE_SUFFIX);	
-
-// 		if(select_date_bottom_int == 1) { 		// Month Day
-// 			getMonth(char_suffix, 1, tick_time);
-// 			strcat(char_suffix,"%e");
-// 			if(toggle_suffix == 1) {
-// 				getSuffix(char_suffix,tick_time);
-// 			}
-// 		} else {								// Default (Day Month)
-			strcat(char_suffix,"%e");
-			if(toggle_suffix == 1) {
-				getSuffix(char_suffix,tick_time);
-			}	
-			getMonth(char_suffix, 0, tick_time);
-// 		}
-		strftime(b_buffer, sizeof(char_suffix), char_suffix, tick_time);	// áµ—Ê°
+ 		char char_buffer[16] = "";
+		int toggle_suffix = persist_read_int(MESSAGE_KEY_TOGGLE_SUFFIX);
+		strftime(date_current, sizeof(date_current), "%d%m", tick_time);
+		strftime(month_current, sizeof(month_current), "%B", tick_time);
+		
+		strcat(char_buffer,"%e");				// Day
+		if(toggle_suffix == 1) {
+			if (strncmp(date_current, "01", 2) == 0 || strncmp(date_current, "21", 2) == 0 || strncmp(date_current,"31",2) == 0) { 
+				strcat(char_buffer,"st");
+			} else if (strncmp(date_current, "02", 2) == 0 || strncmp(date_current, "22", 2) == 0) {
+				strcat(char_buffer,"nd");
+			} else if (strncmp(date_current, "03", 2) == 0 || strncmp(date_current, "23", 2) == 0) { 
+				strcat(char_buffer,"rd");
+			} else {
+				strcat(char_buffer,"th");
+			}
+		}
+		#if defined(PBL_RECT)					// Month
+			if(strlen(month_current) > 7) {
+				strcat(char_buffer,"  %b");
+			} else {
+				strcat(char_buffer,"  %B");
+			}
+		#elif defined(PBL_ROUND)
+			if(strlen(month_current) > 5) {
+				strcat(char_buffer,"  %b");
+			} else {
+				strcat(char_buffer,"  %B");
+			}
+		#endif
+		strftime(b_buffer, sizeof(char_buffer), char_buffer, tick_time);	// ᵗʰ
 	}
 	text_layer_set_text(s_top_layer, t_buffer);
 	text_layer_set_text(s_bottom_layer, b_buffer);
@@ -245,11 +221,8 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	persist_write_int(MESSAGE_KEY_TOGGLE_BATTERY, toggle_battery);
 	persist_write_string(MESSAGE_KEY_SELECT_BATTERY_PERCENT, select_battery_percent);
 // Date	
-// 	Tuple *select_date_bottom_t = dict_find(iter, MESSAGE_KEY_SELECT_DATE_BOTTOM);
 	Tuple *toggle_suffix_t = dict_find(iter, MESSAGE_KEY_TOGGLE_SUFFIX);
-// 	char *select_date_bottom = select_date_bottom_t->value->cstring;
 	int toggle_suffix = toggle_suffix_t->value->int32;
-// 	persist_write_string(MESSAGE_KEY_SELECT_DATE_BOTTOM, select_date_bottom);
 	persist_write_int(MESSAGE_KEY_TOGGLE_SUFFIX, toggle_suffix);
 // Custom Text
 	Tuple *check_date_0_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE);
