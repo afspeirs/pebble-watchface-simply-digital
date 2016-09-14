@@ -20,7 +20,8 @@
             "TOGGLE_BATTERY",
             "TOGGLE_SUFFIX",
             "SELECT_BATTERY_PERCENT",
-            "CHECK_DATE[3]"
+            "CHECK_DATE[3]",
+            "SELECT_BLUETOOTH_DISCONNECT"
         ],
         "projectType": "native",
         "resources": {
@@ -73,5 +74,5 @@
             "watchface": true
         }
     },
-    "version": "0.50.0"
+    "version": "0.51.0"
 }

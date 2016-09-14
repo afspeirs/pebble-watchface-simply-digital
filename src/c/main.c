@@ -37,14 +37,37 @@ void customText(char t_buffer[16], char b_buffer[16]) {
 	} else if(check_date_0 == 1 && strcmp("0101", date_current) == 0) {  // New Years
 		strcpy(t_buffer, "Happy");
 		strcpy(b_buffer, "New  Year");
-	} else if(check_date_1 == 1 && strcmp("3110", date_current) == 0) {  // Christmas
+	} else if(check_date_1 == 1 && strcmp("3110", date_current) == 0) {  // Halloween
 		strcpy(t_buffer, "\0");
 		strcpy(b_buffer, "Halloween");
-	} else if(check_date_2 == 1 && strcmp("2512", date_current) == 0) {  // Halloween
+	} else if(check_date_2 == 1 && strcmp("2512", date_current) == 0) {  // Christmas
 		strcpy(t_buffer, "Merry");
 		strcpy(b_buffer, "Christmas");
 	}
-	// burns night is on the 25th January
+	
+	// Valentines				14th February
+	// Earth Day				
+	// Mother's Day US			May ish
+	// Mother's Day UK			March ish
+	// Father's Day US			
+	// Father's Day UK			June ish
+	// Independence Day (US)	4th July
+	// Independence Day (MEX)
+	// Canada Day				
+	// Victoria Day (Canada)	
+	// Thanksgiving				3rd thursday in november?
+	// black friday??
+	// Eid
+	// Diwali
+	// Boxing Day				26th December
+	// Hannukah					december
+	// Passover					
+	// Chinese New Year
+	// Kwanzaa
+	// MLK Day
+	
+	
+	// burns night				25h January
 	// rememberence sunday could be from the 8th to the 14th november
 	else {
 		strcpy(t_buffer, "\0");
@@ -101,31 +124,49 @@ static void battery_callback(BatteryChargeState state) {
 }
 
 static void bluetooth_callback(bool connected) {
+	char *select_bluetooth_disconnect = "";
+ 	persist_read_string(MESSAGE_KEY_SELECT_BLUETOOTH_DISCONNECT,select_bluetooth_disconnect,5);
+	int select_bluetooth_disconnect_int = atoi(select_bluetooth_disconnect);
+	
 	int colour_background = persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND);
 	int colour_date = persist_read_int(MESSAGE_KEY_COLOUR_DATE);
 	int colour_bluetooth = persist_read_int(MESSAGE_KEY_COLOUR_BLUETOOTH);
 	
-	if(!connected) {												// Disconected
-		if(colour_background || colour_bluetooth) {
+	if(!connected) {												
+		if(!select_bluetooth_disconnect_int == 0) {
+			if(colour_background || colour_bluetooth) {	// Disconected with config
+				#if defined(PBL_COLOR)
+					GColor bt_colour = GColorFromHEX(colour_bluetooth);
+					text_layer_set_text_color(s_top_layer, bt_colour);		// Set Top Colour
+					text_layer_set_text_color(s_bottom_layer, bt_colour);	// Set Bottom Colour
+				#elif defined(PBL_BW)
+					GColor bg_colour = GColorFromHEX(colour_bluetooth);
+					text_layer_set_text_color(s_top_layer, gcolor_legible_over(bg_colour));		// Set Top Colour				// This shouldnt work, but it does :(
+					text_layer_set_text_color(s_bottom_layer, gcolor_legible_over(bg_colour));	// Set Bottom Colour
+				#endif
+			} else { 									// Disconnected and no config
+				#if defined(PBL_COLOR)
+					text_layer_set_text_color(s_top_layer, GColorRed);		// Set Top Colour
+					text_layer_set_text_color(s_bottom_layer, GColorRed);	// Set Bottom Colour
+				#elif defined(PBL_BW)
+					text_layer_set_text_color(s_top_layer, GColorBlack);
+					text_layer_set_text_color(s_bottom_layer, GColorBlack);
+				#endif
+			}
+		} else {						// No vibration & no colour changes
 			#if defined(PBL_COLOR)
-				GColor bt_colour = GColorFromHEX(colour_bluetooth);
-				text_layer_set_text_color(s_top_layer, bt_colour);		// Set Top Colour
-				text_layer_set_text_color(s_bottom_layer, bt_colour);	// Set Bottom Colour
+				GColor dt_colour = GColorFromHEX(colour_date);
+				text_layer_set_text_color(s_top_layer, dt_colour);
+				text_layer_set_text_color(s_bottom_layer, dt_colour);
 			#elif defined(PBL_BW)
-				GColor bg_colour = GColorFromHEX(colour_bluetooth);
-				text_layer_set_text_color(s_top_layer, gcolor_legible_over(bg_colour));		// Set Top Colour				// This shouldnt work, but it does :(
-				text_layer_set_text_color(s_bottom_layer, gcolor_legible_over(bg_colour));	// Set Bottom Colour
-			#endif
-		} else {
-			#if defined(PBL_COLOR)
-				text_layer_set_text_color(s_top_layer, GColorRed);		// Set Top Colour
-				text_layer_set_text_color(s_bottom_layer, GColorRed);	// Set Bottom Colour
-			#elif defined(PBL_BW)
-				text_layer_set_text_color(s_top_layer, GColorBlack);	// Set Top Colour
-				text_layer_set_text_color(s_bottom_layer, GColorBlack);	// Set Bottom Colour
+				GColor bg_colour = GColorFromHEX(colour_background);
+				text_layer_set_text_color(s_top_layer, gcolor_legible_over(bg_colour));
+				text_layer_set_text_color(s_bottom_layer, gcolor_legible_over(bg_colour));
 			#endif
 		}
-		vibes_long_pulse();			// Vibrate if disconected
+		if(select_bluetooth_disconnect_int == 1) { vibes_short_pulse(); }		// Short vibration
+		else if(select_bluetooth_disconnect_int == 2) { vibes_long_pulse(); }	// Long vibration
+		else if(select_bluetooth_disconnect_int == 3) { vibes_double_pulse(); }	// Double vibration
 	} else {														// Connected
 		if(colour_background || colour_date) {
 			#if defined(PBL_COLOR)
@@ -154,16 +195,20 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 		Tuple *colour_hour_t = dict_find(iter, MESSAGE_KEY_COLOUR_HOUR);
 		Tuple *colour_minute_t = dict_find(iter, MESSAGE_KEY_COLOUR_MINUTE);
 		Tuple *colour_date_t = dict_find(iter, MESSAGE_KEY_COLOUR_DATE);
-		Tuple *colour_bluetooth_t = dict_find(iter, MESSAGE_KEY_COLOUR_BLUETOOTH);
 			colour_hour = colour_hour_t->value->int32;
 			colour_minute = colour_minute_t->value->int32;
 		int colour_date = colour_date_t->value->int32;
-		int colour_bluetooth = colour_bluetooth_t->value->int32;
 		persist_write_int(MESSAGE_KEY_COLOUR_HOUR, colour_hour);
 		persist_write_int(MESSAGE_KEY_COLOUR_MINUTE, colour_minute);
 		persist_write_int(MESSAGE_KEY_COLOUR_DATE, colour_date);
-		persist_write_int(MESSAGE_KEY_COLOUR_BLUETOOTH, colour_bluetooth);
 	#endif
+// Bluetooth
+	Tuple *colour_bluetooth_t = dict_find(iter, MESSAGE_KEY_COLOUR_BLUETOOTH);
+	int colour_bluetooth = colour_bluetooth_t->value->int32;
+	persist_write_int(MESSAGE_KEY_COLOUR_BLUETOOTH, colour_bluetooth);
+	Tuple *select_bluetooth_diconnect_t = dict_find(iter, MESSAGE_KEY_SELECT_BLUETOOTH_DISCONNECT);
+	char *select_bluetooth_disconnect = select_bluetooth_diconnect_t->value->cstring;
+	persist_write_string(MESSAGE_KEY_SELECT_BLUETOOTH_DISCONNECT, select_bluetooth_disconnect);	
 // Battery
 	Tuple *toggle_battery_t = dict_find(iter, MESSAGE_KEY_TOGGLE_BATTERY);
 	Tuple *select_battery_percent_t = dict_find(iter, MESSAGE_KEY_SELECT_BATTERY_PERCENT);
@@ -196,6 +241,8 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	}
 	bluetooth_callback(connection_service_peek_pebble_app_connection());
 	layer_mark_dirty(window_get_root_layer(s_window));
+	
+// 	APP_LOG(APP_LOG_LEVEL_DEBUG, select_bluetooth_disconnect);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -274,11 +321,12 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 static void window_load(Window *window) {
 	Layer *window_layer = window_get_root_layer(window);
 	GRect bounds = layer_get_unobstructed_bounds(window_layer);
+	setlocale(LC_ALL, "");								// This may work for localising the watchface
 	
 	s_time_date_layer = layer_create(bounds);
 	layer_set_update_proc(s_time_date_layer, time_date_update_proc);
 	layer_add_child(window_layer, s_time_date_layer);
-	
+		
 // Fonts
 	s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_72));
 	s_date_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_28));
