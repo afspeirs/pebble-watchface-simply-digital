@@ -96,7 +96,7 @@ module.exports = [
 			{
 				"type": "toggle",
 				"messageKey": "TOGGLE_BATTERY",
-				"label": "Show battery icon",
+				"label": "Show low battery icon",
 				"defaultValue": false,
 			},
 			{
@@ -140,22 +140,6 @@ module.exports = [
 				"type": "heading",
 				"defaultValue": "Date"
 			},
-// 			{
-// 				"type": "select",
-// 				"messageKey": "SELECT_DATE_BOTTOM",
-// 				"defaultValue": "0",
-// 				"label": "Date format",
-// 				"options": [
-// 					{ 
-// 						"label": "Day Month",
-// 						"value": "0" 
-// 					},
-// 					{ 
-// 						"label": "Month Day",
-// 						"value": "1" 
-// 					},
-// 				]
-// 			},
 			{
 				"type": "toggle",
 				"messageKey": "TOGGLE_SUFFIX",
@@ -165,10 +149,10 @@ module.exports = [
 			{
 				"type": "toggle",
 				"messageKey": "TOGGLE_WEEK",
-				"label": "Toggle Week",
+				"label": "Show calendar week",
 				"defaultValue": false,
-				"description": "Toggle Week on bottom",
-			},
+				"description": "Toggle calendar week on bottom",
+			}
 		]
 	},
 	{

@@ -201,11 +201,11 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 		persist_write_int(MESSAGE_KEY_COLOUR_HOUR, colour_hour);
 		persist_write_int(MESSAGE_KEY_COLOUR_MINUTE, colour_minute);
 		persist_write_int(MESSAGE_KEY_COLOUR_DATE, colour_date);
-	#endif
 // Bluetooth
-	Tuple *colour_bluetooth_t = dict_find(iter, MESSAGE_KEY_COLOUR_BLUETOOTH);
-	int colour_bluetooth = colour_bluetooth_t->value->int32;
-	persist_write_int(MESSAGE_KEY_COLOUR_BLUETOOTH, colour_bluetooth);
+		Tuple *colour_bluetooth_t = dict_find(iter, MESSAGE_KEY_COLOUR_BLUETOOTH);
+		int colour_bluetooth = colour_bluetooth_t->value->int32;
+		persist_write_int(MESSAGE_KEY_COLOUR_BLUETOOTH, colour_bluetooth);
+	#endif
 	Tuple *select_bluetooth_diconnect_t = dict_find(iter, MESSAGE_KEY_SELECT_BLUETOOTH_DISCONNECT);
 	char *select_bluetooth_disconnect = select_bluetooth_diconnect_t->value->cstring;
 	persist_write_string(MESSAGE_KEY_SELECT_BLUETOOTH_DISCONNECT, select_bluetooth_disconnect);	
