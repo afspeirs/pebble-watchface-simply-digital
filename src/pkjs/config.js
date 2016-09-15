@@ -151,6 +151,7 @@ module.exports = [
 				"messageKey": "TOGGLE_WEEK",
 				"label": "Show calendar week",
 				"defaultValue": false,
+				"capabilities": ["NOT_ROUND"],
 				"description": "Toggle calendar week on bottom",
 			}
 		]
