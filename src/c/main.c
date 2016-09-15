@@ -220,6 +220,9 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	Tuple *toggle_suffix_t = dict_find(iter, MESSAGE_KEY_TOGGLE_SUFFIX);
 	int toggle_suffix = toggle_suffix_t->value->int32;
 	persist_write_int(MESSAGE_KEY_TOGGLE_SUFFIX, toggle_suffix);
+	Tuple *toggle_week_t = dict_find(iter, MESSAGE_KEY_TOGGLE_WEEK);
+	int toggle_week = toggle_week_t->value->int32;
+	persist_write_int(MESSAGE_KEY_TOGGLE_WEEK, toggle_week);
 // Custom Text
 	Tuple *check_date_0_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE);
 	Tuple *check_date_1_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+1);
@@ -291,15 +294,20 @@ static void time_date_update_proc(Layer *layer, GContext *ctx) {
 				strcat(char_buffer,"th");
 			}
 		}
+		
+		int toggle_week = persist_read_int(MESSAGE_KEY_TOGGLE_WEEK);
 		#if defined(PBL_RECT)					// Month
-			if(strlen(month_current) > 7) {
-				strcat(char_buffer,"  %b");
+			if(strlen(month_current) > 7 || toggle_week) {
+				strcat(char_buffer,"  %b"); // Short
+				if(toggle_week) {
+					strcat(char_buffer,"  W%V");
+				}
 			} else {
 				strcat(char_buffer,"  %B");
 			}
 		#elif defined(PBL_ROUND)
 			if(strlen(month_current) > 5) {
-				strcat(char_buffer,"  %b");
+				strcat(char_buffer,"  %b"); // Short
 			} else {
 				strcat(char_buffer,"  %B");
 			}
@@ -321,7 +329,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 static void window_load(Window *window) {
 	Layer *window_layer = window_get_root_layer(window);
 	GRect bounds = layer_get_unobstructed_bounds(window_layer);
-	setlocale(LC_ALL, "");								// This may work for localising the watchface
+	setlocale(LC_ALL, "");
 	
 	s_time_date_layer = layer_create(bounds);
 	layer_set_update_proc(s_time_date_layer, time_date_update_proc);

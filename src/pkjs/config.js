@@ -139,7 +139,7 @@ module.exports = [
 			{
 				"type": "heading",
 				"defaultValue": "Date"
-			},	
+			},
 // 			{
 // 				"type": "select",
 // 				"messageKey": "SELECT_DATE_BOTTOM",
@@ -161,6 +161,13 @@ module.exports = [
 				"messageKey": "TOGGLE_SUFFIX",
 				"label": "Show suffix",
 				"defaultValue": false,
+			},
+			{
+				"type": "toggle",
+				"messageKey": "TOGGLE_WEEK",
+				"label": "Toggle Week",
+				"defaultValue": false,
+				"description": "Toggle Week on bottom",
 			},
 		]
 	},
