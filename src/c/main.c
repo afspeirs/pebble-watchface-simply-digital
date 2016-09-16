@@ -133,40 +133,31 @@ static void bluetooth_callback(bool connected) {
 	int colour_bluetooth = persist_read_int(MESSAGE_KEY_COLOUR_BLUETOOTH);
 	
 	if(!connected) {												
-		if(!select_bluetooth_disconnect_int == 0) {
-			if(colour_background || colour_bluetooth) {	// Disconected with config
-				#if defined(PBL_COLOR)
-					GColor bt_colour = GColorFromHEX(colour_bluetooth);
-					text_layer_set_text_color(s_top_layer, bt_colour);		// Set Top Colour
-					text_layer_set_text_color(s_bottom_layer, bt_colour);	// Set Bottom Colour
-				#elif defined(PBL_BW)
-					GColor bg_colour = GColorFromHEX(colour_bluetooth);
-					text_layer_set_text_color(s_top_layer, gcolor_legible_over(bg_colour));		// Set Top Colour				// This shouldnt work, but it does :(
-					text_layer_set_text_color(s_bottom_layer, gcolor_legible_over(bg_colour));	// Set Bottom Colour
-				#endif
-			} else { 									// Disconnected and no config
-				#if defined(PBL_COLOR)
-					text_layer_set_text_color(s_top_layer, GColorRed);		// Set Top Colour
-					text_layer_set_text_color(s_bottom_layer, GColorRed);	// Set Bottom Colour
-				#elif defined(PBL_BW)
-					text_layer_set_text_color(s_top_layer, GColorBlack);
-					text_layer_set_text_color(s_bottom_layer, GColorBlack);
-				#endif
-			}
-		} else {						// No vibration & no colour changes
+		if(colour_background || colour_bluetooth) {	// Disconected with config
 			#if defined(PBL_COLOR)
-				GColor dt_colour = GColorFromHEX(colour_date);
-				text_layer_set_text_color(s_top_layer, dt_colour);
-				text_layer_set_text_color(s_bottom_layer, dt_colour);
+			GColor bt_colour = GColorFromHEX(colour_bluetooth);
+			text_layer_set_text_color(s_top_layer, bt_colour);		// Set Top Colour
+			text_layer_set_text_color(s_bottom_layer, bt_colour);	// Set Bottom Colour
 			#elif defined(PBL_BW)
-				GColor bg_colour = GColorFromHEX(colour_background);
-				text_layer_set_text_color(s_top_layer, gcolor_legible_over(bg_colour));
-				text_layer_set_text_color(s_bottom_layer, gcolor_legible_over(bg_colour));
+			GColor bg_colour = GColorFromHEX(colour_bluetooth);
+			text_layer_set_text_color(s_top_layer, gcolor_legible_over(bg_colour));		// Set Top Colour				// This shouldnt work, but it does :(
+			text_layer_set_text_color(s_bottom_layer, gcolor_legible_over(bg_colour));	// Set Bottom Colour
+			#endif
+		} else { 									// Disconnected and no config
+			#if defined(PBL_COLOR)
+			text_layer_set_text_color(s_top_layer, GColorRed);		// Set Top Colour
+			text_layer_set_text_color(s_bottom_layer, GColorRed);	// Set Bottom Colour
+			#elif defined(PBL_BW)
+			text_layer_set_text_color(s_top_layer, GColorBlack);
+			text_layer_set_text_color(s_bottom_layer, GColorBlack);
 			#endif
 		}
-		if(select_bluetooth_disconnect_int == 1) { vibes_short_pulse(); }		// Short vibration
+		if(select_bluetooth_disconnect_int == 0) { }		// No vibration 
+		else if(select_bluetooth_disconnect_int == 1) { vibes_short_pulse(); }		// Short vibration
 		else if(select_bluetooth_disconnect_int == 2) { vibes_long_pulse(); }	// Long vibration
 		else if(select_bluetooth_disconnect_int == 3) { vibes_double_pulse(); }	// Double vibration
+		else { vibes_long_pulse(); }	// Default
+
 	} else {														// Connected
 		if(colour_background || colour_date) {
 			#if defined(PBL_COLOR)
