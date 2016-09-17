@@ -138,35 +138,6 @@ static void battery_callback(BatteryChargeState state) {
 	} else {
 		layer_set_hidden(bitmap_layer_get_layer(s_battery_layer), true);	// Hidden
 	}
-
-	/*
-	
-		have a drop down menu in config settings->
-		 Show battery icon at:
-		 	10%
-			20%
-			30%
-			Always show
-			
-	Selecting "Always show battery icon" will update the icon based on the charge level of the watch
-	
-	
-	*/
-	
-	// if menu = 10% || 20% || 30% && charge level is less than selected
-		// show battery 1
-	// else if menu = always show
-		// if charge is between 100 and 76
-			// show battery 4
-		// if charge is between 75 and 51
-			// show battery 3
-		// if charge is between 50 and 26
-			// show battery 2
-		// if charge is between 25 and 0
-			// show battery 1
-	// else
-		// hide menu
-
 }
 
 static void bluetooth_callback(bool connected) {
@@ -226,9 +197,6 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	char *select_bluetooth_disconnect = select_bluetooth_diconnect_t->value->cstring;
 	persist_write_string(MESSAGE_KEY_SELECT_BLUETOOTH_DISCONNECT, select_bluetooth_disconnect);	
 // Battery
-// 	Tuple *toggle_battery_t = dict_find(iter, MESSAGE_KEY_TOGGLE_BATTERY);
-// 	int toggle_battery = toggle_battery_t->value->int32;	
-// 	persist_write_int(MESSAGE_KEY_TOGGLE_BATTERY, toggle_battery);
 	Tuple *select_battery_percent_t = dict_find(iter, MESSAGE_KEY_SELECT_BATTERY_PERCENT);
 	char *select_battery_percent = select_battery_percent_t->value->cstring;
 	persist_write_string(MESSAGE_KEY_SELECT_BATTERY_PERCENT, select_battery_percent);
@@ -436,8 +404,8 @@ static void init() {
   		.pebble_app_connection_handler = bluetooth_callback
 	});
 
-	const int inbox_size = 128;
-	const int outbox_size = 128;
+	const int inbox_size = 256;
+	const int outbox_size = 256;
 	app_message_register_inbox_received(inbox_received_handler);
 	app_message_open(inbox_size, outbox_size);
 

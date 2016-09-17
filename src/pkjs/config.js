@@ -93,17 +93,12 @@ module.exports = [
 				"type": "heading",
 				"defaultValue": "Battery"
 			},
-// 			{
-// 				"type": "toggle",
-// 				"messageKey": "TOGGLE_BATTERY",
-// 				"label": "Show low battery icon",
-// 				"defaultValue": false,
-// 			},
 			{
 				"type": "select",
 				"messageKey": "SELECT_BATTERY_PERCENT",
 				"defaultValue": "0",
 				"label": "Low battery percent",
+				"description": "Selecting \"Always show\" will update the icon based on the charge level of the watch",
 				"options": [
 					{
 						"label": "None",
