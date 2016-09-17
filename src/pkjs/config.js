@@ -93,19 +93,23 @@ module.exports = [
 				"type": "heading",
 				"defaultValue": "Battery"
 			},
-			{
-				"type": "toggle",
-				"messageKey": "TOGGLE_BATTERY",
-				"label": "Show low battery icon",
-				"defaultValue": false,
-			},
+// 			{
+// 				"type": "toggle",
+// 				"messageKey": "TOGGLE_BATTERY",
+// 				"label": "Show low battery icon",
+// 				"defaultValue": false,
+// 			},
 			{
 				"type": "select",
 				"messageKey": "SELECT_BATTERY_PERCENT",
-				"defaultValue": "20",
+				"defaultValue": "0",
 				"label": "Low battery percent",
 				"options": [
-					{ 
+					{
+						"label": "None",
+						"value": "0" 
+					},
+					{
 						"label": "10%",
 						"value": "10" 
 					},
@@ -118,17 +122,9 @@ module.exports = [
 						"value": "30" 
 					},
 					{ 
-						"label": "40%",
-						"value": "40" 
-					},
-					{ 
-						"label": "50%",
-						"value": "50" 
-					},
-					{ 
-						"label": "60%",
-						"value": "60" 
-					},
+						"label": "Always show",
+						"value": "100" 
+					}
 				]
 			},
 		]

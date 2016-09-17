@@ -12,16 +12,19 @@ char date_current[5], month_current[16];
 //////////// Methods /////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void getBatteryIcon(int colour_background) {
+void getBatteryIcon(int colour_background, int image_number) {
+	int BatteryBlack[] = {RESOURCE_ID_IMAGE_BATTERY_BLACK_1, RESOURCE_ID_IMAGE_BATTERY_BLACK_2, RESOURCE_ID_IMAGE_BATTERY_BLACK_3, RESOURCE_ID_IMAGE_BATTERY_BLACK_4};
+	int BatteryWhite[] = {RESOURCE_ID_IMAGE_BATTERY_WHITE_1, RESOURCE_ID_IMAGE_BATTERY_WHITE_2, RESOURCE_ID_IMAGE_BATTERY_WHITE_3, RESOURCE_ID_IMAGE_BATTERY_WHITE_4};
+	
+	gbitmap_destroy(s_battery_bitmap);
  	if(colour_background) {
- 		GColor bg_colour = GColorFromHEX(colour_background);
-		if (gcolor_equal(gcolor_legible_over(bg_colour), GColorBlack)) {
-			s_battery_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATTERY_BLACK);
+		if (gcolor_equal(gcolor_legible_over(GColorFromHEX(colour_background)), GColorBlack)) {
+			s_battery_bitmap = gbitmap_create_with_resource(BatteryBlack[image_number]);
 		} else {
-			s_battery_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATTERY_WHITE);
+			s_battery_bitmap = gbitmap_create_with_resource(BatteryWhite[image_number]);
 		}
 	} else {
-		s_battery_bitmap = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATTERY_WHITE);
+		s_battery_bitmap = gbitmap_create_with_resource(BatteryWhite[image_number]);
 	}
 	bitmap_layer_set_bitmap(s_battery_layer, s_battery_bitmap);
 }
@@ -110,17 +113,60 @@ static void battery_callback(BatteryChargeState state) {
 	char *select_battery_percent = "";
  	persist_read_string(MESSAGE_KEY_SELECT_BATTERY_PERCENT,select_battery_percent,5);
 	int select_battery_percent_int = atoi(select_battery_percent);
+	int colour_background = persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND);
 	
-	int toggle_battery = persist_read_int(MESSAGE_KEY_TOGGLE_BATTERY);
-	if(toggle_battery == 1) { //on
-		if(state.charge_percent < select_battery_percent_int) {
+	if(!select_battery_percent_int == 0) { // Show
+		if(select_battery_percent_int == 100) { // Always show battery
+			if(75 < state.charge_percent && state.charge_percent <= 100) {
+				getBatteryIcon(colour_background, 3);
+			} else if(50 < state.charge_percent && state.charge_percent <= 75) {
+				getBatteryIcon(colour_background, 2);
+			} else if(25 < state.charge_percent && state.charge_percent <= 50) {
+				getBatteryIcon(colour_background, 1);
+			} else if( 0 < state.charge_percent && state.charge_percent <= 25) {
+				getBatteryIcon(colour_background, 0);
+			}
 			layer_set_hidden(bitmap_layer_get_layer(s_battery_layer), false);	// Visible
 		} else {
-			layer_set_hidden(bitmap_layer_get_layer(s_battery_layer), true);	// Hidden
+			if(state.charge_percent < select_battery_percent_int) {
+				getBatteryIcon(colour_background, 0);
+				layer_set_hidden(bitmap_layer_get_layer(s_battery_layer), false);	// Visible
+			} else {
+				layer_set_hidden(bitmap_layer_get_layer(s_battery_layer), true);	// Hidden
+			}
 		}
 	} else {
-		layer_set_hidden(bitmap_layer_get_layer(s_battery_layer), true);		// Hidden
+		layer_set_hidden(bitmap_layer_get_layer(s_battery_layer), true);	// Hidden
 	}
+
+	/*
+	
+		have a drop down menu in config settings->
+		 Show battery icon at:
+		 	10%
+			20%
+			30%
+			Always show
+			
+	Selecting "Always show battery icon" will update the icon based on the charge level of the watch
+	
+	
+	*/
+	
+	// if menu = 10% || 20% || 30% && charge level is less than selected
+		// show battery 1
+	// else if menu = always show
+		// if charge is between 100 and 76
+			// show battery 4
+		// if charge is between 75 and 51
+			// show battery 3
+		// if charge is between 50 and 26
+			// show battery 2
+		// if charge is between 25 and 0
+			// show battery 1
+	// else
+		// hide menu
+
 }
 
 static void bluetooth_callback(bool connected) {
@@ -180,11 +226,11 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	char *select_bluetooth_disconnect = select_bluetooth_diconnect_t->value->cstring;
 	persist_write_string(MESSAGE_KEY_SELECT_BLUETOOTH_DISCONNECT, select_bluetooth_disconnect);	
 // Battery
-	Tuple *toggle_battery_t = dict_find(iter, MESSAGE_KEY_TOGGLE_BATTERY);
+// 	Tuple *toggle_battery_t = dict_find(iter, MESSAGE_KEY_TOGGLE_BATTERY);
+// 	int toggle_battery = toggle_battery_t->value->int32;	
+// 	persist_write_int(MESSAGE_KEY_TOGGLE_BATTERY, toggle_battery);
 	Tuple *select_battery_percent_t = dict_find(iter, MESSAGE_KEY_SELECT_BATTERY_PERCENT);
-	int toggle_battery = toggle_battery_t->value->int32;
 	char *select_battery_percent = select_battery_percent_t->value->cstring;
-	persist_write_int(MESSAGE_KEY_TOGGLE_BATTERY, toggle_battery);
 	persist_write_string(MESSAGE_KEY_SELECT_BATTERY_PERCENT, select_battery_percent);
 // Date	
 	Tuple *toggle_suffix_t = dict_find(iter, MESSAGE_KEY_TOGGLE_SUFFIX);
@@ -207,15 +253,11 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 // Set Colours
 	setColours(colour_background, colour_hour, colour_minute);
 	
-	if(toggle_battery == 1) {		// On
-		gbitmap_destroy(s_battery_bitmap);
-		getBatteryIcon(colour_background);
-		battery_callback(battery_state_service_peek());
-	}
+	battery_callback(battery_state_service_peek());
 	bluetooth_callback(connection_service_peek_pebble_app_connection());
 	layer_mark_dirty(window_get_root_layer(s_window));
 	
-// 	APP_LOG(APP_LOG_LEVEL_DEBUG, select_bluetooth_disconnect);
+//	APP_LOG(APP_LOG_LEVEL_DEBUG, select_battery_percent);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -315,18 +357,16 @@ static void window_load(Window *window) {
  		s_minute_layer	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
 		s_top_layer		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31, bounds.size.w,   30));
  		s_bottom_layer	= text_layer_create(GRect(				0, bounds.size.h * 3/4 -5, bounds.size.w,   30));
-		s_battery_layer	= bitmap_layer_create(GRect(4, 2, 12, 12)); // battery
+		s_battery_layer	= bitmap_layer_create(GRect(4, 2, 13, 6)); // battery
 	#elif defined(PBL_ROUND)
 		s_hour_layer	= text_layer_create(GRect(   10, bounds.size.h / 2 - 47 + 1, bounds.size.w/2, 75));
 		s_minute_layer	= text_layer_create(GRect(73+10, bounds.size.h / 2 - 47 + 1, bounds.size.w/2, 75));
 		s_top_layer		= text_layer_create(GRect(    0, bounds.size.h / 12 + 3, bounds.size.w,   30));
 		s_bottom_layer	= text_layer_create(GRect(    0, bounds.size.h * 3/4 -5-2, bounds.size.w,   30));
- 		s_battery_layer	= bitmap_layer_create(GRect(84, 2, 12, 12)); // battery
+ 		s_battery_layer	= bitmap_layer_create(GRect(84, 4, 13, 6)); // battery
 	#endif
 
 // Battery Image
-	int colour_background = persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND);
-	getBatteryIcon(colour_background);
 	layer_mark_dirty(bitmap_layer_get_layer(s_battery_layer));
 	#if defined(PBL_COLOR)
 		bitmap_layer_set_compositing_mode(s_battery_layer, GCompOpSet);	
@@ -358,7 +398,7 @@ static void window_load(Window *window) {
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_bottom_layer));
 
 // Colours
-//	int colour_background = persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND);
+	int colour_background = persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND);
 	int colour_hour = persist_read_int(MESSAGE_KEY_COLOUR_HOUR);
 	int colour_minute = persist_read_int(MESSAGE_KEY_COLOUR_MINUTE);
 	setColours(colour_background, colour_hour, colour_minute);					// Sets background, hour and minute colours
