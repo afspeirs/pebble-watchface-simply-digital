@@ -1,11 +1,11 @@
 #include <pebble.h>
 
 static Window *s_window;
-static Layer *s_time_date_layer;
-static TextLayer *s_hour_layer, *s_minute_layer, *s_top_layer, *s_bottom_layer;
-static GFont s_time_font, s_date_font;
-static BitmapLayer *s_battery_layer;
-static GBitmap *s_battery_bitmap;
+static Layer *s_layer_time_date;
+static TextLayer *s_text_hour, *s_text_minute, *s_text_top, *s_text_bottom;
+static GFont s_font_time, s_font_date;
+static BitmapLayer *s_layer_battery;
+static GBitmap *s_bitmap_battery;
 char date_current[5], month_current[16];
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -16,17 +16,17 @@ void getBatteryIcon(int colour_background, int image_number) {
 	int BatteryBlack[] = {RESOURCE_ID_IMAGE_BATTERY_BLACK_1, RESOURCE_ID_IMAGE_BATTERY_BLACK_2, RESOURCE_ID_IMAGE_BATTERY_BLACK_3, RESOURCE_ID_IMAGE_BATTERY_BLACK_4};
 	int BatteryWhite[] = {RESOURCE_ID_IMAGE_BATTERY_WHITE_1, RESOURCE_ID_IMAGE_BATTERY_WHITE_2, RESOURCE_ID_IMAGE_BATTERY_WHITE_3, RESOURCE_ID_IMAGE_BATTERY_WHITE_4};
 	
-	gbitmap_destroy(s_battery_bitmap);
+	gbitmap_destroy(s_bitmap_battery);
  	if(colour_background) {
 		if (gcolor_equal(gcolor_legible_over(GColorFromHEX(colour_background)), GColorBlack)) {
-			s_battery_bitmap = gbitmap_create_with_resource(BatteryBlack[image_number]);
+			s_bitmap_battery = gbitmap_create_with_resource(BatteryBlack[image_number]);
 		} else {
-			s_battery_bitmap = gbitmap_create_with_resource(BatteryWhite[image_number]);
+			s_bitmap_battery = gbitmap_create_with_resource(BatteryWhite[image_number]);
 		}
 	} else {
-		s_battery_bitmap = gbitmap_create_with_resource(BatteryWhite[image_number]);
+		s_bitmap_battery = gbitmap_create_with_resource(BatteryWhite[image_number]);
 	}
-	bitmap_layer_set_bitmap(s_battery_layer, s_battery_bitmap);
+	bitmap_layer_set_bitmap(s_layer_battery, s_bitmap_battery);
 }
 
 void customText(char t_buffer[16], char b_buffer[16]) {
@@ -83,16 +83,16 @@ void setColours(int colour_background, int colour_hour, int colour_minute) {
 		GColor bg_colour = GColorFromHEX(colour_background);
 		window_set_background_color(s_window, bg_colour);			// Set Background Colour
 		#if defined(PBL_COLOR)
-			text_layer_set_text_color(s_hour_layer, GColorFromHEX(colour_hour));		// Set Hour Colour
-			text_layer_set_text_color(s_minute_layer, GColorFromHEX(colour_minute));	// Set Minute Colour
+			text_layer_set_text_color(s_text_hour, GColorFromHEX(colour_hour));		// Set Hour Colour
+			text_layer_set_text_color(s_text_minute, GColorFromHEX(colour_minute));	// Set Minute Colour
 		#elif defined(PBL_BW)	
-			text_layer_set_text_color(s_hour_layer, gcolor_legible_over(bg_colour));	// Set Hour Colour
-			text_layer_set_text_color(s_minute_layer, gcolor_legible_over(bg_colour));	// Set Minute Colour
+			text_layer_set_text_color(s_text_hour, gcolor_legible_over(bg_colour));	// Set Hour Colour
+			text_layer_set_text_color(s_text_minute, gcolor_legible_over(bg_colour));	// Set Minute Colour
 		#endif
 	} else {
 		window_set_background_color(s_window, GColorBlack);			// Set Background Colour
-		text_layer_set_text_color(s_hour_layer, GColorWhite);		// Set Hour Colour
-		text_layer_set_text_color(s_minute_layer, GColorWhite);		// Set Minute Colour
+		text_layer_set_text_color(s_text_hour, GColorWhite);		// Set Hour Colour
+		text_layer_set_text_color(s_text_minute, GColorWhite);		// Set Minute Colour
 	}
 }
 
@@ -103,10 +103,10 @@ void setColours(int colour_background, int colour_hour, int colour_minute) {
 void unobstructed_change(AnimationProgress progress, void* data) {
 	GRect bounds = layer_get_unobstructed_bounds(window_get_root_layer(s_window));
 
-	layer_set_frame(text_layer_get_layer(s_hour_layer),GRect(				 0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
-	layer_set_frame(text_layer_get_layer(s_minute_layer),GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
-	layer_set_frame(text_layer_get_layer(s_top_layer),GRect(				 0, bounds.size.h / 4 - 31, bounds.size.w,   30));
-	layer_set_frame(text_layer_get_layer(s_bottom_layer),GRect(				 0, bounds.size.h * 3/4 -5, bounds.size.w,   30));
+	layer_set_frame(text_layer_get_layer(s_text_hour),GRect(				 0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
+	layer_set_frame(text_layer_get_layer(s_text_minute),GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
+	layer_set_frame(text_layer_get_layer(s_text_top),GRect(				 0, bounds.size.h / 4 - 31, bounds.size.w,   30));
+	layer_set_frame(text_layer_get_layer(s_text_bottom),GRect(				 0, bounds.size.h * 3/4 -5, bounds.size.w,   30));
 }
 
 static void battery_callback(BatteryChargeState state) {
@@ -126,17 +126,17 @@ static void battery_callback(BatteryChargeState state) {
 			} else if( 0 < state.charge_percent && state.charge_percent <= 25) {
 				getBatteryIcon(colour_background, 0);
 			}
-			layer_set_hidden(bitmap_layer_get_layer(s_battery_layer), false);	// Visible
+			layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), false);	// Visible
 		} else {
 			if(state.charge_percent < select_battery_percent_int) {
 				getBatteryIcon(colour_background, 0);
-				layer_set_hidden(bitmap_layer_get_layer(s_battery_layer), false);	// Visible
+				layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), false);	// Visible
 			} else {
-				layer_set_hidden(bitmap_layer_get_layer(s_battery_layer), true);	// Hidden
+				layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), true);	// Hidden
 			}
 		}
 	} else {
-		layer_set_hidden(bitmap_layer_get_layer(s_battery_layer), true);	// Hidden
+		layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), true);	// Hidden
 	}
 }
 
@@ -150,11 +150,11 @@ static void bluetooth_callback(bool connected) {
 	
 	if(!connected) {												
 		if(colour_background || colour_bluetooth) {	// Disconected with config
-			text_layer_set_text_color(s_top_layer, PBL_IF_BW_ELSE(gcolor_legible_over(GColorFromHEX(colour_background)), GColorFromHEX(colour_bluetooth)));		// Set Top Colour
-			text_layer_set_text_color(s_bottom_layer, PBL_IF_BW_ELSE(gcolor_legible_over(GColorFromHEX(colour_background)), GColorFromHEX(colour_bluetooth)));	// Set Bottom Colour
+			text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(gcolor_legible_over(GColorFromHEX(colour_background)), GColorFromHEX(colour_bluetooth)));		// Set Top Colour
+			text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(gcolor_legible_over(GColorFromHEX(colour_background)), GColorFromHEX(colour_bluetooth)));	// Set Bottom Colour
 		} else { 									// Disconnected and no config
-			text_layer_set_text_color(s_top_layer, PBL_IF_BW_ELSE(GColorBlack, GColorRed));		// Set Top Colour
-			text_layer_set_text_color(s_bottom_layer, PBL_IF_BW_ELSE(GColorBlack, GColorRed));	// Set Bottom Colour
+			text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(GColorBlack, GColorRed));		// Set Top Colour
+			text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(GColorBlack, GColorRed));	// Set Bottom Colour
 		}
 		if(select_bluetooth_disconnect_int == 0) { }		// No vibration 
 		else if(select_bluetooth_disconnect_int == 1) { vibes_short_pulse(); }		// Short vibration
@@ -163,11 +163,11 @@ static void bluetooth_callback(bool connected) {
 		else { vibes_long_pulse(); }	// Default
 	} else {														// Connected
 		if(colour_background || colour_date) {
-			text_layer_set_text_color(s_top_layer, PBL_IF_BW_ELSE(gcolor_legible_over(GColorFromHEX(colour_background)), GColorFromHEX(colour_date)));		// Set Top Colour
-			text_layer_set_text_color(s_bottom_layer, PBL_IF_BW_ELSE(gcolor_legible_over(GColorFromHEX(colour_background)), GColorFromHEX(colour_date)));	// Set Bottom Colour
+			text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(gcolor_legible_over(GColorFromHEX(colour_background)), GColorFromHEX(colour_date)));		// Set Top Colour
+			text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(gcolor_legible_over(GColorFromHEX(colour_background)), GColorFromHEX(colour_date)));	// Set Bottom Colour
 		} else {
-			text_layer_set_text_color(s_top_layer, GColorWhite);		// Set Top Colour
-			text_layer_set_text_color(s_bottom_layer, GColorWhite);		// Set Bottom Colour
+			text_layer_set_text_color(s_text_top, GColorWhite);		// Set Top Colour
+			text_layer_set_text_color(s_text_bottom, GColorWhite);		// Set Bottom Colour
 		}
 	}
 }
@@ -246,8 +246,8 @@ static void time_date_update_proc(Layer *layer, GContext *ctx) {
 		strftime(h_buffer, sizeof(h_buffer), "%I", tick_time);	//%I
 	}
 	strftime(m_buffer, sizeof(m_buffer), "%M", tick_time);		//%M
-	text_layer_set_text(s_hour_layer, h_buffer);
-	text_layer_set_text(s_minute_layer, m_buffer);
+	text_layer_set_text(s_text_hour, h_buffer);
+	text_layer_set_text(s_text_minute, m_buffer);
 
 // Date
 	static char t_buffer[16];
@@ -294,8 +294,8 @@ static void time_date_update_proc(Layer *layer, GContext *ctx) {
 		#endif
 		strftime(b_buffer, sizeof(char_buffer), char_buffer, tick_time);	// ᵗʰ
 	}
-	text_layer_set_text(s_top_layer, t_buffer);
-	text_layer_set_text(s_bottom_layer, b_buffer);
+	text_layer_set_text(s_text_top, t_buffer);
+	text_layer_set_text(s_text_bottom, b_buffer);
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -311,59 +311,59 @@ static void window_load(Window *window) {
 	GRect bounds = layer_get_unobstructed_bounds(window_layer);
 	setlocale(LC_ALL, "");
 	
-	s_time_date_layer = layer_create(bounds);
-	layer_set_update_proc(s_time_date_layer, time_date_update_proc);
-	layer_add_child(window_layer, s_time_date_layer);
+	s_layer_time_date = layer_create(bounds);
+	layer_set_update_proc(s_layer_time_date, time_date_update_proc);
+	layer_add_child(window_layer, s_layer_time_date);
 		
 // Fonts
-	s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_72));
-	s_date_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_28));
+	s_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_72));
+	s_font_date = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_28));
 	
 // Locations
 	#if defined(PBL_RECT)
-		s_hour_layer	= text_layer_create(GRect(				0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
- 		s_minute_layer	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
-		s_top_layer		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31, bounds.size.w,   30));
- 		s_bottom_layer	= text_layer_create(GRect(				0, bounds.size.h * 3/4 -5, bounds.size.w,   30));
-		s_battery_layer	= bitmap_layer_create(GRect(4, 2, 13, 6)); // battery
+		s_text_hour	= text_layer_create(GRect(				0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
+ 		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
+		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31, bounds.size.w,   30));
+ 		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4 -5, bounds.size.w,   30));
+		s_layer_battery	= bitmap_layer_create(GRect(4, 2, 13, 6)); // battery
 	#elif defined(PBL_ROUND)
-		s_hour_layer	= text_layer_create(GRect(   10, bounds.size.h / 2 - 47 + 1, bounds.size.w/2, 75));
-		s_minute_layer	= text_layer_create(GRect(73+10, bounds.size.h / 2 - 47 + 1, bounds.size.w/2, 75));
-		s_top_layer		= text_layer_create(GRect(    0, bounds.size.h / 12 + 3, bounds.size.w,   30));
-		s_bottom_layer	= text_layer_create(GRect(    0, bounds.size.h * 3/4 -5-2, bounds.size.w,   30));
- 		s_battery_layer	= bitmap_layer_create(GRect(84, 4, 13, 6)); // battery
+		s_text_hour	= text_layer_create(GRect(   10, bounds.size.h / 2 - 47 + 1, bounds.size.w/2, 75));
+		s_text_minute	= text_layer_create(GRect(73+10, bounds.size.h / 2 - 47 + 1, bounds.size.w/2, 75));
+		s_text_top		= text_layer_create(GRect(    0, bounds.size.h / 12 + 3, bounds.size.w,   30));
+		s_text_bottom	= text_layer_create(GRect(    0, bounds.size.h * 3/4 -5-2, bounds.size.w,   30));
+ 		s_layer_battery	= bitmap_layer_create(GRect(84, 4, 13, 6)); // battery
 	#endif
 
 // Battery Image
-	layer_mark_dirty(bitmap_layer_get_layer(s_battery_layer));
+	layer_mark_dirty(bitmap_layer_get_layer(s_layer_battery));
 	#if defined(PBL_COLOR)
-		bitmap_layer_set_compositing_mode(s_battery_layer, GCompOpSet);	
+		bitmap_layer_set_compositing_mode(s_layer_battery, GCompOpSet);	
 	#endif
-	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_battery_layer));
+	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_layer_battery));
 		
 // Hour
-	text_layer_set_font(s_hour_layer, s_time_font);
-	text_layer_set_text_alignment(s_hour_layer, GTextAlignmentCenter);
-	text_layer_set_background_color(s_hour_layer, GColorClear);
-	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_hour_layer));
+	text_layer_set_font(s_text_hour, s_font_time);
+	text_layer_set_text_alignment(s_text_hour, GTextAlignmentCenter);
+	text_layer_set_background_color(s_text_hour, GColorClear);
+	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_text_hour));
 	
 // Minutes
-	text_layer_set_font(s_minute_layer, s_time_font);
-	text_layer_set_text_alignment(s_minute_layer, GTextAlignmentCenter);
-	text_layer_set_background_color(s_minute_layer, GColorClear);
-	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_minute_layer));
+	text_layer_set_font(s_text_minute, s_font_time);
+	text_layer_set_text_alignment(s_text_minute, GTextAlignmentCenter);
+	text_layer_set_background_color(s_text_minute, GColorClear);
+	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_text_minute));
 
 // Top
-	text_layer_set_font(s_top_layer, s_date_font);
-	text_layer_set_text_alignment(s_top_layer, GTextAlignmentCenter);
-	text_layer_set_background_color(s_top_layer, GColorClear);
-	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_top_layer));
+	text_layer_set_font(s_text_top, s_font_date);
+	text_layer_set_text_alignment(s_text_top, GTextAlignmentCenter);
+	text_layer_set_background_color(s_text_top, GColorClear);
+	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_text_top));
 
 // Bottom
-	text_layer_set_font(s_bottom_layer, s_date_font);
-	text_layer_set_text_alignment(s_bottom_layer, GTextAlignmentCenter);
-	text_layer_set_background_color(s_bottom_layer, GColorClear);
-	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_bottom_layer));
+	text_layer_set_font(s_text_bottom, s_font_date);
+	text_layer_set_text_alignment(s_text_bottom, GTextAlignmentCenter);
+	text_layer_set_background_color(s_text_bottom, GColorClear);
+	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_text_bottom));
 
 // Colours
 	int colour_background = persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND);
@@ -374,13 +374,13 @@ static void window_load(Window *window) {
 }
 
 static void window_unload(Window *window) {
-	layer_destroy(s_time_date_layer);
-	text_layer_destroy(s_hour_layer);
-	text_layer_destroy(s_minute_layer);
-	text_layer_destroy(s_top_layer);
-	text_layer_destroy(s_bottom_layer);
-	fonts_unload_custom_font(s_time_font);
-	fonts_unload_custom_font(s_date_font);
+	layer_destroy(s_layer_time_date);
+	text_layer_destroy(s_text_hour);
+	text_layer_destroy(s_text_minute);
+	text_layer_destroy(s_text_top);
+	text_layer_destroy(s_text_bottom);
+	fonts_unload_custom_font(s_font_time);
+	fonts_unload_custom_font(s_font_date);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -416,8 +416,8 @@ static void init() {
 }
 
 static void deinit() {
-	gbitmap_destroy(s_battery_bitmap);
-	bitmap_layer_destroy(s_battery_layer);
+	gbitmap_destroy(s_bitmap_battery);
+	bitmap_layer_destroy(s_layer_battery);
 	
 	tick_timer_service_unsubscribe();
 	window_destroy(s_window);
