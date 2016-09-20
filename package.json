@@ -27,15 +27,9 @@
         "resources": {
             "media": [
                 {
-                    "file": "images/BatteryBlack_4",
-                    "name": "IMAGE_BATTERY_BLACK_4",
-                    "storageFormat": "png",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/BatteryBlack_3",
-                    "name": "IMAGE_BATTERY_BLACK_3",
+                    "file": "images/Menu Image",
+                    "menuIcon": true,
+                    "name": "IMAGE_MENU_IMAGE",
                     "storageFormat": "png",
                     "targetPlatforms": null,
                     "type": "bitmap"
@@ -59,6 +53,26 @@
                     "type": "bitmap"
                 },
                 {
+                    "file": "images/BatteryWhite_1",
+                    "name": "IMAGE_BATTERY_WHITE_1",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/BatteryBlack_4",
+                    "name": "IMAGE_BATTERY_BLACK_4",
+                    "storageFormat": "png",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/BatteryBlack_3",
+                    "name": "IMAGE_BATTERY_BLACK_3",
+                    "storageFormat": "png",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
                     "file": "images/BatteryBlack_2",
                     "name": "IMAGE_BATTERY_BLACK_2",
                     "storageFormat": "png",
@@ -73,20 +87,7 @@
                     "type": "bitmap"
                 },
                 {
-                    "file": "images/BatteryWhite_1",
-                    "name": "IMAGE_BATTERY_WHITE_1",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/Menu Image",
-                    "menuIcon": true,
-                    "name": "IMAGE_MENU_IMAGE",
-                    "storageFormat": "png",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
+                    "characterRegex": "[0-9 A-Za-z]",
                     "file": "fonts/Bebas Neue Regular",
                     "name": "FONT_BEBAS_NEUE_REGULAR_28",
                     "targetPlatforms": null,
@@ -113,5 +114,5 @@
             "watchface": true
         }
     },
-    "version": "0.54.0"
+    "version": "0.55.0"
 }

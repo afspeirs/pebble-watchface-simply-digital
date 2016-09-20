@@ -232,6 +232,17 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 //////////// Time & Date /////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// void upper_string(char s[]) {
+//    int c = 0;
+ 
+//    while (s[c] != '\0') {
+//       if (s[c] >= 'a' && s[c] <= 'z') {
+//          s[c] = s[c] - 32;
+//       }
+//       c++;
+//    }
+// }
+
 static void time_date_update_proc(Layer *layer, GContext *ctx) {
 	time_t temp = time(NULL); 
 	struct tm *tick_time = localtime(&temp);
@@ -294,6 +305,8 @@ static void time_date_update_proc(Layer *layer, GContext *ctx) {
 		#endif
 		strftime(b_buffer, sizeof(char_buffer), char_buffer, tick_time);	// ᵗʰ
 	}
+// 	upper_string(t_buffer);
+// 	upper_string(b_buffer);
 	text_layer_set_text(s_text_top, t_buffer);
 	text_layer_set_text(s_text_bottom, b_buffer);
 }
