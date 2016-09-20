@@ -232,25 +232,12 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 //////////// Time & Date /////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// void upper_string(char s[]) {
-//    int c = 0;
- 
-//    while (s[c] != '\0') {
-//       if (s[c] >= 'a' && s[c] <= 'z') {
-//          s[c] = s[c] - 32;
-//       }
-//       c++;
-//    }
-// }
-
 static void time_date_update_proc(Layer *layer, GContext *ctx) {
 	time_t temp = time(NULL); 
 	struct tm *tick_time = localtime(&temp);
+	static char h_buffer[3], m_buffer[3], t_buffer[16], b_buffer[16];
 
 // Time
-	static char h_buffer[3];
-	static char m_buffer[3];
-	
 	if(clock_is_24h_style()) {
 		strftime(h_buffer, sizeof(h_buffer), "%H", tick_time);	//%H
 	} else {
@@ -261,9 +248,6 @@ static void time_date_update_proc(Layer *layer, GContext *ctx) {
 	text_layer_set_text(s_text_minute, m_buffer);
 
 // Date
-	static char t_buffer[16];
-	static char b_buffer[16];
-
 	customText(t_buffer, b_buffer);	
 	if(strcmp(t_buffer, "\0") == 0) {			// If Top is empty, write current weekday
 		strftime(t_buffer, sizeof(t_buffer), "%A", tick_time);		// %A
@@ -272,8 +256,8 @@ static void time_date_update_proc(Layer *layer, GContext *ctx) {
 		int toggle_suffix = persist_read_int(MESSAGE_KEY_TOGGLE_SUFFIX);
 		strftime(date_current, sizeof(date_current), "%d%m", tick_time);
 		strftime(month_current, sizeof(month_current), "%B", tick_time);
-		
-		strcat(char_buffer,"%e");				// Day
+// Day
+		strcat(char_buffer,"%e");
 		if(toggle_suffix == 1) {
 			if (strncmp(date_current, "01", 2) == 0 || strncmp(date_current, "21", 2) == 0 || strncmp(date_current,"31",2) == 0) { 
 				strcat(char_buffer,"st");
@@ -285,9 +269,9 @@ static void time_date_update_proc(Layer *layer, GContext *ctx) {
 				strcat(char_buffer,"th");
 			}
 		}
-		
+// Month
 		int toggle_week = persist_read_int(MESSAGE_KEY_TOGGLE_WEEK);
-		#if defined(PBL_RECT)					// Month
+		#if defined(PBL_RECT)
 			if(strlen(month_current) > 7 || toggle_week) {
 				strcat(char_buffer,"  %b"); // Short
 				if(toggle_week) {
@@ -305,8 +289,6 @@ static void time_date_update_proc(Layer *layer, GContext *ctx) {
 		#endif
 		strftime(b_buffer, sizeof(char_buffer), char_buffer, tick_time);	// ᵗʰ
 	}
-// 	upper_string(t_buffer);
-// 	upper_string(b_buffer);
 	text_layer_set_text(s_text_top, t_buffer);
 	text_layer_set_text(s_text_bottom, b_buffer);
 }
@@ -334,13 +316,13 @@ static void window_load(Window *window) {
 	
 // Locations
 	#if defined(PBL_RECT)
-		s_text_hour	= text_layer_create(GRect(				0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
+		s_text_hour		= text_layer_create(GRect(				0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
  		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
 		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31, bounds.size.w,   30));
  		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4 -5, bounds.size.w,   30));
 		s_layer_battery	= bitmap_layer_create(GRect(4, 2, 13, 6)); // battery
 	#elif defined(PBL_ROUND)
-		s_text_hour	= text_layer_create(GRect(   10, bounds.size.h / 2 - 47 + 1, bounds.size.w/2, 75));
+		s_text_hour		= text_layer_create(GRect(   10, bounds.size.h / 2 - 47 + 1, bounds.size.w/2, 75));
 		s_text_minute	= text_layer_create(GRect(73+10, bounds.size.h / 2 - 47 + 1, bounds.size.w/2, 75));
 		s_text_top		= text_layer_create(GRect(    0, bounds.size.h / 12 + 3, bounds.size.w,   30));
 		s_text_bottom	= text_layer_create(GRect(    0, bounds.size.h * 3/4 -5-2, bounds.size.w,   30));

@@ -87,7 +87,7 @@
                     "type": "bitmap"
                 },
                 {
-                    "characterRegex": "[0-9 A-Za-z]",
+                    "characterRegex": "[0-9 a-zA-Z]",
                     "file": "fonts/Bebas Neue Regular",
                     "name": "FONT_BEBAS_NEUE_REGULAR_28",
                     "targetPlatforms": null,
