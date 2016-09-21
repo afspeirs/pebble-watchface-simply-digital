@@ -1,6 +1,6 @@
 #include <pebble.h>
 
-uint32_t key = 0;	// Used to determine whether AppMessages have been recieved
+uint32_t received = 0;	// Used to determine whether AppMessages have been recieved
 
 static Window *s_window;
 static Layer *s_layer_time_date;
@@ -19,7 +19,7 @@ void getBatteryIcon(int colour_background, int image_number) {
 	int BatteryWhite[] = {RESOURCE_ID_IMAGE_BATTERY_WHITE_1, RESOURCE_ID_IMAGE_BATTERY_WHITE_2, RESOURCE_ID_IMAGE_BATTERY_WHITE_3, RESOURCE_ID_IMAGE_BATTERY_WHITE_4};
 	
 	gbitmap_destroy(s_bitmap_battery);
-	if(persist_read_bool(key)) {
+	if(persist_read_bool(received)) {
 		if (gcolor_equal(gcolor_legible_over(GColorFromHEX(colour_background)), GColorBlack)) {
 			s_bitmap_battery = gbitmap_create_with_resource(BatteryBlack[image_number]);
 		} else {
@@ -81,7 +81,7 @@ void customText(char t_buffer[16], char b_buffer[16]) {
 }
 
 void setColours(int colour_background, int colour_hour, int colour_minute) {
-	if(persist_read_bool(key)) {
+	if(persist_read_bool(received)) {
 		GColor bg_colour = GColorFromHEX(colour_background);
 		window_set_background_color(s_window, bg_colour);			// Set Background Colour
 		#if defined(PBL_COLOR)
@@ -101,15 +101,6 @@ void setColours(int colour_background, int colour_hour, int colour_minute) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////// Callbacks ///////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void unobstructed_change(AnimationProgress progress, void* data) {
-	GRect bounds = layer_get_unobstructed_bounds(window_get_root_layer(s_window));
-
-	layer_set_frame(text_layer_get_layer(s_text_hour),GRect(				 0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
-	layer_set_frame(text_layer_get_layer(s_text_minute),GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
-	layer_set_frame(text_layer_get_layer(s_text_top),GRect(				 0, bounds.size.h / 4 - 31, bounds.size.w,   30));
-	layer_set_frame(text_layer_get_layer(s_text_bottom),GRect(				 0, bounds.size.h * 3/4 -5, bounds.size.w,   30));
-}
 
 static void battery_callback(BatteryChargeState state) {
 	char *select_battery_percent = "";
@@ -148,7 +139,7 @@ static void bluetooth_callback(bool connected) {
  		persist_read_string(MESSAGE_KEY_SELECT_BLUETOOTH_DISCONNECT,select_bluetooth_disconnect,5);
 		int select_bluetooth_disconnect_int = atoi(select_bluetooth_disconnect);
 		
-	if(persist_read_bool(key)) {	// Disconected with config
+	if(persist_read_bool(received)) {	// Disconected with config
 			GColor bg_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND));
 			GColor bt_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BLUETOOTH));
 			text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(gcolor_legible_over(bg_colour), bt_colour));		// Set Top Colour
@@ -163,7 +154,7 @@ static void bluetooth_callback(bool connected) {
 		else if(select_bluetooth_disconnect_int == 3) { vibes_double_pulse(); }	// Double vibration
 		else { vibes_long_pulse(); }	// Default
 	} else {														// Connected
-	if(persist_read_bool(key)) {
+	if(persist_read_bool(received)) {
 			GColor bg_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND));
 			GColor dt_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_DATE));
 			text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(gcolor_legible_over(bg_colour), dt_colour));		// Set Top Colour
@@ -176,7 +167,7 @@ static void bluetooth_callback(bool connected) {
 }
 
 static void inbox_received_handler(DictionaryIterator *iter, void *context) {
-	persist_write_bool(key, true);
+	persist_write_bool(received, true);
 // Colours
 	Tuple *colour_background_t = dict_find(iter, MESSAGE_KEY_COLOUR_BACKGROUND);
 	int colour_background = colour_background_t->value->int32;
@@ -230,6 +221,15 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	layer_mark_dirty(window_get_root_layer(s_window));
 	
 //	APP_LOG(APP_LOG_LEVEL_DEBUG, select_battery_percent);
+}
+
+void unobstructed_change(AnimationProgress progress, void* data) {
+	GRect bounds = layer_get_unobstructed_bounds(window_get_root_layer(s_window));
+
+	layer_set_frame(text_layer_get_layer(s_text_hour),GRect(				 0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
+	layer_set_frame(text_layer_get_layer(s_text_minute),GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
+	layer_set_frame(text_layer_get_layer(s_text_top),GRect(				 0, bounds.size.h / 4 - 31, bounds.size.w,   30));
+	layer_set_frame(text_layer_get_layer(s_text_bottom),GRect(				 0, bounds.size.h * 3/4 -5, bounds.size.w,   30));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
