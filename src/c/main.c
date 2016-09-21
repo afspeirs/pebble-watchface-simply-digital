@@ -1,5 +1,7 @@
 #include <pebble.h>
 
+uint32_t key = 0;	// Used to determine whether AppMessages have been recieved
+
 static Window *s_window;
 static Layer *s_layer_time_date;
 static TextLayer *s_text_hour, *s_text_minute, *s_text_top, *s_text_bottom;
@@ -17,7 +19,7 @@ void getBatteryIcon(int colour_background, int image_number) {
 	int BatteryWhite[] = {RESOURCE_ID_IMAGE_BATTERY_WHITE_1, RESOURCE_ID_IMAGE_BATTERY_WHITE_2, RESOURCE_ID_IMAGE_BATTERY_WHITE_3, RESOURCE_ID_IMAGE_BATTERY_WHITE_4};
 	
 	gbitmap_destroy(s_bitmap_battery);
- 	if(colour_background) {
+	if(persist_read_bool(key)) {
 		if (gcolor_equal(gcolor_legible_over(GColorFromHEX(colour_background)), GColorBlack)) {
 			s_bitmap_battery = gbitmap_create_with_resource(BatteryBlack[image_number]);
 		} else {
@@ -79,7 +81,7 @@ void customText(char t_buffer[16], char b_buffer[16]) {
 }
 
 void setColours(int colour_background, int colour_hour, int colour_minute) {
-	if(colour_background || colour_hour) {
+	if(persist_read_bool(key)) {
 		GColor bg_colour = GColorFromHEX(colour_background);
 		window_set_background_color(s_window, bg_colour);			// Set Background Colour
 		#if defined(PBL_COLOR)
@@ -140,18 +142,17 @@ static void battery_callback(BatteryChargeState state) {
 	}
 }
 
-static void bluetooth_callback(bool connected) {
-	char *select_bluetooth_disconnect = "";
- 	persist_read_string(MESSAGE_KEY_SELECT_BLUETOOTH_DISCONNECT,select_bluetooth_disconnect,5);
-	int select_bluetooth_disconnect_int = atoi(select_bluetooth_disconnect);
-	int colour_background = persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND);
-	int colour_date = persist_read_int(MESSAGE_KEY_COLOUR_DATE);
-	int colour_bluetooth = persist_read_int(MESSAGE_KEY_COLOUR_BLUETOOTH);
-	
-	if(!connected) {												
-		if(colour_background || colour_bluetooth) {	// Disconected with config
-			text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(gcolor_legible_over(GColorFromHEX(colour_background)), GColorFromHEX(colour_bluetooth)));		// Set Top Colour
-			text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(gcolor_legible_over(GColorFromHEX(colour_background)), GColorFromHEX(colour_bluetooth)));	// Set Bottom Colour
+static void bluetooth_callback(bool connected) {													  	
+	if(!connected) {
+		char *select_bluetooth_disconnect = "";
+ 		persist_read_string(MESSAGE_KEY_SELECT_BLUETOOTH_DISCONNECT,select_bluetooth_disconnect,5);
+		int select_bluetooth_disconnect_int = atoi(select_bluetooth_disconnect);
+		
+	if(persist_read_bool(key)) {	// Disconected with config
+			GColor bg_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND));
+			GColor bt_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BLUETOOTH));
+			text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(gcolor_legible_over(bg_colour), bt_colour));		// Set Top Colour
+			text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(gcolor_legible_over(bg_colour), bt_colour));	// Set Bottom Colour
 		} else { 									// Disconnected and no config
 			text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(GColorBlack, GColorRed));		// Set Top Colour
 			text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(GColorBlack, GColorRed));	// Set Bottom Colour
@@ -162,17 +163,20 @@ static void bluetooth_callback(bool connected) {
 		else if(select_bluetooth_disconnect_int == 3) { vibes_double_pulse(); }	// Double vibration
 		else { vibes_long_pulse(); }	// Default
 	} else {														// Connected
-		if(colour_background || colour_date) {
-			text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(gcolor_legible_over(GColorFromHEX(colour_background)), GColorFromHEX(colour_date)));		// Set Top Colour
-			text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(gcolor_legible_over(GColorFromHEX(colour_background)), GColorFromHEX(colour_date)));	// Set Bottom Colour
+	if(persist_read_bool(key)) {
+			GColor bg_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND));
+			GColor dt_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_DATE));
+			text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(gcolor_legible_over(bg_colour), dt_colour));		// Set Top Colour
+			text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(gcolor_legible_over(bg_colour), dt_colour));	// Set Bottom Colour
 		} else {
 			text_layer_set_text_color(s_text_top, GColorWhite);		// Set Top Colour
-			text_layer_set_text_color(s_text_bottom, GColorWhite);		// Set Bottom Colour
+			text_layer_set_text_color(s_text_bottom, GColorWhite);	// Set Bottom Colour
 		}
 	}
 }
 
 static void inbox_received_handler(DictionaryIterator *iter, void *context) {
+	persist_write_bool(key, true);
 // Colours
 	Tuple *colour_background_t = dict_find(iter, MESSAGE_KEY_COLOUR_BACKGROUND);
 	int colour_background = colour_background_t->value->int32;
