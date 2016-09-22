@@ -9,6 +9,7 @@ static GFont s_font_time, s_font_date;
 static BitmapLayer *s_layer_battery;
 static GBitmap *s_bitmap_battery;
 char date_current[5], month_current[16];
+static bool appStarted = false;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////// Methods /////////////////////////////////////////////////////////////////////////////////
@@ -128,8 +129,8 @@ static void battery_callback(BatteryChargeState state) {
 				layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), true);	// Hidden
 			}
 		}
-	} else {
-		layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), true);	// Hidden
+	} else {	// Hidden
+		layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), true);
 	}
 }
 
@@ -148,11 +149,13 @@ static void bluetooth_callback(bool connected) {
 			text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(GColorBlack, GColorRed));		// Set Top Colour
 			text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(GColorBlack, GColorRed));	// Set Bottom Colour
 		}
-		if(select_bluetooth_disconnect_int == 0) { }		// No vibration 
-		else if(select_bluetooth_disconnect_int == 1) { vibes_short_pulse(); }		// Short vibration
-		else if(select_bluetooth_disconnect_int == 2) { vibes_long_pulse(); }	// Long vibration
-		else if(select_bluetooth_disconnect_int == 3) { vibes_double_pulse(); }	// Double vibration
-		else { vibes_long_pulse(); }	// Default
+		if(appStarted) {
+			if(select_bluetooth_disconnect_int == 0) { }		// No vibration 
+			else if(select_bluetooth_disconnect_int == 1) { vibes_short_pulse(); }		// Short vibration
+			else if(select_bluetooth_disconnect_int == 2) { vibes_long_pulse(); }	// Long vibration
+			else if(select_bluetooth_disconnect_int == 3) { vibes_double_pulse(); }	// Double vibration
+			else { vibes_long_pulse(); }	// Default
+		}
 	} else {														// Connected
 	if(persist_read_bool(received)) {
 			GColor bg_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND));
@@ -169,56 +172,39 @@ static void bluetooth_callback(bool connected) {
 static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	persist_write_bool(received, true);
 // Colours
-	Tuple *colour_background_t = dict_find(iter, MESSAGE_KEY_COLOUR_BACKGROUND);
-	int colour_background = colour_background_t->value->int32;
-	persist_write_int(MESSAGE_KEY_COLOUR_BACKGROUND, colour_background);
+	int colour_background = dict_find(iter, MESSAGE_KEY_COLOUR_BACKGROUND)->value->int32;
+	persist_write_int(MESSAGE_KEY_COLOUR_BACKGROUND, colour_background);	
 	int colour_hour = 0, colour_minute = 0;
 	#if defined(PBL_COLOR)
-		Tuple *colour_hour_t = dict_find(iter, MESSAGE_KEY_COLOUR_HOUR);
-		Tuple *colour_minute_t = dict_find(iter, MESSAGE_KEY_COLOUR_MINUTE);
-		Tuple *colour_date_t = dict_find(iter, MESSAGE_KEY_COLOUR_DATE);
-			colour_hour = colour_hour_t->value->int32;
-			colour_minute = colour_minute_t->value->int32;
-		int colour_date = colour_date_t->value->int32;
+			colour_hour = dict_find(iter, MESSAGE_KEY_COLOUR_HOUR)->value->int32;
 		persist_write_int(MESSAGE_KEY_COLOUR_HOUR, colour_hour);
-		persist_write_int(MESSAGE_KEY_COLOUR_MINUTE, colour_minute);
+			colour_minute = dict_find(iter, MESSAGE_KEY_COLOUR_MINUTE)->value->int32;
+		persist_write_int(MESSAGE_KEY_COLOUR_MINUTE, colour_minute);	
+		int colour_date = dict_find(iter, MESSAGE_KEY_COLOUR_DATE)->value->int32;
 		persist_write_int(MESSAGE_KEY_COLOUR_DATE, colour_date);
 // Bluetooth
-		Tuple *colour_bluetooth_t = dict_find(iter, MESSAGE_KEY_COLOUR_BLUETOOTH);
-		int colour_bluetooth = colour_bluetooth_t->value->int32;
+		int colour_bluetooth = dict_find(iter, MESSAGE_KEY_COLOUR_BLUETOOTH)->value->int32;
 		persist_write_int(MESSAGE_KEY_COLOUR_BLUETOOTH, colour_bluetooth);
 	#endif
-	Tuple *select_bluetooth_diconnect_t = dict_find(iter, MESSAGE_KEY_SELECT_BLUETOOTH_DISCONNECT);
-	char *select_bluetooth_disconnect = select_bluetooth_diconnect_t->value->cstring;
-	persist_write_string(MESSAGE_KEY_SELECT_BLUETOOTH_DISCONNECT, select_bluetooth_disconnect);	
+	persist_write_string(MESSAGE_KEY_SELECT_BLUETOOTH_DISCONNECT, dict_find(iter, MESSAGE_KEY_SELECT_BLUETOOTH_DISCONNECT)->value->cstring);	
 // Battery
-	Tuple *select_battery_percent_t = dict_find(iter, MESSAGE_KEY_SELECT_BATTERY_PERCENT);
-	char *select_battery_percent = select_battery_percent_t->value->cstring;
-	persist_write_string(MESSAGE_KEY_SELECT_BATTERY_PERCENT, select_battery_percent);
+	persist_write_string(MESSAGE_KEY_SELECT_BATTERY_PERCENT, dict_find(iter, MESSAGE_KEY_SELECT_BATTERY_PERCENT)->value->cstring);
 // Date	
-	Tuple *toggle_suffix_t = dict_find(iter, MESSAGE_KEY_TOGGLE_SUFFIX);
-	int toggle_suffix = toggle_suffix_t->value->int32;
-	persist_write_int(MESSAGE_KEY_TOGGLE_SUFFIX, toggle_suffix);
-	Tuple *toggle_week_t = dict_find(iter, MESSAGE_KEY_TOGGLE_WEEK);
-	int toggle_week = toggle_week_t->value->int32;
-	persist_write_int(MESSAGE_KEY_TOGGLE_WEEK, toggle_week);
+	persist_write_int(MESSAGE_KEY_TOGGLE_SUFFIX, dict_find(iter, MESSAGE_KEY_TOGGLE_SUFFIX)->value->int32);
+	persist_write_int(MESSAGE_KEY_TOGGLE_WEEK, dict_find(iter, MESSAGE_KEY_TOGGLE_WEEK)->value->int32);
 // Custom Text
-	Tuple *check_date_0_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE);
-	Tuple *check_date_1_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+1);
-	Tuple *check_date_2_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+2);
- 	int check_date_0 = check_date_0_t->value->int32;
-	int check_date_1 = check_date_1_t->value->int32;
-	int check_date_2 = check_date_2_t->value->int32;
-	persist_write_int(MESSAGE_KEY_CHECK_DATE, check_date_0);
-	persist_write_int(MESSAGE_KEY_CHECK_DATE+1, check_date_1);
-	persist_write_int(MESSAGE_KEY_CHECK_DATE+2, check_date_2);
+	persist_write_int(MESSAGE_KEY_CHECK_DATE,   dict_find(iter, MESSAGE_KEY_CHECK_DATE  )->value->int32);
+	persist_write_int(MESSAGE_KEY_CHECK_DATE+1, dict_find(iter, MESSAGE_KEY_CHECK_DATE+1)->value->int32);
+	persist_write_int(MESSAGE_KEY_CHECK_DATE+2, dict_find(iter, MESSAGE_KEY_CHECK_DATE+2)->value->int32);
 	
 // Set Colours
 	setColours(colour_background, colour_hour, colour_minute);
 	
-	battery_callback(battery_state_service_peek());
-	bluetooth_callback(connection_service_peek_pebble_app_connection());
+	appStarted = false;
+	bluetooth_callback(connection_service_peek_pebble_app_connection());		// Sets date colours (and detects if a phone is connected)
+	appStarted = true;
 	layer_mark_dirty(window_get_root_layer(s_window));
+	battery_callback(battery_state_service_peek());
 	
 //	APP_LOG(APP_LOG_LEVEL_DEBUG, select_battery_percent);
 }
@@ -369,7 +355,9 @@ static void window_load(Window *window) {
 	int colour_hour = persist_read_int(MESSAGE_KEY_COLOUR_HOUR);
 	int colour_minute = persist_read_int(MESSAGE_KEY_COLOUR_MINUTE);
 	setColours(colour_background, colour_hour, colour_minute);					// Sets background, hour and minute colours
+	appStarted = false;
 	bluetooth_callback(connection_service_peek_pebble_app_connection());		// Sets date colours (and detects if a phone is connected)
+	appStarted = true;
 }
 
 static void window_unload(Window *window) {
