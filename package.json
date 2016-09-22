@@ -13,15 +13,15 @@
         "enableMultiJS": true,
         "messageKeys": [
             "COLOUR_BACKGROUND",
-            "COLOUR_DATE",
             "COLOUR_HOUR",
             "COLOUR_MINUTE",
+            "COLOUR_DATE",
             "COLOUR_BLUETOOTH",
-            "TOGGLE_SUFFIX",
-            "SELECT_BATTERY_PERCENT",
-            "CHECK_DATE[3]",
             "SELECT_BLUETOOTH_DISCONNECT",
-            "TOGGLE_WEEK"
+            "SELECT_BATTERY_PERCENT",
+            "TOGGLE_SUFFIX",
+            "TOGGLE_WEEK",
+            "CHECK_DATE[3]"
         ],
         "projectType": "native",
         "resources": {
@@ -114,5 +114,5 @@
             "watchface": true
         }
     },
-    "version": "0.55.0"
+    "version": "0.56.0"
 }

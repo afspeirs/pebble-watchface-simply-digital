@@ -20,14 +20,6 @@ module.exports = [
 			},
 			{
 				"type": "color",
-				"messageKey": "COLOUR_DATE",
-				"label": "Date",
-				"defaultValue": "FFFFFF",
-				"sunlight": true,
-				"capabilities": ["NOT_BW"],
-			},
-			{
-				"type": "color",
 				"messageKey": "COLOUR_HOUR",
 				"label": "Hour",
 				"defaultValue": "FFAA00",
@@ -41,7 +33,15 @@ module.exports = [
 				"defaultValue": "FFFFFF",
 				"sunlight": true,
 				"capabilities": ["NOT_BW"],
-			}
+			},
+			{
+				"type": "color",
+				"messageKey": "COLOUR_DATE",
+				"label": "Date",
+				"defaultValue": "FFFFFF",
+				"sunlight": true,
+				"capabilities": ["NOT_BW"],
+			},
 		]
 	},
 	{
