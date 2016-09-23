@@ -15,13 +15,13 @@ static bool appStarted = false;
 //////////// Methods /////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void getBatteryIcon(int colour_background, int image_number) {
+void getBatteryIcon(int image_number) {
 	int BatteryBlack[] = {RESOURCE_ID_IMAGE_BATTERY_BLACK_1, RESOURCE_ID_IMAGE_BATTERY_BLACK_2, RESOURCE_ID_IMAGE_BATTERY_BLACK_3, RESOURCE_ID_IMAGE_BATTERY_BLACK_4};
 	int BatteryWhite[] = {RESOURCE_ID_IMAGE_BATTERY_WHITE_1, RESOURCE_ID_IMAGE_BATTERY_WHITE_2, RESOURCE_ID_IMAGE_BATTERY_WHITE_3, RESOURCE_ID_IMAGE_BATTERY_WHITE_4};
 	
 	gbitmap_destroy(s_bitmap_battery);
 	if(persist_read_bool(received)) {
-		if (gcolor_equal(gcolor_legible_over(GColorFromHEX(colour_background)), GColorBlack)) {
+		if (gcolor_equal(gcolor_legible_over(GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND))), GColorBlack)) {
 			s_bitmap_battery = gbitmap_create_with_resource(BatteryBlack[image_number]);
 		} else {
 			s_bitmap_battery = gbitmap_create_with_resource(BatteryWhite[image_number]);
@@ -85,13 +85,8 @@ void setColours(int colour_background, int colour_hour, int colour_minute) {
 	if(persist_read_bool(received)) {
 		GColor bg_colour = GColorFromHEX(colour_background);
 		window_set_background_color(s_window, bg_colour);			// Set Background Colour
-		#if defined(PBL_COLOR)
-			text_layer_set_text_color(s_text_hour, GColorFromHEX(colour_hour));		// Set Hour Colour
-			text_layer_set_text_color(s_text_minute, GColorFromHEX(colour_minute));	// Set Minute Colour
-		#elif defined(PBL_BW)	
-			text_layer_set_text_color(s_text_hour, gcolor_legible_over(bg_colour));	// Set Hour Colour
-			text_layer_set_text_color(s_text_minute, gcolor_legible_over(bg_colour));	// Set Minute Colour
-		#endif
+		text_layer_set_text_color(s_text_hour, PBL_IF_BW_ELSE(gcolor_legible_over(bg_colour), GColorFromHEX(colour_hour)));		// Set Hour Colour
+		text_layer_set_text_color(s_text_minute, PBL_IF_BW_ELSE(gcolor_legible_over(bg_colour), GColorFromHEX(colour_minute)));	// Set Minute Colour
 	} else {
 		window_set_background_color(s_window, GColorBlack);			// Set Background Colour
 		text_layer_set_text_color(s_text_hour, GColorWhite);		// Set Hour Colour
@@ -104,26 +99,25 @@ void setColours(int colour_background, int colour_hour, int colour_minute) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void battery_callback(BatteryChargeState state) {
-	char *select_battery_percent = "";
- 	persist_read_string(MESSAGE_KEY_SELECT_BATTERY_PERCENT,select_battery_percent,5);
-	int select_battery_percent_int = atoi(select_battery_percent);
-	int colour_background = persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND);
-	
-	if(!select_battery_percent_int == 0) { // Show
+	if(persist_read_bool(received)) {
+		char *select_battery_percent = "";
+		persist_read_string(MESSAGE_KEY_SELECT_BATTERY_PERCENT,select_battery_percent,5);
+		int select_battery_percent_int = atoi(select_battery_percent);
+
 		if(select_battery_percent_int == 100) { // Always show battery
 			if(75 < state.charge_percent && state.charge_percent <= 100) {
-				getBatteryIcon(colour_background, 3);
+				getBatteryIcon(3);
 			} else if(50 < state.charge_percent && state.charge_percent <= 75) {
-				getBatteryIcon(colour_background, 2);
+				getBatteryIcon(2);
 			} else if(25 < state.charge_percent && state.charge_percent <= 50) {
-				getBatteryIcon(colour_background, 1);
+				getBatteryIcon(1);
 			} else if( 0 < state.charge_percent && state.charge_percent <= 25) {
-				getBatteryIcon(colour_background, 0);
+				getBatteryIcon(0);
 			}
 			layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), false);	// Visible
 		} else {
 			if(state.charge_percent < select_battery_percent_int) {
-				getBatteryIcon(colour_background, 0);
+				getBatteryIcon(0);
 				layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), false);	// Visible
 			} else {
 				layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), true);	// Hidden
@@ -140,7 +134,7 @@ static void bluetooth_callback(bool connected) {
  		persist_read_string(MESSAGE_KEY_SELECT_BLUETOOTH_DISCONNECT,select_bluetooth_disconnect,5);
 		int select_bluetooth_disconnect_int = atoi(select_bluetooth_disconnect);
 		
-	if(persist_read_bool(received)) {	// Disconected with config
+		if(persist_read_bool(received)) {	// Disconected with config
 			GColor bg_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND));
 			GColor bt_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BLUETOOTH));
 			text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(gcolor_legible_over(bg_colour), bt_colour));		// Set Top Colour
@@ -157,7 +151,7 @@ static void bluetooth_callback(bool connected) {
 			else { vibes_long_pulse(); }	// Default
 		}
 	} else {														// Connected
-	if(persist_read_bool(received)) {
+		if(persist_read_bool(received)) {
 			GColor bg_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND));
 			GColor dt_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_DATE));
 			text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(gcolor_legible_over(bg_colour), dt_colour));		// Set Top Colour
@@ -200,22 +194,21 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 // Set Colours
 	setColours(colour_background, colour_hour, colour_minute);
 	
+	layer_mark_dirty(window_get_root_layer(s_window));
+	battery_callback(battery_state_service_peek());
 	appStarted = false;
 	bluetooth_callback(connection_service_peek_pebble_app_connection());		// Sets date colours (and detects if a phone is connected)
 	appStarted = true;
-	layer_mark_dirty(window_get_root_layer(s_window));
-	battery_callback(battery_state_service_peek());
-	
 //	APP_LOG(APP_LOG_LEVEL_DEBUG, select_battery_percent);
 }
 
 void unobstructed_change(AnimationProgress progress, void* data) {
 	GRect bounds = layer_get_unobstructed_bounds(window_get_root_layer(s_window));
 
-	layer_set_frame(text_layer_get_layer(s_text_hour),GRect(				 0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
+	layer_set_frame(text_layer_get_layer(s_text_hour),GRect(				0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
 	layer_set_frame(text_layer_get_layer(s_text_minute),GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
-	layer_set_frame(text_layer_get_layer(s_text_top),GRect(				 0, bounds.size.h / 4 - 31, bounds.size.w,   30));
-	layer_set_frame(text_layer_get_layer(s_text_bottom),GRect(				 0, bounds.size.h * 3/4 -5, bounds.size.w,   30));
+	layer_set_frame(text_layer_get_layer(s_text_top),GRect(					0, bounds.size.h / 4 - 31, bounds.size.w,   30));
+	layer_set_frame(text_layer_get_layer(s_text_bottom),GRect(				0, bounds.size.h * 3/4 -5, bounds.size.w,   30));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -260,11 +253,10 @@ static void time_date_update_proc(Layer *layer, GContext *ctx) {
 			}
 		}
 // Month
-		int toggle_week = persist_read_int(MESSAGE_KEY_TOGGLE_WEEK);
 		#if defined(PBL_RECT)
-			if(strlen(month_current) > 7 || toggle_week) {
+			if(strlen(month_current) > 7) {
 				strcat(char_buffer,"  %b"); // Short
-				if(toggle_week) {
+				if(persist_read_int(MESSAGE_KEY_TOGGLE_WEEK)) {
 					strcat(char_buffer,"  W%V");
 				}
 			} else {
@@ -310,7 +302,7 @@ static void window_load(Window *window) {
  		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
 		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31, bounds.size.w,   30));
  		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4 -5, bounds.size.w,   30));
-		s_layer_battery	= bitmap_layer_create(GRect(4, 2, 13, 6)); // battery
+		s_layer_battery	= bitmap_layer_create(GRect(4, 4, 13, 6)); // battery
 	#elif defined(PBL_ROUND)
 		s_text_hour		= text_layer_create(GRect(   10, bounds.size.h / 2 - 47 + 1, bounds.size.w/2, 75));
 		s_text_minute	= text_layer_create(GRect(73+10, bounds.size.h / 2 - 47 + 1, bounds.size.w/2, 75));
@@ -381,12 +373,12 @@ static void init() {
 		.unload = window_unload
 	});
 	window_stack_push(s_window, true);
-	
+
 	UnobstructedAreaHandlers handlers = {
 		.change = unobstructed_change,
 	};
 	unobstructed_area_service_subscribe(handlers, NULL);
-	
+
 	connection_service_subscribe((ConnectionHandlers) {
   		.pebble_app_connection_handler = bluetooth_callback
 	});
