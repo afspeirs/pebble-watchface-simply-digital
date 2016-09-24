@@ -85,8 +85,13 @@ void setColours(int colour_background, int colour_hour, int colour_minute) {
 	if(persist_read_bool(received)) {
 		GColor bg_colour = GColorFromHEX(colour_background);
 		window_set_background_color(s_window, bg_colour);			// Set Background Colour
-		text_layer_set_text_color(s_text_hour, PBL_IF_BW_ELSE(gcolor_legible_over(bg_colour), GColorFromHEX(colour_hour)));		// Set Hour Colour
-		text_layer_set_text_color(s_text_minute, PBL_IF_BW_ELSE(gcolor_legible_over(bg_colour), GColorFromHEX(colour_minute)));	// Set Minute Colour
+		#if defined(PBL_BW)
+			text_layer_set_text_color(s_text_hour, gcolor_legible_over(bg_colour));		// Set Hour Colour
+			text_layer_set_text_color(s_text_minute, gcolor_legible_over(bg_colour));	// Set Minute Colour
+		#elif defined(PBL_COLOR)
+			text_layer_set_text_color(s_text_hour, GColorFromHEX(colour_hour));			// Set Hour Colour
+			text_layer_set_text_color(s_text_minute, GColorFromHEX(colour_minute));		// Set Minute Colour
+		#endif
 	} else {
 		window_set_background_color(s_window, GColorBlack);			// Set Background Colour
 		text_layer_set_text_color(s_text_hour, GColorWhite);		// Set Hour Colour
@@ -130,33 +135,48 @@ static void battery_callback(BatteryChargeState state) {
 
 static void bluetooth_callback(bool connected) {													  	
 	if(!connected) {
-		char *select_bluetooth_disconnect = "";
- 		persist_read_string(MESSAGE_KEY_SELECT_BLUETOOTH_DISCONNECT,select_bluetooth_disconnect,5);
-		int select_bluetooth_disconnect_int = atoi(select_bluetooth_disconnect);
-		
 		if(persist_read_bool(received)) {	// Disconected with config
-			GColor bg_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND));
-			GColor bt_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BLUETOOTH));
-			text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(gcolor_legible_over(bg_colour), bt_colour));		// Set Top Colour
-			text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(gcolor_legible_over(bg_colour), bt_colour));	// Set Bottom Colour
-		} else { 									// Disconnected and no config
-			text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(GColorBlack, GColorRed));		// Set Top Colour
-			text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(GColorBlack, GColorRed));	// Set Bottom Colour
+			#if defined(PBL_BW)
+				GColor bg_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND));
+				text_layer_set_text_color(s_text_top, gcolor_legible_over(bg_colour));		// Set Top Colour
+				text_layer_set_text_color(s_text_bottom, gcolor_legible_over(bg_colour));	// Set Bottom Colour
+			#elif defined(PBL_COLOR)
+				GColor bt_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BLUETOOTH));
+				text_layer_set_text_color(s_text_top, bt_colour);		// Set Top Colour
+				text_layer_set_text_color(s_text_bottom, bt_colour);	// Set Bottom Colour
+			#endif
+		} else { 							// Disconnected without config
+			#if defined(PBL_BW)
+				text_layer_set_text_color(s_text_top, GColorBlack);		// Set Top Colour
+				text_layer_set_text_color(s_text_bottom, GColorBlack);	// Set Bottom Colour
+			#elif defined(PBL_COLOR)
+				text_layer_set_text_color(s_text_top, GColorRed);		// Set Top Colour
+				text_layer_set_text_color(s_text_bottom, GColorRed);	// Set Bottom Colour
+			#endif
 		}
 		if(appStarted) {
-			if(select_bluetooth_disconnect_int == 0) { }		// No vibration 
-			else if(select_bluetooth_disconnect_int == 1) { vibes_short_pulse(); }		// Short vibration
+			char *select_bluetooth_disconnect = "";
+ 			persist_read_string(MESSAGE_KEY_SELECT_BLUETOOTH_DISCONNECT,select_bluetooth_disconnect,5);
+			int select_bluetooth_disconnect_int = atoi(select_bluetooth_disconnect);
+			
+			if(select_bluetooth_disconnect_int == 0) { }							// No vibration 
+			else if(select_bluetooth_disconnect_int == 1) { vibes_short_pulse(); }	// Short vibration
 			else if(select_bluetooth_disconnect_int == 2) { vibes_long_pulse(); }	// Long vibration
 			else if(select_bluetooth_disconnect_int == 3) { vibes_double_pulse(); }	// Double vibration
 			else { vibes_long_pulse(); }	// Default
 		}
-	} else {														// Connected
-		if(persist_read_bool(received)) {
-			GColor bg_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND));
-			GColor dt_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_DATE));
-			text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(gcolor_legible_over(bg_colour), dt_colour));		// Set Top Colour
-			text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(gcolor_legible_over(bg_colour), dt_colour));	// Set Bottom Colour
-		} else {
+	} else {
+		if(persist_read_bool(received)) {	// Connected with config
+			#if defined(PBL_BW)
+				GColor bg_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND));
+				text_layer_set_text_color(s_text_top, gcolor_legible_over(bg_colour));		// Set Top Colour
+				text_layer_set_text_color(s_text_bottom, gcolor_legible_over(bg_colour));	// Set Bottom Colour
+			#elif defined(PBL_COLOR)
+				GColor dt_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_DATE));
+				text_layer_set_text_color(s_text_top, dt_colour);							// Set Top Colour
+				text_layer_set_text_color(s_text_bottom, dt_colour);						// Set Bottom Colour
+			#endif
+		} else {							// Connected without config
 			text_layer_set_text_color(s_text_top, GColorWhite);		// Set Top Colour
 			text_layer_set_text_color(s_text_bottom, GColorWhite);	// Set Bottom Colour
 		}
