@@ -1,6 +1,6 @@
 #include <pebble.h>
 
-uint32_t received = 0;	// Used to determine whether AppMessages have been recieved
+uint32_t received = 0;	// Used to determine whether AppMessages have been received
 
 static Window *s_window;
 static Layer *s_layer_time_date;
@@ -251,8 +251,6 @@ static void time_date_update_proc(Layer *layer, GContext *ctx) {
 	text_layer_set_text(s_text_minute, m_buffer);
 
 // Date
-	strftime(date_current, sizeof(date_current), "%d%m", tick_time);
-	strftime(month_current, sizeof(month_current), "%B", tick_time);
 	customText(t_buffer, b_buffer);	
 	if(strcmp(t_buffer, "\0") == 0) {			// If Top is empty, write current weekday
 		strftime(t_buffer, sizeof(t_buffer), "%A", tick_time);		// %A
@@ -298,7 +296,13 @@ static void time_date_update_proc(Layer *layer, GContext *ctx) {
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+    if( (units_changed & DAY_UNIT) != 0 ) {
+		strftime(date_current, sizeof(date_current), "%d%m", tick_time);
+		strftime(month_current, sizeof(month_current), "%B", tick_time);
+// 		APP_LOG(APP_LOG_LEVEL_DEBUG, "This is updating every day");
+	}
 	layer_mark_dirty(window_get_root_layer(s_window));
+// 	APP_LOG(APP_LOG_LEVEL_DEBUG, "This updates every minute");
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -413,7 +417,7 @@ static void init() {
 	battery_state_service_subscribe(battery_callback);
 	battery_callback(battery_state_service_peek());
 
-	tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
+	tick_timer_service_subscribe(MINUTE_UNIT | DAY_UNIT, tick_handler);
 }
 
 static void deinit() {
