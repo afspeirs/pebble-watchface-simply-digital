@@ -262,15 +262,12 @@ static void time_date_update_proc(Layer *layer, GContext *ctx) {
 // Day
 		strcat(char_buffer,"%e");
 		if(toggle_suffix == 1) {
-			if (strncmp(date_current, "01", 2) == 0 || strncmp(date_current, "21", 2) == 0 || strncmp(date_current,"31",2) == 0) { 
-				strcat(char_buffer,"st");
-			} else if (strncmp(date_current, "02", 2) == 0 || strncmp(date_current, "22", 2) == 0) {
-				strcat(char_buffer,"nd");
-			} else if (strncmp(date_current, "03", 2) == 0 || strncmp(date_current, "23", 2) == 0) { 
-				strcat(char_buffer,"rd");
-			} else {
-				strcat(char_buffer,"th");
-			}
+			switch (date_current[1]) {
+				case 1:	 strcat(char_buffer,"st");
+				case 2:	 strcat(char_buffer,"nd");
+				case 3:	 strcat(char_buffer,"rd");
+				default: strcat(char_buffer,"th");
+			}			
 		}
 // Month
 		#if defined(PBL_RECT)
@@ -280,7 +277,7 @@ static void time_date_update_proc(Layer *layer, GContext *ctx) {
 					strcat(char_buffer,"  W%V");
 				}
 			} else {
-				strcat(char_buffer,"  %B");
+				strcat(char_buffer,"  %B"); //%B
 			}
 		#elif defined(PBL_ROUND)
 			if(strlen(month_current) > 5) {
@@ -296,13 +293,11 @@ static void time_date_update_proc(Layer *layer, GContext *ctx) {
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-    if( (units_changed & DAY_UNIT) != 0 ) {
+    if((units_changed & DAY_UNIT) != 0 ) {
 		strftime(date_current, sizeof(date_current), "%d%m", tick_time);
 		strftime(month_current, sizeof(month_current), "%B", tick_time);
-// 		APP_LOG(APP_LOG_LEVEL_DEBUG, "This is updating every day");
 	}
 	layer_mark_dirty(window_get_root_layer(s_window));
-// 	APP_LOG(APP_LOG_LEVEL_DEBUG, "This updates every minute");
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////

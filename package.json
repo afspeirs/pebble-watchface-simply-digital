@@ -6,9 +6,6 @@
     "keywords": [],
     "name": "simply-digital",
     "pebble": {
-        "capabilities": [
-            "configurable"
-        ],
         "displayName": "Simply Digital",
         "enableMultiJS": true,
         "messageKeys": [
