@@ -31,47 +31,8 @@
                     "type": "bitmap"
                 },
                 {
-                    "file": "images/BatteryWhite_4",
-                    "name": "IMAGE_BATTERY_WHITE_4",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/BatteryWhite_3",
-                    "name": "IMAGE_BATTERY_WHITE_3",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/BatteryWhite_2",
-                    "name": "IMAGE_BATTERY_WHITE_2",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
                     "file": "images/BatteryWhite_1",
                     "name": "IMAGE_BATTERY_WHITE_1",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/BatteryBlack_4",
-                    "name": "IMAGE_BATTERY_BLACK_4",
-                    "storageFormat": "png",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/BatteryBlack_3",
-                    "name": "IMAGE_BATTERY_BLACK_3",
-                    "storageFormat": "png",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/BatteryBlack_2",
-                    "name": "IMAGE_BATTERY_BLACK_2",
-                    "storageFormat": "png",
                     "targetPlatforms": null,
                     "type": "bitmap"
                 },

@@ -15,19 +15,16 @@ static bool appStarted = false;
 //////////// Methods /////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void getBatteryIcon(int image_number) {
-	int BatteryBlack[] = {RESOURCE_ID_IMAGE_BATTERY_BLACK_1, RESOURCE_ID_IMAGE_BATTERY_BLACK_2, RESOURCE_ID_IMAGE_BATTERY_BLACK_3, RESOURCE_ID_IMAGE_BATTERY_BLACK_4};
-	int BatteryWhite[] = {RESOURCE_ID_IMAGE_BATTERY_WHITE_1, RESOURCE_ID_IMAGE_BATTERY_WHITE_2, RESOURCE_ID_IMAGE_BATTERY_WHITE_3, RESOURCE_ID_IMAGE_BATTERY_WHITE_4};
-	
+void getBatteryIcon() {	
 	gbitmap_destroy(s_bitmap_battery);
 	if(persist_read_bool(received)) {
 		if (gcolor_equal(gcolor_legible_over(GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND))), GColorBlack)) {
-			s_bitmap_battery = gbitmap_create_with_resource(BatteryBlack[image_number]);
+			s_bitmap_battery = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATTERY_BLACK_1);
 		} else {
-			s_bitmap_battery = gbitmap_create_with_resource(BatteryWhite[image_number]);
+			s_bitmap_battery = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATTERY_WHITE_1);
 		}
 	} else {
-		s_bitmap_battery = gbitmap_create_with_resource(BatteryWhite[image_number]);
+		s_bitmap_battery = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATTERY_WHITE_1);
 	}
 	bitmap_layer_set_bitmap(s_layer_battery, s_bitmap_battery);
 }
@@ -60,24 +57,15 @@ static void battery_callback(BatteryChargeState state) {
 		persist_read_string(MESSAGE_KEY_SELECT_BATTERY_PERCENT,select_battery_percent,5);
 		int select_battery_percent_int = atoi(select_battery_percent);
 
-		if(select_battery_percent_int == 100) { // Always show battery
-			if(75 < state.charge_percent && state.charge_percent <= 100) {
-				getBatteryIcon(3);
-			} else if(50 < state.charge_percent && state.charge_percent <= 75) {
-				getBatteryIcon(2);
-			} else if(25 < state.charge_percent && state.charge_percent <= 50) {
-				getBatteryIcon(1);
-			} else if( 0 < state.charge_percent && state.charge_percent <= 25) {
-				getBatteryIcon(0);
-			}
-			layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), false);	// Visible
-		} else {
+		if(select_battery_percent_int != 0) {
 			if(state.charge_percent < select_battery_percent_int) {
-				getBatteryIcon(0);
+				getBatteryIcon();
 				layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), false);	// Visible
 			} else {
 				layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), true);	// Hidden
 			}
+		} else {	// Hidden
+			layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), true);
 		}
 	} else {	// Hidden
 		layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), true);
@@ -204,12 +192,15 @@ static void time_date_update_proc(Layer *layer, GContext *ctx) {
 // Day
 	strcat(char_buffer,"%e");
 	if(toggle_suffix == 1) {
-		switch (date_current[1]) {
-			case 1:	 strcat(char_buffer,"st");
-			case 2:	 strcat(char_buffer,"nd");
-			case 3:	 strcat(char_buffer,"rd");
-			default: strcat(char_buffer,"th");
-		}			
+		if (strncmp(date_current, "01", 2) == 0 || strncmp(date_current, "21", 2) == 0 || strncmp(date_current,"31",2) == 0) { 
+			strcat(char_buffer,"st");
+		} else if (strncmp(date_current, "02", 2) == 0 || strncmp(date_current, "22", 2) == 0) {
+			strcat(char_buffer,"nd");
+		} else if (strncmp(date_current, "03", 2) == 0 || strncmp(date_current, "23", 2) == 0) { 
+			strcat(char_buffer,"rd");
+		} else {
+			strcat(char_buffer,"th");
+		}
 	}
 // Month
 	#if defined(PBL_RECT)
