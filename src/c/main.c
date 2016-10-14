@@ -32,55 +32,6 @@ void getBatteryIcon(int image_number) {
 	bitmap_layer_set_bitmap(s_layer_battery, s_bitmap_battery);
 }
 
-void customText(char t_buffer[16], char b_buffer[16]) {
-	int check_date_0 = persist_read_int(MESSAGE_KEY_CHECK_DATE);
-	int check_date_1 = persist_read_int(MESSAGE_KEY_CHECK_DATE+1);
-	int check_date_2 = persist_read_int(MESSAGE_KEY_CHECK_DATE+2);
-
-	if(strcmp("0104", date_current) == 0) {		// If date is 1st April, Display "April Fools" on bottom
-		strcpy(t_buffer, "\0");
-		strcpy(b_buffer, "April  Fools");
-	} else if(check_date_0 == 1 && strcmp("0101", date_current) == 0) {  // New Years
-		strcpy(t_buffer, "Happy");
-		strcpy(b_buffer, "New  Year");
-	} else if(check_date_1 == 1 && strcmp("3110", date_current) == 0) {  // Halloween
-		strcpy(t_buffer, "\0");
-		strcpy(b_buffer, "Halloween");
-	} else if(check_date_2 == 1 && strcmp("2512", date_current) == 0) {  // Christmas
-		strcpy(t_buffer, "Merry");
-		strcpy(b_buffer, "Christmas");
-	}
-	
-	// Valentines				14th February
-	// Earth Day				
-	// Mother's Day US			May ish
-	// Mother's Day UK			March ish
-	// Father's Day US			
-	// Father's Day UK			June ish
-	// Independence Day (US)	4th July
-	// Independence Day (MEX)
-	// Canada Day				
-	// Victoria Day (Canada)	
-	// Thanksgiving				3rd thursday in november?
-	// black friday??
-	// Eid
-	// Diwali
-	// Boxing Day				26th December
-	// Hannukah					december
-	// Passover					
-	// Chinese New Year
-	// Kwanzaa
-	// MLK Day
-	
-	
-	// burns night				25h January
-	// rememberence sunday could be from the 8th to the 14th november
-	else {
-		strcpy(t_buffer, "\0");
-		strcpy(b_buffer, "\0");
-	}
-}
-
 void setColours(int colour_background, int colour_hour, int colour_minute) {
 	if(persist_read_bool(received)) {
 		GColor bg_colour = GColorFromHEX(colour_background);
@@ -138,19 +89,19 @@ static void bluetooth_callback(bool connected) {
 		if(persist_read_bool(received)) {	// Disconected with config
 			#if defined(PBL_BW)
 				GColor bg_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND));
-				text_layer_set_text_color(s_text_top, gcolor_legible_over(bg_colour));		// Set Top Colour
+				text_layer_set_text_color(s_text_top,	 gcolor_legible_over(bg_colour));	// Set Top Colour
 				text_layer_set_text_color(s_text_bottom, gcolor_legible_over(bg_colour));	// Set Bottom Colour
 			#elif defined(PBL_COLOR)
 				GColor bt_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BLUETOOTH));
-				text_layer_set_text_color(s_text_top, bt_colour);		// Set Top Colour
+				text_layer_set_text_color(s_text_top,	 bt_colour);	// Set Top Colour
 				text_layer_set_text_color(s_text_bottom, bt_colour);	// Set Bottom Colour
 			#endif
 		} else { 							// Disconnected without config
 			#if defined(PBL_BW)
-				text_layer_set_text_color(s_text_top, GColorBlack);		// Set Top Colour
+				text_layer_set_text_color(s_text_top,	 GColorBlack);	// Set Top Colour
 				text_layer_set_text_color(s_text_bottom, GColorBlack);	// Set Bottom Colour
 			#elif defined(PBL_COLOR)
-				text_layer_set_text_color(s_text_top, GColorRed);		// Set Top Colour
+				text_layer_set_text_color(s_text_top,	 GColorRed);	// Set Top Colour
 				text_layer_set_text_color(s_text_bottom, GColorRed);	// Set Bottom Colour
 			#endif
 		}
@@ -169,11 +120,11 @@ static void bluetooth_callback(bool connected) {
 		if(persist_read_bool(received)) {	// Connected with config
 			#if defined(PBL_BW)
 				GColor bg_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND));
-				text_layer_set_text_color(s_text_top, gcolor_legible_over(bg_colour));		// Set Top Colour
+				text_layer_set_text_color(s_text_top,	 gcolor_legible_over(bg_colour));	// Set Top Colour
 				text_layer_set_text_color(s_text_bottom, gcolor_legible_over(bg_colour));	// Set Bottom Colour
 			#elif defined(PBL_COLOR)
 				GColor dt_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_DATE));
-				text_layer_set_text_color(s_text_top, dt_colour);							// Set Top Colour
+				text_layer_set_text_color(s_text_top,	 dt_colour);						// Set Top Colour
 				text_layer_set_text_color(s_text_bottom, dt_colour);						// Set Bottom Colour
 			#endif
 		} else {							// Connected without config
@@ -206,11 +157,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 // Date	
 	persist_write_int(MESSAGE_KEY_TOGGLE_SUFFIX, dict_find(iter, MESSAGE_KEY_TOGGLE_SUFFIX)->value->int32);
 	persist_write_int(MESSAGE_KEY_TOGGLE_WEEK, dict_find(iter, MESSAGE_KEY_TOGGLE_WEEK)->value->int32);
-// Custom Text
-	persist_write_int(MESSAGE_KEY_CHECK_DATE,   dict_find(iter, MESSAGE_KEY_CHECK_DATE  )->value->int32);
-	persist_write_int(MESSAGE_KEY_CHECK_DATE+1, dict_find(iter, MESSAGE_KEY_CHECK_DATE+1)->value->int32);
-	persist_write_int(MESSAGE_KEY_CHECK_DATE+2, dict_find(iter, MESSAGE_KEY_CHECK_DATE+2)->value->int32);
-	
+
 // Set Colours
 	setColours(colour_background, colour_hour, colour_minute);
 	
@@ -251,43 +198,38 @@ static void time_date_update_proc(Layer *layer, GContext *ctx) {
 	text_layer_set_text(s_text_minute, m_buffer);
 
 // Date
-	customText(t_buffer, b_buffer);	
-	if(strcmp(t_buffer, "\0") == 0) {			// If Top is empty, write current weekday
-		strftime(t_buffer, sizeof(t_buffer), "%A", tick_time);		// %A
-	} if(strcmp(b_buffer, "\0") == 0) {			// If Bottom is empty, write current date		
- 		char char_buffer[16] = "";
-		int toggle_suffix = persist_read_int(MESSAGE_KEY_TOGGLE_SUFFIX);
-		strftime(date_current, sizeof(date_current), "%d%m", tick_time);
-		strftime(month_current, sizeof(month_current), "%B", tick_time);
+	strftime(t_buffer, sizeof(t_buffer), "%A", tick_time);		// %A
+	char char_buffer[16] = "";
+	int toggle_suffix = persist_read_int(MESSAGE_KEY_TOGGLE_SUFFIX);
 // Day
-		strcat(char_buffer,"%e");
-		if(toggle_suffix == 1) {
-			switch (date_current[1]) {
-				case 1:	 strcat(char_buffer,"st");
-				case 2:	 strcat(char_buffer,"nd");
-				case 3:	 strcat(char_buffer,"rd");
-				default: strcat(char_buffer,"th");
-			}			
-		}
-// Month
-		#if defined(PBL_RECT)
-			if(strlen(month_current) > 7) {
-				strcat(char_buffer,"  %b"); // Short
-				if(persist_read_int(MESSAGE_KEY_TOGGLE_WEEK)) {
-					strcat(char_buffer,"  W%V");
-				}
-			} else {
-				strcat(char_buffer,"  %B"); //%B
-			}
-		#elif defined(PBL_ROUND)
-			if(strlen(month_current) > 5) {
-				strcat(char_buffer,"  %b"); // Short
-			} else {
-				strcat(char_buffer,"  %B");
-			}
-		#endif
-		strftime(b_buffer, sizeof(char_buffer), char_buffer, tick_time);	// ᵗʰ
+	strcat(char_buffer,"%e");
+	if(toggle_suffix == 1) {
+		switch (date_current[1]) {
+			case 1:	 strcat(char_buffer,"st");
+			case 2:	 strcat(char_buffer,"nd");
+			case 3:	 strcat(char_buffer,"rd");
+			default: strcat(char_buffer,"th");
+		}			
 	}
+// Month
+	#if defined(PBL_RECT)
+	if(strlen(month_current) > 7) {
+		strcat(char_buffer,"  %b"); // Short
+		if(persist_read_int(MESSAGE_KEY_TOGGLE_WEEK)) {
+			strcat(char_buffer,"  W%V");
+		}
+	} else {
+		strcat(char_buffer,"  %B"); //%B
+	}
+	#elif defined(PBL_ROUND)
+	if(strlen(month_current) > 5) {
+		strcat(char_buffer,"  %b"); // Short
+	} else {
+		strcat(char_buffer,"  %B");
+	}
+	#endif
+	strftime(b_buffer, sizeof(char_buffer), char_buffer, tick_time);	// ᵗʰ
+	
 	text_layer_set_text(s_text_top, t_buffer);
 	text_layer_set_text(s_text_bottom, b_buffer);
 }
