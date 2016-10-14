@@ -15,16 +15,19 @@ static bool appStarted = false;
 //////////// Methods /////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void getBatteryIcon() {	
+void getBatteryIcon(int image_number) {
+	int BatteryBlack[] = {RESOURCE_ID_IMAGE_BATTERY_BLACK_1, RESOURCE_ID_IMAGE_BATTERY_BLACK_2, RESOURCE_ID_IMAGE_BATTERY_BLACK_3, RESOURCE_ID_IMAGE_BATTERY_BLACK_4};
+	int BatteryWhite[] = {RESOURCE_ID_IMAGE_BATTERY_WHITE_1, RESOURCE_ID_IMAGE_BATTERY_WHITE_2, RESOURCE_ID_IMAGE_BATTERY_WHITE_3, RESOURCE_ID_IMAGE_BATTERY_WHITE_4};
+	
 	gbitmap_destroy(s_bitmap_battery);
 	if(persist_read_bool(received)) {
 		if (gcolor_equal(gcolor_legible_over(GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND))), GColorBlack)) {
-			s_bitmap_battery = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATTERY_BLACK_1);
+			s_bitmap_battery = gbitmap_create_with_resource(BatteryBlack[image_number]);
 		} else {
-			s_bitmap_battery = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATTERY_WHITE_1);
+			s_bitmap_battery = gbitmap_create_with_resource(BatteryWhite[image_number]);
 		}
 	} else {
-		s_bitmap_battery = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATTERY_WHITE_1);
+		s_bitmap_battery = gbitmap_create_with_resource(BatteryWhite[image_number]);
 	}
 	bitmap_layer_set_bitmap(s_layer_battery, s_bitmap_battery);
 }
@@ -57,15 +60,24 @@ static void battery_callback(BatteryChargeState state) {
 		persist_read_string(MESSAGE_KEY_SELECT_BATTERY_PERCENT,select_battery_percent,5);
 		int select_battery_percent_int = atoi(select_battery_percent);
 
-		if(select_battery_percent_int != 0) {
+		if(select_battery_percent_int == 100) { // Always show battery
+			if(75 < state.charge_percent && state.charge_percent <= 100) {
+				getBatteryIcon(3);
+			} else if(50 < state.charge_percent && state.charge_percent <= 75) {
+				getBatteryIcon(2);
+			} else if(25 < state.charge_percent && state.charge_percent <= 50) {
+				getBatteryIcon(1);
+			} else if( 0 < state.charge_percent && state.charge_percent <= 25) {
+				getBatteryIcon(0);
+			}
+			layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), false);	// Visible
+		} else {
 			if(state.charge_percent < select_battery_percent_int) {
-				getBatteryIcon();
+				getBatteryIcon(0);
 				layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), false);	// Visible
 			} else {
 				layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), true);	// Hidden
 			}
-		} else {	// Hidden
-			layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), true);
 		}
 	} else {	// Hidden
 		layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), true);
@@ -77,19 +89,19 @@ static void bluetooth_callback(bool connected) {
 		if(persist_read_bool(received)) {	// Disconected with config
 			#if defined(PBL_BW)
 				GColor bg_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND));
-				text_layer_set_text_color(s_text_top,	 gcolor_legible_over(bg_colour));	// Set Top Colour
+				text_layer_set_text_color(s_text_top, gcolor_legible_over(bg_colour));		// Set Top Colour
 				text_layer_set_text_color(s_text_bottom, gcolor_legible_over(bg_colour));	// Set Bottom Colour
 			#elif defined(PBL_COLOR)
 				GColor bt_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BLUETOOTH));
-				text_layer_set_text_color(s_text_top,	 bt_colour);	// Set Top Colour
+				text_layer_set_text_color(s_text_top, bt_colour);		// Set Top Colour
 				text_layer_set_text_color(s_text_bottom, bt_colour);	// Set Bottom Colour
 			#endif
 		} else { 							// Disconnected without config
 			#if defined(PBL_BW)
-				text_layer_set_text_color(s_text_top,	 GColorBlack);	// Set Top Colour
+				text_layer_set_text_color(s_text_top, GColorBlack);		// Set Top Colour
 				text_layer_set_text_color(s_text_bottom, GColorBlack);	// Set Bottom Colour
 			#elif defined(PBL_COLOR)
-				text_layer_set_text_color(s_text_top,	 GColorRed);	// Set Top Colour
+				text_layer_set_text_color(s_text_top, GColorRed);		// Set Top Colour
 				text_layer_set_text_color(s_text_bottom, GColorRed);	// Set Bottom Colour
 			#endif
 		}
@@ -108,11 +120,11 @@ static void bluetooth_callback(bool connected) {
 		if(persist_read_bool(received)) {	// Connected with config
 			#if defined(PBL_BW)
 				GColor bg_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND));
-				text_layer_set_text_color(s_text_top,	 gcolor_legible_over(bg_colour));	// Set Top Colour
+				text_layer_set_text_color(s_text_top, gcolor_legible_over(bg_colour));		// Set Top Colour
 				text_layer_set_text_color(s_text_bottom, gcolor_legible_over(bg_colour));	// Set Bottom Colour
 			#elif defined(PBL_COLOR)
 				GColor dt_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_DATE));
-				text_layer_set_text_color(s_text_top,	 dt_colour);						// Set Top Colour
+				text_layer_set_text_color(s_text_top, dt_colour);							// Set Top Colour
 				text_layer_set_text_color(s_text_bottom, dt_colour);						// Set Bottom Colour
 			#endif
 		} else {							// Connected without config
@@ -145,7 +157,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 // Date	
 	persist_write_int(MESSAGE_KEY_TOGGLE_SUFFIX, dict_find(iter, MESSAGE_KEY_TOGGLE_SUFFIX)->value->int32);
 	persist_write_int(MESSAGE_KEY_TOGGLE_WEEK, dict_find(iter, MESSAGE_KEY_TOGGLE_WEEK)->value->int32);
-
+	
 // Set Colours
 	setColours(colour_background, colour_hour, colour_minute);
 	
@@ -174,6 +186,8 @@ static void time_date_update_proc(Layer *layer, GContext *ctx) {
 	time_t temp = time(NULL); 
 	struct tm *tick_time = localtime(&temp);
 	static char h_buffer[3], m_buffer[3], t_buffer[16], b_buffer[16];
+	strftime(date_current, sizeof(date_current), "%d%m", tick_time);
+	strftime(month_current, sizeof(month_current), "%B", tick_time);
 
 // Time
 	if(clock_is_24h_style()) {
@@ -189,6 +203,7 @@ static void time_date_update_proc(Layer *layer, GContext *ctx) {
 	strftime(t_buffer, sizeof(t_buffer), "%A", tick_time);		// %A
 	char char_buffer[16] = "";
 	int toggle_suffix = persist_read_int(MESSAGE_KEY_TOGGLE_SUFFIX);
+
 // Day
 	strcat(char_buffer,"%e");
 	if(toggle_suffix == 1) {
@@ -210,7 +225,7 @@ static void time_date_update_proc(Layer *layer, GContext *ctx) {
 			strcat(char_buffer,"  W%V");
 		}
 	} else {
-		strcat(char_buffer,"  %B"); //%B
+		strcat(char_buffer,"  %B");
 	}
 	#elif defined(PBL_ROUND)
 	if(strlen(month_current) > 5) {
@@ -226,10 +241,6 @@ static void time_date_update_proc(Layer *layer, GContext *ctx) {
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-    if((units_changed & DAY_UNIT) != 0 ) {
-		strftime(date_current, sizeof(date_current), "%d%m", tick_time);
-		strftime(month_current, sizeof(month_current), "%B", tick_time);
-	}
 	layer_mark_dirty(window_get_root_layer(s_window));
 }
 
