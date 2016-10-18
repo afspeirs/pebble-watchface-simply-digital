@@ -147,22 +147,22 @@ module.exports = [
 			}
 		]
 	},
-// 	{
-// 		"type": "section",
-// 		"items": [
-// 			{
-// 				"type": "heading",
-// 				"defaultValue": "Custom Text"
-// 			},
-// 			{
-// 				"type": "checkboxgroup",
-// 				"messageKey": "CHECK_DATE",
-// 				"label": "Select events to be displayed:",
-// 				"defaultValue": [false, false, false],
-// 				"options": ["New Years Day", "Halloween", "Christmas Day"]
-// 			}
-// 		]
-// 	},
+	{
+		"type": "section",
+		"items": [
+			{
+				"type": "heading",
+				"defaultValue": "Custom Text"
+			},
+			{
+				"type": "checkboxgroup",
+				"messageKey": "CHECK_DATE",
+				"label": "Select events to be displayed:",
+				"defaultValue": [false, false, false],
+				"options": ["New Years Day", "Halloween", "Christmas Day"]
+			}
+		]
+	},
 // 	{
 // 		"type": "section",
 // 		"items": [
