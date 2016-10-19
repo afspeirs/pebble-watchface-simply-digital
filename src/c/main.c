@@ -25,7 +25,7 @@ void customText(char t_buffer[16], char b_buffer[16]) {
 	} else if(check_date_0 == 1 && strcmp("0101", date_current) == 0) {  // New Years
 		strcpy(t_buffer, "Happy");
 		strcpy(b_buffer, "New  Year");
-	} else if(check_date_1 == 1 && strcmp("1910", date_current) == 0) {  // Halloween
+	} else if(check_date_1 == 1 && strcmp("3110", date_current) == 0) {  // Halloween
 		strcpy(t_buffer, "\0");
 		strcpy(b_buffer, "Halloween");
 	} else if(check_date_2 == 1 && strcmp("2512", date_current) == 0) {  // Christmas
