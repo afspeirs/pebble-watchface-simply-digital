@@ -20,7 +20,8 @@
             "SELECT_BLUETOOTH_DISCONNECT",
             "SELECT_BATTERY_PERCENT",
             "TOGGLE_SUFFIX",
-            "TOGGLE_WEEK"
+            "TOGGLE_WEEK",
+            "CHECK_DATE[3]"
         ],
         "projectType": "native",
         "resources": {
@@ -106,12 +107,13 @@
             "aplite",
             "basalt",
             "chalk",
-            "diorite"
+            "diorite",
+            "emery"
         ],
         "uuid": "51c897b8-5ca6-4412-82db-11a4cf304ae1",
         "watchapp": {
             "watchface": true
         }
     },
-    "version": "0.61.0"
+    "version": "0.62.0"
 }

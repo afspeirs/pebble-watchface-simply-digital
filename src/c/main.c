@@ -3,7 +3,6 @@
 uint32_t received = 0;	// Used to determine whether AppMessages have been received
 
 static Window *s_window;
-static Layer *s_layer_time_date;
 static TextLayer *s_text_hour, *s_text_minute, *s_text_top, *s_text_bottom;
 static GFont s_font_time, s_font_date;
 static BitmapLayer *s_layer_battery;
@@ -14,6 +13,55 @@ static bool appStarted = false;
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////// Methods /////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void customText(char t_buffer[16], char b_buffer[16]) {
+	int check_date_0 = persist_read_int(MESSAGE_KEY_CHECK_DATE);
+	int check_date_1 = persist_read_int(MESSAGE_KEY_CHECK_DATE+1);
+	int check_date_2 = persist_read_int(MESSAGE_KEY_CHECK_DATE+2);
+
+	if(strcmp("0104", date_current) == 0) {		// If date is 1st April, Display "April Fools" on bottom
+		strcpy(t_buffer, "\0");
+		strcpy(b_buffer, "April  Fools");
+	} else if(check_date_0 == 1 && strcmp("0101", date_current) == 0) {  // New Years
+		strcpy(t_buffer, "Happy");
+		strcpy(b_buffer, "New  Year");
+	} else if(check_date_1 == 1 && strcmp("1910", date_current) == 0) {  // Halloween
+		strcpy(t_buffer, "\0");
+		strcpy(b_buffer, "Halloween");
+	} else if(check_date_2 == 1 && strcmp("2512", date_current) == 0) {  // Christmas
+		strcpy(t_buffer, "Merry");
+		strcpy(b_buffer, "Christmas");
+	}
+	
+	// Valentines				14th February
+	// Earth Day				
+	// Mother's Day US			May ish
+	// Mother's Day UK			March ish
+	// Father's Day US			
+	// Father's Day UK			June ish
+	// Independence Day (US)	4th July
+	// Independence Day (MEX)
+	// Canada Day				
+	// Victoria Day (Canada)	
+	// Thanksgiving				3rd thursday in november?
+	// black friday??
+	// Eid
+	// Diwali
+	// Boxing Day				26th December
+	// Hannukah					december
+	// Passover					
+	// Chinese New Year
+	// Kwanzaa
+	// MLK Day
+	
+	
+	// burns night				25h January
+	// rememberence sunday could be from the 8th to the 14th november
+	else {
+		strcpy(t_buffer, "\0");
+		strcpy(b_buffer, "\0");
+	}
+}
 
 void getBatteryIcon(int image_number) {
 	int BatteryBlack[] = {RESOURCE_ID_IMAGE_BATTERY_BLACK_1, RESOURCE_ID_IMAGE_BATTERY_BLACK_2, RESOURCE_ID_IMAGE_BATTERY_BLACK_3, RESOURCE_ID_IMAGE_BATTERY_BLACK_4};
@@ -50,53 +98,72 @@ void setColours(int colour_background, int colour_hour, int colour_minute) {
 	}
 }
 
-void customText(char t_buffer[16], char b_buffer[16]) {
-	int check_date_0 = persist_read_int(MESSAGE_KEY_CHECK_DATE);
-	int check_date_1 = persist_read_int(MESSAGE_KEY_CHECK_DATE+1);
-	int check_date_2 = persist_read_int(MESSAGE_KEY_CHECK_DATE+2);
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////// Time & Date /////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	if(strcmp("0104", date_current) == 0) {		// If date is 1st April, Display "April Fools" on bottom
-		strcpy(t_buffer, "\0");
-		strcpy(b_buffer, "April  Fools");
-	} else if(check_date_0 == 1 && strcmp("0101", date_current) == 0) {  // New Years
-		strcpy(t_buffer, "Happy");
-		strcpy(b_buffer, "New  Year");
-	} else if(check_date_1 == 1 && strcmp("1810", date_current) == 0) {  // Halloween
-		strcpy(t_buffer, "\0");
-		strcpy(b_buffer, "Halloween");
-	} else if(check_date_2 == 1 && strcmp("2512", date_current) == 0) {  // Christmas
-		strcpy(t_buffer, "Merry");
-		strcpy(b_buffer, "Christmas");
+static void update_time() {
+	time_t temp = time(NULL); 
+	struct tm *tick_time = localtime(&temp);
+	static char h_buffer[3], m_buffer[3], t_buffer[16], b_buffer[16];
+	strftime(date_current, sizeof(date_current), "%d%m", tick_time);
+	strftime(month_current, sizeof(month_current), "%B", tick_time);
+
+// Time
+	if(clock_is_24h_style()) {
+		strftime(h_buffer, sizeof(h_buffer), "%H", tick_time);	//%H
+	} else {
+		strftime(h_buffer, sizeof(h_buffer), "%I", tick_time);	//%I
 	}
-	
-	// Valentines				14th February
-	// Earth Day				
-	// Mother's Day US			May ish
-	// Mother's Day UK			March ish
-	// Father's Day US			
-	// Father's Day UK			June ish
-	// Independence Day (US)	4th July
-	// Independence Day (MEX)
-	// Canada Day				
-	// Victoria Day (Canada)	
-	// Thanksgiving				3rd thursday in november?
-	// black friday??
-	// Eid
-	// Diwali
-	// Boxing Day				26th December
-	// Hannukah					december
-	// Passover					
-	// Chinese New Year
-	// Kwanzaa
-	// MLK Day
-	
-	
-	// burns night				25h January
-	// rememberence sunday could be from the 8th to the 14th november
-	else {
-		strcpy(t_buffer, "\0");
-		strcpy(b_buffer, "\0");
+	strftime(m_buffer, sizeof(m_buffer), "%M", tick_time);		//%M
+	text_layer_set_text(s_text_hour, h_buffer);
+	text_layer_set_text(s_text_minute, m_buffer);
+
+// Date
+	customText(t_buffer, b_buffer);
+	if(strcmp(t_buffer, "\0") == 0) {			// If Top is empty, write current weekday
+		strftime(t_buffer, sizeof(t_buffer), "%A", tick_time);		// %A
+	} if(strcmp(b_buffer, "\0") == 0) {			// If Bottom is empty, write current date		
+ 		char char_buffer[16] = "";
+		int toggle_suffix = persist_read_int(MESSAGE_KEY_TOGGLE_SUFFIX);
+// Day
+		strcat(char_buffer,"%e");
+		if(toggle_suffix == 1) {
+			if (strncmp(date_current, "01", 2) == 0 || strncmp(date_current, "21", 2) == 0 || strncmp(date_current,"31",2) == 0) { 
+				strcat(char_buffer,"st");
+			} else if (strncmp(date_current, "02", 2) == 0 || strncmp(date_current, "22", 2) == 0) {
+				strcat(char_buffer,"nd");
+			} else if (strncmp(date_current, "03", 2) == 0 || strncmp(date_current, "23", 2) == 0) { 
+				strcat(char_buffer,"rd");
+			} else {
+				strcat(char_buffer,"th");
+			}
+		}
+// Month
+		#if defined(PBL_RECT)
+			if(strlen(month_current) > 7) {
+				strcat(char_buffer,"  %b"); // Short
+				if(persist_read_int(MESSAGE_KEY_TOGGLE_WEEK)) {
+					strcat(char_buffer,"  W%V");
+				}
+			} else {
+				strcat(char_buffer,"  %B");
+			}
+		#elif defined(PBL_ROUND)
+			if(strlen(month_current) > 5) {
+				strcat(char_buffer,"  %b"); // Short
+			} else {
+				strcat(char_buffer,"  %B");
+			}
+		#endif
+		strftime(b_buffer, sizeof(char_buffer), char_buffer, tick_time);	// ᵗʰ
 	}
+	text_layer_set_text(s_text_top, t_buffer);
+	text_layer_set_text(s_text_bottom, b_buffer);
+}
+
+static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+	layer_mark_dirty(window_get_root_layer(s_window));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -215,7 +282,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 // Set Colours
 	setColours(colour_background, colour_hour, colour_minute);
 	
-	layer_mark_dirty(window_get_root_layer(s_window));
+	update_time();
 	battery_callback(battery_state_service_peek());
 	appStarted = false;
 	bluetooth_callback(connection_service_peek_pebble_app_connection());		// Sets date colours (and detects if a phone is connected)
@@ -233,74 +300,6 @@ void unobstructed_change(AnimationProgress progress, void* data) {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////// Time & Date /////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-
-static void time_date_update_proc(Layer *layer, GContext *ctx) {
-	time_t temp = time(NULL); 
-	struct tm *tick_time = localtime(&temp);
-	static char h_buffer[3], m_buffer[3], t_buffer[16], b_buffer[16];
-
-// Time
-	if(clock_is_24h_style()) {
-		strftime(h_buffer, sizeof(h_buffer), "%H", tick_time);	//%H
-	} else {
-		strftime(h_buffer, sizeof(h_buffer), "%I", tick_time);	//%I
-	}
-	strftime(m_buffer, sizeof(m_buffer), "%M", tick_time);		//%M
-	text_layer_set_text(s_text_hour, h_buffer);
-	text_layer_set_text(s_text_minute, m_buffer);
-
-// Date
-	customText(t_buffer, b_buffer);	
-	if(strcmp(t_buffer, "\0") == 0) {			// If Top is empty, write current weekday
-		strftime(t_buffer, sizeof(t_buffer), "%A", tick_time);		// %A
-	} if(strcmp(b_buffer, "\0") == 0) {			// If Bottom is empty, write current date		
- 		char char_buffer[16] = "";
-		int toggle_suffix = persist_read_int(MESSAGE_KEY_TOGGLE_SUFFIX);
-		strftime(date_current, sizeof(date_current), "%d%m", tick_time);
-		strftime(month_current, sizeof(month_current), "%B", tick_time);
-// Day
-		strcat(char_buffer,"%e");
-		if(toggle_suffix == 1) {
-			if (strncmp(date_current, "01", 2) == 0 || strncmp(date_current, "21", 2) == 0 || strncmp(date_current,"31",2) == 0) { 
-				strcat(char_buffer,"st");
-			} else if (strncmp(date_current, "02", 2) == 0 || strncmp(date_current, "22", 2) == 0) {
-				strcat(char_buffer,"nd");
-			} else if (strncmp(date_current, "03", 2) == 0 || strncmp(date_current, "23", 2) == 0) { 
-				strcat(char_buffer,"rd");
-			} else {
-				strcat(char_buffer,"th");
-			}
-		}
-// Month
-		#if defined(PBL_RECT)
-			if(strlen(month_current) > 7) {
-				strcat(char_buffer,"  %b"); // Short
-				if(persist_read_int(MESSAGE_KEY_TOGGLE_WEEK)) {
-					strcat(char_buffer,"  W%V");
-				}
-			} else {
-				strcat(char_buffer,"  %B");
-			}
-		#elif defined(PBL_ROUND)
-			if(strlen(month_current) > 5) {
-				strcat(char_buffer,"  %b"); // Short
-			} else {
-				strcat(char_buffer,"  %B");
-			}
-		#endif
-		strftime(b_buffer, sizeof(char_buffer), char_buffer, tick_time);	// ᵗʰ
-	}
-	text_layer_set_text(s_text_top, t_buffer);
-	text_layer_set_text(s_text_bottom, b_buffer);
-}
-
-static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-	layer_mark_dirty(window_get_root_layer(s_window));
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////// Window //////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -308,10 +307,6 @@ static void window_load(Window *window) {
 	Layer *window_layer = window_get_root_layer(window);
 	GRect bounds = layer_get_unobstructed_bounds(window_layer);
 	setlocale(LC_ALL, "");
-	
-	s_layer_time_date = layer_create(bounds);
-	layer_set_update_proc(s_layer_time_date, time_date_update_proc);
-	layer_add_child(window_layer, s_layer_time_date);
 		
 // Fonts
 	s_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_72));
@@ -371,10 +366,11 @@ static void window_load(Window *window) {
 	appStarted = false;
 	bluetooth_callback(connection_service_peek_pebble_app_connection());		// Sets date colours (and detects if a phone is connected)
 	appStarted = true;
+	
+	update_time();
 }
 
 static void window_unload(Window *window) {
-	layer_destroy(s_layer_time_date);
 	text_layer_destroy(s_text_hour);
 	text_layer_destroy(s_text_minute);
 	text_layer_destroy(s_text_top);
