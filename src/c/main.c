@@ -163,7 +163,7 @@ static void update_time() {
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-	layer_mark_dirty(window_get_root_layer(s_window));
+	update_time();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
