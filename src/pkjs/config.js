@@ -106,15 +106,15 @@ module.exports = [
 					},
 					{
 						"label": "10%",
-						"value": "10" 
+						"value": "11" 
 					},
-					{ 
+					{
 						"label": "20%",
-						"value": "20" 
+						"value": "21"
 					},
 					{ 
 						"label": "30%",
-						"value": "30" 
+						"value": "31"
 					},
 					{ 
 						"label": "Always show",
