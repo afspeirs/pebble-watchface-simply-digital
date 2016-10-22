@@ -154,12 +154,30 @@ module.exports = [
 				"type": "heading",
 				"defaultValue": "Custom Text"
 			},
+// 			{
+// 				"type": "toggle",
+// 				"messageKey": "TOGGLE_TEXT_1",
+// 				"label": "New Years Day",
+// 				"defaultValue": false,
+// 			},
+// 			{
+// 				"type": "toggle",
+// 				"messageKey": "TOGGLE_TEXT_2",
+// 				"label": "Burns Night",
+// 				"defaultValue": false,
+// 			},
+// 			{
+// 				"type": "toggle",
+// 				"messageKey": "TOGGLE_TEXT_3",
+// 				"label": "Valentines Day",
+// 				"defaultValue": false,
+// 			},
 			{
 				"type": "checkboxgroup",
 				"messageKey": "CHECK_DATE",
 				"label": "Select events to be displayed:",
-				"defaultValue": [false, false, false],
-				"options": ["New Years Day", "Halloween", "Christmas Day"]
+				"defaultValue": [false, false, false, false],
+				"options": ["New Years Day", "Burns Nights", "Halloween", "Christmas Day"]
 			}
 		]
 	},

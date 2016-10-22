@@ -14,55 +14,6 @@ static bool appStarted = false;
 //////////// Methods /////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void customText(char t_buffer[16], char b_buffer[16]) {
-	int check_date_0 = persist_read_int(MESSAGE_KEY_CHECK_DATE);
-	int check_date_1 = persist_read_int(MESSAGE_KEY_CHECK_DATE+1);
-	int check_date_2 = persist_read_int(MESSAGE_KEY_CHECK_DATE+2);
-
-	if(strcmp("0104", date_current) == 0) {		// If date is 1st April, Display "April Fools" on bottom
-		strcpy(t_buffer, "\0");
-		strcpy(b_buffer, "April  Fools");
-	} else if(check_date_0 == 1 && strcmp("0101", date_current) == 0) {  // New Years
-		strcpy(t_buffer, "Happy");
-		strcpy(b_buffer, "New  Year");
-	} else if(check_date_1 == 1 && strcmp("3110", date_current) == 0) {  // Halloween
-		strcpy(t_buffer, "\0");
-		strcpy(b_buffer, "Halloween");
-	} else if(check_date_2 == 1 && strcmp("2512", date_current) == 0) {  // Christmas
-		strcpy(t_buffer, "Merry");
-		strcpy(b_buffer, "Christmas");
-	}
-	
-	// Valentines				14th February
-	// Earth Day				
-	// Mother's Day US			May ish
-	// Mother's Day UK			March ish
-	// Father's Day US			
-	// Father's Day UK			June ish
-	// Independence Day (US)	4th July
-	// Independence Day (MEX)
-	// Canada Day				
-	// Victoria Day (Canada)	
-	// Thanksgiving				3rd thursday in november?
-	// black friday??
-	// Eid
-	// Diwali
-	// Boxing Day				26th December
-	// Hannukah					december
-	// Passover					
-	// Chinese New Year
-	// Kwanzaa
-	// MLK Day
-	
-	
-	// burns night				25h January
-	// rememberence sunday could be from the 8th to the 14th november
-	else {
-		strcpy(t_buffer, "\0");
-		strcpy(b_buffer, "\0");
-	}
-}
-
 void getBatteryIcon(int image_number) {
 	int BatteryBlack[] = {RESOURCE_ID_IMAGE_BATTERY_BLACK_1, RESOURCE_ID_IMAGE_BATTERY_BLACK_2, RESOURCE_ID_IMAGE_BATTERY_BLACK_3, RESOURCE_ID_IMAGE_BATTERY_BLACK_4};
 	int BatteryWhite[] = {RESOURCE_ID_IMAGE_BATTERY_WHITE_1, RESOURCE_ID_IMAGE_BATTERY_WHITE_2, RESOURCE_ID_IMAGE_BATTERY_WHITE_3, RESOURCE_ID_IMAGE_BATTERY_WHITE_4};
@@ -119,16 +70,43 @@ static void update_time() {
 	text_layer_set_text(s_text_hour, h_buffer);
 	text_layer_set_text(s_text_minute, m_buffer);
 
-// Date
-	customText(t_buffer, b_buffer);
-	if(strcmp(t_buffer, "\0") == 0) {			// If Top is empty, write current weekday
-		strftime(t_buffer, sizeof(t_buffer), "%A", tick_time);		// %A
-	} if(strcmp(b_buffer, "\0") == 0) {			// If Bottom is empty, write current date		
- 		char char_buffer[16] = "";
-		int toggle_suffix = persist_read_int(MESSAGE_KEY_TOGGLE_SUFFIX);
+// Top
+	strftime(t_buffer, sizeof(t_buffer), "%A", tick_time);		// %A
+// Bottom
+	char char_buffer[16] = "";
+	if(strcmp("0104", date_current) == 0) {		// If date is 1st April, Display "April Fools" on bottom
+		strcpy(char_buffer, "April  Fools");
+	} else if(strcmp("0101", date_current) == 0 && persist_read_int(MESSAGE_KEY_CHECK_DATE) == 1) {  // New Years                   persist_read_int(MESSAGE_KEY_TOGGLE_TEXT_1) == 1
+		strcpy(char_buffer, "New  Year");		//  1st January
+	} else if(strcmp("2501", date_current) == 0 && persist_read_int(MESSAGE_KEY_CHECK_DATE+1) == 1) {  // Burns Night
+		strcpy(char_buffer, "Burns  Night");
+	} else if(strcmp("3110", date_current) == 0 && persist_read_int(MESSAGE_KEY_CHECK_DATE+2) == 1) {  // Halloween
+		strcpy(char_buffer, "Halloween");
+	} else if(strcmp("2512", date_current) == 0 && persist_read_int(MESSAGE_KEY_CHECK_DATE+3) == 1) { // Christmas
+		strcpy(char_buffer, "Christmas");
+	}
+	
+	// Mother's Day US			May ish
+	// Mother's Day UK			March ish
+	// Father's Day US			
+	// Father's Day UK			June ish
+	// Independence Day (US)	4th July
+	// Thanksgiving				3rd thursday in november?
+	// black friday??
+	// Diwali
+	// Boxing Day				26th December
+	// Hannukah					december
+	// Passover					
+	// Chinese New Year
+	// Kwanzaa
+	// Martin Luther King Day (US)
+	// Saints days (patrik, andrews)
+	
+	// Rememberence sunday (UK) could be from the 8th to the 14th november
+	else {
 // Day
-		strcat(char_buffer,"%e");
-		if(toggle_suffix == 1) {
+		strcpy(char_buffer,"%e");
+		if(persist_read_int(MESSAGE_KEY_TOGGLE_SUFFIX) == 1) {
 			if (strncmp(date_current, "01", 2) == 0 || strncmp(date_current, "21", 2) == 0 || strncmp(date_current,"31",2) == 0) { 
 				strcat(char_buffer,"st");
 			} else if (strncmp(date_current, "02", 2) == 0 || strncmp(date_current, "22", 2) == 0) {
@@ -156,8 +134,8 @@ static void update_time() {
 				strcat(char_buffer,"  %B");
 			}
 		#endif
-		strftime(b_buffer, sizeof(char_buffer), char_buffer, tick_time);	// ᵗʰ
 	}
+	strftime(b_buffer, sizeof(char_buffer), char_buffer, tick_time);
 	text_layer_set_text(s_text_top, t_buffer);
 	text_layer_set_text(s_text_bottom, b_buffer);
 }
@@ -274,11 +252,16 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	persist_write_int(MESSAGE_KEY_TOGGLE_SUFFIX, dict_find(iter, MESSAGE_KEY_TOGGLE_SUFFIX)->value->int32);
 	persist_write_int(MESSAGE_KEY_TOGGLE_WEEK, dict_find(iter, MESSAGE_KEY_TOGGLE_WEEK)->value->int32);
 // Custom Text
-	persist_write_int(MESSAGE_KEY_CHECK_DATE,   dict_find(iter, MESSAGE_KEY_CHECK_DATE  )->value->int32);		
+// 	persist_write_int(MESSAGE_KEY_TOGGLE_TEXT_1, dict_find(iter, MESSAGE_KEY_TOGGLE_TEXT_1)->value->int32);
+// 	persist_write_int(MESSAGE_KEY_TOGGLE_TEXT_2, dict_find(iter, MESSAGE_KEY_TOGGLE_TEXT_2)->value->int32);
+// 	persist_write_int(MESSAGE_KEY_TOGGLE_TEXT_3, dict_find(iter, MESSAGE_KEY_TOGGLE_TEXT_3)->value->int32);
+	persist_write_int(MESSAGE_KEY_CHECK_DATE, 	dict_find(iter, MESSAGE_KEY_CHECK_DATE)->value->int32);		
 	persist_write_int(MESSAGE_KEY_CHECK_DATE+1, dict_find(iter, MESSAGE_KEY_CHECK_DATE+1)->value->int32);		
 	persist_write_int(MESSAGE_KEY_CHECK_DATE+2, dict_find(iter, MESSAGE_KEY_CHECK_DATE+2)->value->int32);
+	persist_write_int(MESSAGE_KEY_CHECK_DATE+3, dict_find(iter, MESSAGE_KEY_CHECK_DATE+3)->value->int32);
+	persist_write_int(MESSAGE_KEY_CHECK_DATE+4, dict_find(iter, MESSAGE_KEY_CHECK_DATE+4)->value->int32);
 	
-	
+
 // Set Colours
 	setColours(colour_background, colour_hour, colour_minute);
 	
