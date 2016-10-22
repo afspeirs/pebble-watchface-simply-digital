@@ -84,6 +84,8 @@ static void update_time() {
 		strcpy(char_buffer, "Halloween");
 	} else if(strcmp("2512", date_current) == 0 && persist_read_int(MESSAGE_KEY_CHECK_DATE+3) == 1) { // Christmas
 		strcpy(char_buffer, "Christmas");
+	} else if(strcmp("2612", date_current) == 0 && persist_read_int(MESSAGE_KEY_CHECK_DATE+4) == 1) { // Christmas
+		strcpy(char_buffer, "Boxing  Day");
 	}
 	
 	// Mother's Day US			May ish
@@ -119,7 +121,7 @@ static void update_time() {
 		}
 // Month
 		#if defined(PBL_RECT)
-			if(strlen(month_current) > 7) {
+			if(strlen(month_current) > 7 || persist_read_int(MESSAGE_KEY_TOGGLE_WEEK)) {
 				strcat(char_buffer,"  %b"); // Short
 				if(persist_read_int(MESSAGE_KEY_TOGGLE_WEEK)) {
 					strcat(char_buffer,"  W%V");
@@ -252,9 +254,6 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	persist_write_int(MESSAGE_KEY_TOGGLE_SUFFIX, dict_find(iter, MESSAGE_KEY_TOGGLE_SUFFIX)->value->int32);
 	persist_write_int(MESSAGE_KEY_TOGGLE_WEEK, dict_find(iter, MESSAGE_KEY_TOGGLE_WEEK)->value->int32);
 // Custom Text
-// 	persist_write_int(MESSAGE_KEY_TOGGLE_TEXT_1, dict_find(iter, MESSAGE_KEY_TOGGLE_TEXT_1)->value->int32);
-// 	persist_write_int(MESSAGE_KEY_TOGGLE_TEXT_2, dict_find(iter, MESSAGE_KEY_TOGGLE_TEXT_2)->value->int32);
-// 	persist_write_int(MESSAGE_KEY_TOGGLE_TEXT_3, dict_find(iter, MESSAGE_KEY_TOGGLE_TEXT_3)->value->int32);
 	persist_write_int(MESSAGE_KEY_CHECK_DATE, 	dict_find(iter, MESSAGE_KEY_CHECK_DATE)->value->int32);		
 	persist_write_int(MESSAGE_KEY_CHECK_DATE+1, dict_find(iter, MESSAGE_KEY_CHECK_DATE+1)->value->int32);		
 	persist_write_int(MESSAGE_KEY_CHECK_DATE+2, dict_find(iter, MESSAGE_KEY_CHECK_DATE+2)->value->int32);
