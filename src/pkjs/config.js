@@ -158,8 +158,8 @@ module.exports = [
 				"type": "checkboxgroup",
 				"messageKey": "CHECK_DATE",
 				"label": "Select events to be displayed:",
-				"defaultValue": [false, false, false, false],
-				"options": ["New Year's Day", "Burns Nights", "Halloween", "Christmas Day", "Boxing Day"]
+				"defaultValue": [false, false, false, false, false],
+				"options": ["New Year's Day", "Burns Night", "Halloween", "Christmas Day", "Boxing Day"]
 			}
 		]
 	},

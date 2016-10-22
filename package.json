@@ -21,7 +21,7 @@
             "SELECT_BATTERY_PERCENT",
             "TOGGLE_SUFFIX",
             "TOGGLE_WEEK",
-            "CHECK_DATE[4]"
+            "CHECK_DATE[5]"
         ],
         "projectType": "native",
         "resources": {
