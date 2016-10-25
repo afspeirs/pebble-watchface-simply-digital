@@ -145,15 +145,6 @@ module.exports = [
 				"capabilities": ["NOT_ROUND"],
 // 				"description": "Toggle calendar week on bottom",
 			},
-// 		]
-// 	},
-// 	{
-// 		"type": "section",
-// 		"items": [
-// 			{
-// 				"type": "heading",
-// 				"defaultValue": "Custom Text"
-// 			},
 			{
 				"type": "checkboxgroup",
 				"messageKey": "CHECK_DATE",

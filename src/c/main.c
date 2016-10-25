@@ -74,13 +74,13 @@ static void update_time() {
 	strftime(t_buffer, sizeof(t_buffer), "%A", tick_time);		// %A
 // Bottom
 	char char_buffer[16] = "";
-	if(strcmp("0104", date_current) == 0) {		// If date is 1st April, Display "April Fools" on bottom
+	if(strcmp("0104", date_current) == 0) {	// April Fools			Should this be hardcoded?
 		strcpy(char_buffer, "April  Fools");
 	} else if(strcmp("0101", date_current) == 0 && persist_read_int(MESSAGE_KEY_CHECK_DATE	)) { // New Year's Day
 		strcpy(char_buffer, "Happy  %Y");		//  1st January
 	} else if(strcmp("2501", date_current) == 0 && persist_read_int(MESSAGE_KEY_CHECK_DATE+1)) { // Burns Night
 		strcpy(char_buffer, "Burns  Night");
-	} else if(strcmp("2310", date_current) == 0 && persist_read_int(MESSAGE_KEY_CHECK_DATE+2)) { // Halloween
+	} else if(strcmp("3110", date_current) == 0 && persist_read_int(MESSAGE_KEY_CHECK_DATE+2)) { // Halloween
 		strcpy(char_buffer, "Halloween");
 	} else if(strcmp("2512", date_current) == 0 && persist_read_int(MESSAGE_KEY_CHECK_DATE+3)) { // Christmas
 		strcpy(char_buffer, "Christmas");
@@ -95,7 +95,7 @@ static void update_time() {
 	// Independence Day (US)	4th July
 	// Thanksgiving				3rd thursday in november?
 	// black friday??	
-	// Rememberence Sunday (UK) could be from the 8th to the 14th november
+	// Rememberence Sunday (UK) A sunday from the 8th to the 14th november
 	
 	else {
 // Day
@@ -251,16 +251,15 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	persist_write_int(MESSAGE_KEY_CHECK_DATE+2, dict_find(iter, MESSAGE_KEY_CHECK_DATE+2)->value->int32);
 	persist_write_int(MESSAGE_KEY_CHECK_DATE+3, dict_find(iter, MESSAGE_KEY_CHECK_DATE+3)->value->int32);
 	persist_write_int(MESSAGE_KEY_CHECK_DATE+4, dict_find(iter, MESSAGE_KEY_CHECK_DATE+4)->value->int32);
-	
 
 // Set Colours
 	setColours(colour_background, colour_hour, colour_minute);
 	
-	update_time();
 	battery_callback(battery_state_service_peek());
 	appStarted = false;
 	bluetooth_callback(connection_service_peek_pebble_app_connection());		// Sets date colours (and detects if a phone is connected)
 	appStarted = true;
+	update_time();
 //	APP_LOG(APP_LOG_LEVEL_DEBUG, select_battery_percent);
 }
 
