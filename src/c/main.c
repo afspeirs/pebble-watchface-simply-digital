@@ -31,16 +31,16 @@ void getBatteryIcon(int image_number) {
 	bitmap_layer_set_bitmap(s_layer_battery, s_bitmap_battery);
 }
 
-void setColours(int colour_background, int colour_hour, int colour_minute) {
+void setColours() {
 	if(persist_read_bool(received)) {
-		GColor bg_colour = GColorFromHEX(colour_background);
+		GColor bg_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND));
 		window_set_background_color(s_window, bg_colour);			// Set Background Colour
 		#if defined(PBL_BW)
 			text_layer_set_text_color(s_text_hour, gcolor_legible_over(bg_colour));		// Set Hour Colour
 			text_layer_set_text_color(s_text_minute, gcolor_legible_over(bg_colour));	// Set Minute Colour
 		#elif defined(PBL_COLOR)
-			text_layer_set_text_color(s_text_hour, GColorFromHEX(colour_hour));			// Set Hour Colour
-			text_layer_set_text_color(s_text_minute, GColorFromHEX(colour_minute));		// Set Minute Colour
+			text_layer_set_text_color(s_text_hour, GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_HOUR)));			// Set Hour Colour
+			text_layer_set_text_color(s_text_minute, GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_MINUTE)));		// Set Minute Colour
 		#endif
 	} else {
 		window_set_background_color(s_window, GColorBlack);			// Set Background Colour
@@ -227,17 +227,12 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 // Colours
 	int colour_background = dict_find(iter, MESSAGE_KEY_COLOUR_BACKGROUND)->value->int32;
 	persist_write_int(MESSAGE_KEY_COLOUR_BACKGROUND, colour_background);	
-	int colour_hour = 0, colour_minute = 0;
 	#if defined(PBL_COLOR)
-			colour_hour = dict_find(iter, MESSAGE_KEY_COLOUR_HOUR)->value->int32;
-		persist_write_int(MESSAGE_KEY_COLOUR_HOUR, colour_hour);
-			colour_minute = dict_find(iter, MESSAGE_KEY_COLOUR_MINUTE)->value->int32;
-		persist_write_int(MESSAGE_KEY_COLOUR_MINUTE, colour_minute);	
-		int colour_date = dict_find(iter, MESSAGE_KEY_COLOUR_DATE)->value->int32;
-		persist_write_int(MESSAGE_KEY_COLOUR_DATE, colour_date);
+		persist_write_int(MESSAGE_KEY_COLOUR_HOUR, dict_find(iter, MESSAGE_KEY_COLOUR_HOUR)->value->int32);
+		persist_write_int(MESSAGE_KEY_COLOUR_MINUTE, dict_find(iter, MESSAGE_KEY_COLOUR_MINUTE)->value->int32);	
+		persist_write_int(MESSAGE_KEY_COLOUR_DATE, dict_find(iter, MESSAGE_KEY_COLOUR_DATE)->value->int32);
 // Bluetooth
-		int colour_bluetooth = dict_find(iter, MESSAGE_KEY_COLOUR_BLUETOOTH)->value->int32;
-		persist_write_int(MESSAGE_KEY_COLOUR_BLUETOOTH, colour_bluetooth);
+		persist_write_int(MESSAGE_KEY_COLOUR_BLUETOOTH, dict_find(iter, MESSAGE_KEY_COLOUR_BLUETOOTH)->value->int32);
 	#endif
 	persist_write_string(MESSAGE_KEY_SELECT_BLUETOOTH_DISCONNECT, dict_find(iter, MESSAGE_KEY_SELECT_BLUETOOTH_DISCONNECT)->value->cstring);	
 // Battery
@@ -252,13 +247,11 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	persist_write_int(MESSAGE_KEY_CHECK_DATE+3, dict_find(iter, MESSAGE_KEY_CHECK_DATE+3)->value->int32);
 	persist_write_int(MESSAGE_KEY_CHECK_DATE+4, dict_find(iter, MESSAGE_KEY_CHECK_DATE+4)->value->int32);
 
-// Set Colours
-	setColours(colour_background, colour_hour, colour_minute);
-	
 	battery_callback(battery_state_service_peek());
 	appStarted = false;
 	bluetooth_callback(connection_service_peek_pebble_app_connection());		// Sets date colours (and detects if a phone is connected)
 	appStarted = true;
+	setColours();
 	update_time();
 //	APP_LOG(APP_LOG_LEVEL_DEBUG, select_battery_percent);
 }
@@ -332,14 +325,10 @@ static void window_load(Window *window) {
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_text_bottom));
 
 // Colours
-	int colour_background = persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND);
-	int colour_hour = persist_read_int(MESSAGE_KEY_COLOUR_HOUR);
-	int colour_minute = persist_read_int(MESSAGE_KEY_COLOUR_MINUTE);
-	setColours(colour_background, colour_hour, colour_minute);					// Sets background, hour and minute colours
 	appStarted = false;
 	bluetooth_callback(connection_service_peek_pebble_app_connection());		// Sets date colours (and detects if a phone is connected)
 	appStarted = true;
-	
+	setColours();					// Sets background, hour and minute colours
 	update_time();
 }
 
@@ -381,6 +370,7 @@ static void init() {
 	battery_state_service_subscribe(battery_callback);
 	battery_callback(battery_state_service_peek());
 
+	update_time();
 	tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
 }
 
