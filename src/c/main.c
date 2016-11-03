@@ -259,10 +259,15 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 void unobstructed_change(AnimationProgress progress, void* data) {
 	GRect bounds = layer_get_unobstructed_bounds(window_get_root_layer(s_window));
 
-	layer_set_frame(text_layer_get_layer(s_text_hour),	GRect(				0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
-	layer_set_frame(text_layer_get_layer(s_text_minute),GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
-	layer_set_frame(text_layer_get_layer(s_text_top),	GRect(				0, bounds.size.h / 4 - 31, bounds.size.w,   30));
-	layer_set_frame(text_layer_get_layer(s_text_bottom),GRect(				0, bounds.size.h * 3/4 -5, bounds.size.w,   30));
+// 	#if PBL_DISPLAY_HEIGHT == 228			// EMERY
+// 		// TODO
+// 	#else									// TIME and OG	
+		s_text_hour		= text_layer_create(GRect(				0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
+		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
+		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31, bounds.size.w,   30));
+		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4 -5, bounds.size.w,   30));
+		s_layer_battery	= bitmap_layer_create(GRect(4, 4, 13, 6)); // battery
+// 	#endif
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -279,18 +284,20 @@ static void window_load(Window *window) {
 	s_font_date = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_28));
 	
 // Locations
-	#if defined(PBL_RECT)
-		s_text_hour		= text_layer_create(GRect(				0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
- 		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
-		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31, bounds.size.w,   30));
- 		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4 -5, bounds.size.w,   30));
-		s_layer_battery	= bitmap_layer_create(GRect(4, 4, 13, 6)); // battery
-	#elif defined(PBL_ROUND)
+	#if PBL_DISPLAY_HEIGHT == 228			// EMERY
+		// TODO
+	#elif PBL_DISPLAY_HEIGHT == 180			// Round
 		s_text_hour		= text_layer_create(GRect(			   10, bounds.size.h / 2 - 47, bounds.size.w/2-10, 75));
- 		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2-10, 75));
+		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2-10, 75));
 		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31+5, bounds.size.w,    30));
- 		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4 -5-5, bounds.size.w,    30));
- 		s_layer_battery	= bitmap_layer_create(GRect(84, 4, 13, 6)); // battery
+		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4 -5-5, bounds.size.w,    30));
+		s_layer_battery	= bitmap_layer_create(GRect(84, 4, 13, 6)); // battery
+	#else									// TIME and OG	
+		s_text_hour		= text_layer_create(GRect(				0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
+		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
+		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31, bounds.size.w,   30));
+		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4 -5, bounds.size.w,   30));
+		s_layer_battery	= bitmap_layer_create(GRect(4, 4, 13, 6)); // battery
 	#endif
 
 // Battery Image
