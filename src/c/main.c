@@ -20,12 +20,11 @@ typedef struct ClaySettings {
 	char *SelectBatteryPercent;
 	bool ToggleSuffix;
 	bool ToggleWeek;
-	bool CheckDate0;
-	bool CheckDate1;
-	bool CheckDate2;
-	bool CheckDate3;
-	bool CheckDate4;
-	bool CheckDate5;
+// 	bool CheckDate0;
+// 	bool CheckDate1;
+// 	bool CheckDate2;
+// 	bool CheckDate3;
+// 	bool CheckDate4;
 } ClaySettings;						// Define our settings struct
 
 static ClaySettings settings;		// An instance of the struct
@@ -36,16 +35,15 @@ static void config_default() {
 	settings.ColourMinute		= GColorWhite;
 	settings.ColourDate			= GColorWhite;
 	settings.ColourBluetooth	= GColorRed;
-	settings.SelectBluetooth	= "2";
+	settings.SelectBluetooth	  = "2";
 	settings.SelectBatteryPercent = "0";
 	settings.ToggleSuffix		= false;
 	settings.ToggleWeek			= false;
-	settings.CheckDate0			= false;	// New Years day
-	settings.CheckDate1			= false;	// Burns Night
-	settings.CheckDate2			= false;	// Halloween
-	settings.CheckDate3			= false;	// Thanksgiving
-	settings.CheckDate4			= false;	// Christmas Day
-	settings.CheckDate5			= false;	// Boxing Day
+// 	settings.CheckDate0			= false;
+// 	settings.CheckDate1			= false;
+// 	settings.CheckDate2			= false;
+// 	settings.CheckDate3			= false;
+// 	settings.CheckDate4			= false;
 }
 
 static void config_load() {
@@ -103,30 +101,29 @@ static void update_time() {
 	char char_buffer[16] = "";
 	if(strcmp("0104", date_current) == 0) {	// April Fools			Should this be hardcoded?
 		strcpy(char_buffer, "April  Fools");
-	} else if(strcmp("0101", date_current) == 0 && settings.CheckDate0) { // New Year's Day
-		strcpy(char_buffer, "Happy  %Y");
-	} else if(strcmp("2501", date_current) == 0 && settings.CheckDate1) { // Burns Night
-		strcpy(char_buffer, "Burns  Night");
-	} else if(strcmp("3110", date_current) == 0 && settings.CheckDate2) { // Halloween
-		strcpy(char_buffer, "Halloween");
-	} else if(strcmp("0611", date_current) == 0 && settings.CheckDate3) { // Thanksgiving
-		// Thanksgiving is on a Thursday 22nd to the 28th
-		strcpy(char_buffer, "Thanksgiving");
-	} else if(strcmp("2512", date_current) == 0 && settings.CheckDate4) { // Christmas
-		strcpy(char_buffer, "Christmas");
-	} else if(strcmp("2612", date_current) == 0 && settings.CheckDate5) { // Boxing Day
-		strcpy(char_buffer, "Boxing  Day");
 	}
+// 	else if(strcmp("0101", date_current) == 0 && settings.CheckDate0) { // New Year's Day
+// 		strcpy(char_buffer, "Happy  %Y");
+// 	} else if(strcmp("2501", date_current) == 0 && settings.CheckDate1) { // Burns Night
+// 		strcpy(char_buffer, "Burns  Night");
+// 	} else if(strcmp("3110", date_current) == 0 && settings.CheckDate2) { // Halloween
+// 		strcpy(char_buffer, "Halloween");
+// 	} else if(strcmp("0611", date_current) == 0 && settings.CheckDate3) { // Christmas
+// 		strcpy(char_buffer, "Christmas");
+// 	} else if(strcmp("2612", date_current) == 0 && settings.CheckDate4) { // Boxing Day
+// 		strcpy(char_buffer, "Boxing  Day");
+// 	}
 
-	// Mother's Day US			May ish
-	// Mother's Day UK			March ish
-	// Father's Day US			
-	// Father's Day UK			June ish
-	// Independence Day (US)	4th July
-	// black friday				Day after Thanksgiving
-	// Rememberence Sunday (UK) A sunday from the 8th to the 14th november
+// 	// Mother's Day US			May ish
+// 	// Mother's Day UK			March ish
+// 	// Father's Day US			
+// 	// Father's Day UK			June ish
+// 	// Independence Day (US)	4th July
+// 	// Thanksgiving				A Thursday between the 22nd and the 28th
+// 	// Black friday				Day after Thanksgiving
+// 	// Rememberence Sunday (UK) A sunday from the 8th to the 14th november
 	
-	else {
+// 	else {
 // Day
 		strcpy(char_buffer,"%e");
 		if(settings.ToggleSuffix) {
@@ -157,7 +154,7 @@ static void update_time() {
 				strcat(char_buffer,"  %B");
 			}
 		#endif
-	}
+// 	}
 	strftime(b_buffer, sizeof(char_buffer), char_buffer, tick_time);
 	text_layer_set_text(s_text_top, t_buffer);
 	text_layer_set_text(s_text_bottom, b_buffer);
@@ -241,18 +238,16 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	Tuple *wk_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_WEEK);
 	if(wk_toggle_t) { settings.ToggleWeek = wk_toggle_t->value->int32 == 1;	}
 // Custom Text
-	Tuple *dt0_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE);
-	if(dt0_check_t) { settings.CheckDate0 = dt0_check_t->value->int32 == 1; }
-	Tuple *dt1_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+1);
-	if(dt1_check_t) { settings.CheckDate1 = dt1_check_t->value->int32 == 1; }
-	Tuple *dt2_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+2);
-	if(dt2_check_t) { settings.CheckDate2 = dt2_check_t->value->int32 == 1; }
-	Tuple *dt3_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+3);
-	if(dt3_check_t) { settings.CheckDate3 = dt3_check_t->value->int32 == 1; }
-	Tuple *dt4_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+4);
-	if(dt4_check_t) { settings.CheckDate4 = dt4_check_t->value->int32 == 1; }
-	Tuple *dt5_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+5);
-	if(dt5_check_t) { settings.CheckDate5 = dt5_check_t->value->int32 == 1; }
+// 	Tuple *dt0_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE);
+// 	if(dt0_check_t) { settings.CheckDate0 = dt0_check_t->value->int32 == 1; }
+// 	Tuple *dt1_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+1);
+// 	if(dt1_check_t) { settings.CheckDate1 = dt1_check_t->value->int32 == 1; }
+// 	Tuple *dt2_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+2);
+// 	if(dt2_check_t) { settings.CheckDate2 = dt2_check_t->value->int32 == 1; }
+// 	Tuple *dt3_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+3);
+// 	if(dt3_check_t) { settings.CheckDate3 = dt3_check_t->value->int32 == 1; }
+// 	Tuple *dt4_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+4);
+// 	if(dt4_check_t) { settings.CheckDate4 = dt4_check_t->value->int32 == 1; }
 
 	battery_callback(battery_state_service_peek());
 	appStarted = false;

@@ -143,34 +143,16 @@ module.exports = [
 				"label": "Show calendar week",
 				"defaultValue": false,
 				"capabilities": ["NOT_ROUND"],
-// 				"description": "Toggle calendar week on bottom",
 			},
-			{
-				"type": "checkboxgroup",
-				"messageKey": "CHECK_DATE",
-				"label": "Select events to be displayed:",
-				"defaultValue": [false, false, false, false, false, false],
-				"options": ["New Year's Day", "Burns Night", "Halloween", "Thanksgiving", "Christmas Day", "Boxing Day"]
-			}
+// 			{
+// 				"type": "checkboxgroup",
+// 				"messageKey": "CHECK_DATE",
+// 				"label": "Select events to be displayed:",
+// 				"defaultValue": [false, false, false, false, false],
+// 				"options": ["New Year's Day", "Burns Night", "Halloween", "Christmas Day", "Boxing Day"]
+// 			}
 		]
 	},
-// 	{
-// 		"type": "section",
-// 		"items": [
-// 			{
-// 				"type": "heading",
-// 				"defaultValue": "Custom Date"
-// 			},
-// 			{
-// 				"type": "input",
-// 				"messageKey": "Custon date",
-// 				"label": "Test date thing",
-// 				"attributes": {
-// 					"type": "date"
-// 				}
-// 			}
-// 		]
-// 	},
 	{
 		"type": "submit",
 		"defaultValue": "Save"

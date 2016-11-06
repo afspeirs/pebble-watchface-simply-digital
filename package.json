@@ -20,8 +20,7 @@
             "SELECT_BLUETOOTH",
             "SELECT_BATTERY_PERCENT",
             "TOGGLE_SUFFIX",
-            "TOGGLE_WEEK",
-            "CHECK_DATE[6]"
+            "TOGGLE_WEEK"
         ],
         "projectType": "native",
         "resources": {
