@@ -101,29 +101,7 @@ static void update_time() {
 	char char_buffer[16] = "";
 	if(strcmp("0104", date_current) == 0) {	// April Fools			Should this be hardcoded?
 		strcpy(char_buffer, "April  Fools");
-	}
-// 	else if(strcmp("0101", date_current) == 0 && settings.CheckDate0) { // New Year's Day
-// 		strcpy(char_buffer, "Happy  %Y");
-// 	} else if(strcmp("2501", date_current) == 0 && settings.CheckDate1) { // Burns Night
-// 		strcpy(char_buffer, "Burns  Night");
-// 	} else if(strcmp("3110", date_current) == 0 && settings.CheckDate2) { // Halloween
-// 		strcpy(char_buffer, "Halloween");
-// 	} else if(strcmp("0611", date_current) == 0 && settings.CheckDate3) { // Christmas
-// 		strcpy(char_buffer, "Christmas");
-// 	} else if(strcmp("2612", date_current) == 0 && settings.CheckDate4) { // Boxing Day
-// 		strcpy(char_buffer, "Boxing  Day");
-// 	}
-
-// 	// Mother's Day US			May ish
-// 	// Mother's Day UK			March ish
-// 	// Father's Day US			
-// 	// Father's Day UK			June ish
-// 	// Independence Day (US)	4th July
-// 	// Thanksgiving				A Thursday between the 22nd and the 28th
-// 	// Black friday				Day after Thanksgiving
-// 	// Rememberence Sunday (UK) A sunday from the 8th to the 14th november
-	
-// 	else {
+	} else {
 // Day
 		strcpy(char_buffer,"%e");
 		if(settings.ToggleSuffix) {
@@ -154,7 +132,7 @@ static void update_time() {
 				strcat(char_buffer,"  %B");
 			}
 		#endif
-// 	}
+	}
 	strftime(b_buffer, sizeof(char_buffer), char_buffer, tick_time);
 	text_layer_set_text(s_text_top, t_buffer);
 	text_layer_set_text(s_text_bottom, b_buffer);
