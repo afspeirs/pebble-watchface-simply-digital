@@ -1,6 +1,6 @@
 #include <pebble.h>
 
-uint32_t received = 0;	// Used to determine whether AppMessages have been received
+#define SETTINGS_KEY 1				// Persistent storage key
 
 static Window *s_window;
 static TextLayer *s_text_hour, *s_text_minute, *s_text_top, *s_text_bottom;
@@ -9,6 +9,49 @@ static BitmapLayer *s_layer_battery;
 static GBitmap *s_bitmap_battery;
 char date_current[5], month_current[16];
 static bool appStarted = false;
+
+typedef struct ClaySettings {
+	GColor ColourBackground;
+	GColor ColourHour;
+	GColor ColourMinute;
+	GColor ColourDate;
+	GColor ColourBluetooth;
+	char *SelectBluetooth;
+	char *SelectBatteryPercent;
+	bool ToggleSuffix;
+	bool ToggleWeek;
+	bool CheckDate0;
+	bool CheckDate1;
+	bool CheckDate2;
+	bool CheckDate3;
+	bool CheckDate4;
+	bool CheckDate5;
+} ClaySettings;						// Define our settings struct
+
+static ClaySettings settings;		// An instance of the struct
+
+static void config_default() {
+	settings.ColourBackground	= GColorBlack;
+	settings.ColourHour			= GColorWhite;
+	settings.ColourMinute		= GColorWhite;
+	settings.ColourDate			= GColorWhite;
+	settings.ColourBluetooth	= GColorRed;
+	settings.SelectBluetooth	= "2";
+	settings.SelectBatteryPercent = "0";
+	settings.ToggleSuffix		= false;
+	settings.ToggleWeek			= false;
+	settings.CheckDate0			= false;	// New Years day
+	settings.CheckDate1			= false;	// Burns Night
+	settings.CheckDate2			= false;	// Halloween
+	settings.CheckDate3			= false;	// Thanksgiving
+	settings.CheckDate4			= false;	// Christmas Day
+	settings.CheckDate5			= false;	// Boxing Day
+}
+
+static void config_load() {
+	config_default();													// Load the default settings
+	persist_read_data(SETTINGS_KEY, &settings, sizeof(settings));		// Read settings from persistent storage, if they exist
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////// Methods /////////////////////////////////////////////////////////////////////////////////
@@ -19,34 +62,18 @@ void getBatteryIcon(int image_number) {
 	int BatteryWhite[] = {RESOURCE_ID_IMAGE_BATTERY_WHITE_1, RESOURCE_ID_IMAGE_BATTERY_WHITE_2, RESOURCE_ID_IMAGE_BATTERY_WHITE_3, RESOURCE_ID_IMAGE_BATTERY_WHITE_4};
 	
 	gbitmap_destroy(s_bitmap_battery);
-	if(persist_read_bool(received)) {
-		if (gcolor_equal(gcolor_legible_over(GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND))), GColorBlack)) {
-			s_bitmap_battery = gbitmap_create_with_resource(BatteryBlack[image_number]);
-		} else {
-			s_bitmap_battery = gbitmap_create_with_resource(BatteryWhite[image_number]);
-		}
+	if (gcolor_equal(gcolor_legible_over(settings.ColourBackground), GColorBlack)) {
+		s_bitmap_battery = gbitmap_create_with_resource(BatteryBlack[image_number]);
 	} else {
-		s_bitmap_battery = gbitmap_create_with_resource(BatteryWhite[image_number]);
+			s_bitmap_battery = gbitmap_create_with_resource(BatteryWhite[image_number]);
 	}
 	bitmap_layer_set_bitmap(s_layer_battery, s_bitmap_battery);
 }
 
 void setColours() {
-	if(persist_read_bool(received)) {
-		GColor bg_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND));
-		window_set_background_color(s_window, bg_colour);			// Set Background Colour
-		#if defined(PBL_BW)
-			text_layer_set_text_color(s_text_hour, gcolor_legible_over(bg_colour));		// Set Hour Colour
-			text_layer_set_text_color(s_text_minute, gcolor_legible_over(bg_colour));	// Set Minute Colour
-		#elif defined(PBL_COLOR)
-			text_layer_set_text_color(s_text_hour, GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_HOUR)));			// Set Hour Colour
-			text_layer_set_text_color(s_text_minute, GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_MINUTE)));		// Set Minute Colour
-		#endif
-	} else {
-		window_set_background_color(s_window, GColorBlack);			// Set Background Colour
-		text_layer_set_text_color(s_text_hour, GColorWhite);		// Set Hour Colour
-		text_layer_set_text_color(s_text_minute, GColorWhite);		// Set Minute Colour
-	}
+	window_set_background_color(s_window, settings.ColourBackground);	// Set Background Colour
+	text_layer_set_text_color(s_text_hour, PBL_IF_BW_ELSE(gcolor_legible_over(settings.ColourBackground), settings.ColourHour));		// Set Hour Colour
+	text_layer_set_text_color(s_text_minute, PBL_IF_BW_ELSE(gcolor_legible_over(settings.ColourBackground), settings.ColourMinute));	// Set Minute Colour
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -76,15 +103,18 @@ static void update_time() {
 	char char_buffer[16] = "";
 	if(strcmp("0104", date_current) == 0) {	// April Fools			Should this be hardcoded?
 		strcpy(char_buffer, "April  Fools");
-	} else if(strcmp("0101", date_current) == 0 && persist_read_int(MESSAGE_KEY_CHECK_DATE	)) { // New Year's Day
-		strcpy(char_buffer, "Happy  %Y");		//  1st January
-	} else if(strcmp("2501", date_current) == 0 && persist_read_int(MESSAGE_KEY_CHECK_DATE+1)) { // Burns Night
+	} else if(strcmp("0101", date_current) == 0 && settings.CheckDate0) { // New Year's Day
+		strcpy(char_buffer, "Happy  %Y");
+	} else if(strcmp("2501", date_current) == 0 && settings.CheckDate1) { // Burns Night
 		strcpy(char_buffer, "Burns  Night");
-	} else if(strcmp("3110", date_current) == 0 && persist_read_int(MESSAGE_KEY_CHECK_DATE+2)) { // Halloween
+	} else if(strcmp("3110", date_current) == 0 && settings.CheckDate2) { // Halloween
 		strcpy(char_buffer, "Halloween");
-	} else if(strcmp("2512", date_current) == 0 && persist_read_int(MESSAGE_KEY_CHECK_DATE+3)) { // Christmas
+	} else if(strcmp("0611", date_current) == 0 && settings.CheckDate3) { // Thanksgiving
+		// Thanksgiving is on a Thursday 22nd to the 28th
+		strcpy(char_buffer, "Thanksgiving");
+	} else if(strcmp("2512", date_current) == 0 && settings.CheckDate4) { // Christmas
 		strcpy(char_buffer, "Christmas");
-	} else if(strcmp("2612", date_current) == 0 && persist_read_int(MESSAGE_KEY_CHECK_DATE+4)) { // Boxing Day
+	} else if(strcmp("2612", date_current) == 0 && settings.CheckDate5) { // Boxing Day
 		strcpy(char_buffer, "Boxing  Day");
 	}
 
@@ -93,14 +123,13 @@ static void update_time() {
 	// Father's Day US			
 	// Father's Day UK			June ish
 	// Independence Day (US)	4th July
-	// Thanksgiving				3rd thursday in november?
-	// black friday??	
+	// black friday				Day after Thanksgiving
 	// Rememberence Sunday (UK) A sunday from the 8th to the 14th november
 	
 	else {
 // Day
 		strcpy(char_buffer,"%e");
-		if(persist_read_int(MESSAGE_KEY_TOGGLE_SUFFIX) == 1) {
+		if(settings.ToggleSuffix) {
 			if (strncmp(date_current, "01", 2) == 0 || strncmp(date_current, "21", 2) == 0 || strncmp(date_current,"31",2) == 0) { 
 				strcat(char_buffer,"st");
 			} else if (strncmp(date_current, "02", 2) == 0 || strncmp(date_current, "22", 2) == 0) {
@@ -113,9 +142,9 @@ static void update_time() {
 		}
 // Month
 		#if defined(PBL_RECT)
-			if(strlen(month_current) > 7 || persist_read_int(MESSAGE_KEY_TOGGLE_WEEK)) {
+			if(strlen(month_current) > 7 || settings.ToggleWeek) {
 				strcat(char_buffer,"  %b"); // Short
-				if(persist_read_int(MESSAGE_KEY_TOGGLE_WEEK)) {
+				if(settings.ToggleWeek) {
 					strcat(char_buffer,"  W%V");
 				}
 			} else {
@@ -143,109 +172,87 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void battery_callback(BatteryChargeState state) {
-	if(persist_read_bool(received)) {
-		char *select_battery_percent = "";
-		persist_read_string(MESSAGE_KEY_SELECT_BATTERY_PERCENT,select_battery_percent,5);
-		int select_battery_percent_int = atoi(select_battery_percent);
-
-		if(select_battery_percent_int == 100) { // Always show battery
-			if(75 < state.charge_percent && state.charge_percent <= 100) {
-				getBatteryIcon(3);
-			} else if(50 < state.charge_percent && state.charge_percent <= 75) {
-				getBatteryIcon(2);
-			} else if(25 < state.charge_percent && state.charge_percent <= 50) {
-				getBatteryIcon(1);
-			} else if( 0 < state.charge_percent && state.charge_percent <= 25) {
-				getBatteryIcon(0);
-			}
+	int select_battery_percent = atoi(settings.SelectBatteryPercent);	
+	if(select_battery_percent == 100) {
+		if(75 < state.charge_percent && state.charge_percent <= 100) {
+			getBatteryIcon(3);
+		} else if(50 < state.charge_percent && state.charge_percent <= 75) {
+			getBatteryIcon(2);
+		} else if(25 < state.charge_percent && state.charge_percent <= 50) {
+			getBatteryIcon(1);
+		} else if( 0 < state.charge_percent && state.charge_percent <= 25) {
+			getBatteryIcon(0);
+		}
+		layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), false);	// Visible
+	} else {
+		if(state.charge_percent <= select_battery_percent) {
+			getBatteryIcon(0);
 			layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), false);	// Visible
 		} else {
-			if(state.charge_percent < select_battery_percent_int) {
-				getBatteryIcon(0);
-				layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), false);	// Visible
-			} else {
-				layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), true);	// Hidden
-			}
+			layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), true);	// Hidden
 		}
-	} else {	// Hidden
-		layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), true);
 	}
 }
 
 static void bluetooth_callback(bool connected) {													  	
 	if(!connected) {
-		if(persist_read_bool(received)) {	// Disconected with config
-			#if defined(PBL_BW)
-				GColor bg_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND));
-				text_layer_set_text_color(s_text_top, gcolor_legible_over(bg_colour));		// Set Top Colour
-				text_layer_set_text_color(s_text_bottom, gcolor_legible_over(bg_colour));	// Set Bottom Colour
-			#elif defined(PBL_COLOR)
-				GColor bt_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BLUETOOTH));
-				text_layer_set_text_color(s_text_top, bt_colour);		// Set Top Colour
-				text_layer_set_text_color(s_text_bottom, bt_colour);	// Set Bottom Colour
-			#endif
-		} else { 							// Disconnected without config
-			#if defined(PBL_BW)
-				text_layer_set_text_color(s_text_top, GColorBlack);		// Set Top Colour
-				text_layer_set_text_color(s_text_bottom, GColorBlack);	// Set Bottom Colour
-			#elif defined(PBL_COLOR)
-				text_layer_set_text_color(s_text_top, GColorRed);		// Set Top Colour
-				text_layer_set_text_color(s_text_bottom, GColorRed);	// Set Bottom Colour
-			#endif
-		}
+		text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(settings.ColourBackground, settings.ColourBluetooth));		// Set Top Colour
+		text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(settings.ColourBackground, settings.ColourBluetooth));	// Set Bottom Colour
 		if(appStarted) {
-			char *select_bluetooth_disconnect = "";
- 			persist_read_string(MESSAGE_KEY_SELECT_BLUETOOTH_DISCONNECT,select_bluetooth_disconnect,5);
-			int select_bluetooth_disconnect_int = atoi(select_bluetooth_disconnect);
-			
-			if(select_bluetooth_disconnect_int == 0) { }							// No vibration 
-			else if(select_bluetooth_disconnect_int == 1) { vibes_short_pulse(); }	// Short vibration
-			else if(select_bluetooth_disconnect_int == 2) { vibes_long_pulse(); }	// Long vibration
-			else if(select_bluetooth_disconnect_int == 3) { vibes_double_pulse(); }	// Double vibration
+			int select_bluetooth = atoi(settings.SelectBluetooth);	
+			if(select_bluetooth == 0) { }							// No vibration 
+			else if(select_bluetooth == 1) { vibes_short_pulse(); }	// Short vibration
+			else if(select_bluetooth == 2) { vibes_long_pulse(); }	// Long vibration
+			else if(select_bluetooth == 3) { vibes_double_pulse(); }	// Double vibration
 			else { vibes_long_pulse(); }	// Default
 		}
 	} else {
-		if(persist_read_bool(received)) {	// Connected with config
-			#if defined(PBL_BW)
-				GColor bg_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_BACKGROUND));
-				text_layer_set_text_color(s_text_top, gcolor_legible_over(bg_colour));		// Set Top Colour
-				text_layer_set_text_color(s_text_bottom, gcolor_legible_over(bg_colour));	// Set Bottom Colour
-			#elif defined(PBL_COLOR)
-				GColor dt_colour = GColorFromHEX(persist_read_int(MESSAGE_KEY_COLOUR_DATE));
-				text_layer_set_text_color(s_text_top, dt_colour);							// Set Top Colour
-				text_layer_set_text_color(s_text_bottom, dt_colour);						// Set Bottom Colour
-			#endif
-		} else {							// Connected without config
-			text_layer_set_text_color(s_text_top, GColorWhite);		// Set Top Colour
-			text_layer_set_text_color(s_text_bottom, GColorWhite);	// Set Bottom Colour
-		}
+		text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(gcolor_legible_over(settings.ColourBackground), settings.ColourDate));		// Set Top Colour
+		text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(gcolor_legible_over(settings.ColourBackground), settings.ColourDate));	// Set Bottom Colour
 	}
 }
 
+static void config_save() {
+  persist_write_data(SETTINGS_KEY, &settings, sizeof(settings));
+}
+
 static void inbox_received_handler(DictionaryIterator *iter, void *context) {
-	persist_write_bool(received, true);
 // Colours
-	int colour_background = dict_find(iter, MESSAGE_KEY_COLOUR_BACKGROUND)->value->int32;
-	persist_write_int(MESSAGE_KEY_COLOUR_BACKGROUND, colour_background);	
-	#if defined(PBL_COLOR)
-		persist_write_int(MESSAGE_KEY_COLOUR_HOUR, dict_find(iter, MESSAGE_KEY_COLOUR_HOUR)->value->int32);
-		persist_write_int(MESSAGE_KEY_COLOUR_MINUTE, dict_find(iter, MESSAGE_KEY_COLOUR_MINUTE)->value->int32);	
-		persist_write_int(MESSAGE_KEY_COLOUR_DATE, dict_find(iter, MESSAGE_KEY_COLOUR_DATE)->value->int32);
+	Tuple *bg_colour_t = dict_find(iter, MESSAGE_KEY_COLOUR_BACKGROUND);
+	if(bg_colour_t) { settings.ColourBackground = GColorFromHEX(bg_colour_t->value->int32); }
+	Tuple *hr_colour_t = dict_find(iter, MESSAGE_KEY_COLOUR_HOUR);
+	if(hr_colour_t) { settings.ColourHour = GColorFromHEX(hr_colour_t->value->int32); }
+	Tuple *mn_colour_t = dict_find(iter, MESSAGE_KEY_COLOUR_MINUTE);
+	if(mn_colour_t) { settings.ColourMinute = GColorFromHEX(mn_colour_t->value->int32); }
+	Tuple *dt_colour_t = dict_find(iter, MESSAGE_KEY_COLOUR_DATE);
+	if(dt_colour_t) { settings.ColourDate = GColorFromHEX(dt_colour_t->value->int32); }
+	Tuple *bt_colour_t = dict_find(iter, MESSAGE_KEY_COLOUR_BLUETOOTH);
+	if(bt_colour_t) { settings.ColourBluetooth = GColorFromHEX(bt_colour_t->value->int32); }
+	
 // Bluetooth
-		persist_write_int(MESSAGE_KEY_COLOUR_BLUETOOTH, dict_find(iter, MESSAGE_KEY_COLOUR_BLUETOOTH)->value->int32);
-	#endif
-	persist_write_string(MESSAGE_KEY_SELECT_BLUETOOTH_DISCONNECT, dict_find(iter, MESSAGE_KEY_SELECT_BLUETOOTH_DISCONNECT)->value->cstring);	
+	Tuple *bt_select_t = dict_find(iter, MESSAGE_KEY_SELECT_BLUETOOTH);
+	if(bt_select_t) { settings.SelectBluetooth = bt_select_t->value->cstring; }
 // Battery
-	persist_write_string(MESSAGE_KEY_SELECT_BATTERY_PERCENT, dict_find(iter, MESSAGE_KEY_SELECT_BATTERY_PERCENT)->value->cstring);
-// Date	
-	persist_write_int(MESSAGE_KEY_TOGGLE_SUFFIX, dict_find(iter, MESSAGE_KEY_TOGGLE_SUFFIX)->value->int32);
-	persist_write_int(MESSAGE_KEY_TOGGLE_WEEK, dict_find(iter, MESSAGE_KEY_TOGGLE_WEEK)->value->int32);
+	Tuple *bp_select_t = dict_find(iter, MESSAGE_KEY_SELECT_BATTERY_PERCENT);
+	if(bp_select_t) { settings.SelectBatteryPercent = bp_select_t->value->cstring; }
+// Bottom Text
+	Tuple *su_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_SUFFIX);
+	if(su_toggle_t) { settings.ToggleSuffix = su_toggle_t->value->int32 == 1; }
+	Tuple *wk_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_WEEK);
+	if(wk_toggle_t) { settings.ToggleWeek = wk_toggle_t->value->int32 == 1;	}
 // Custom Text
-	persist_write_int(MESSAGE_KEY_CHECK_DATE, 	dict_find(iter, MESSAGE_KEY_CHECK_DATE	)->value->int32);		
-	persist_write_int(MESSAGE_KEY_CHECK_DATE+1, dict_find(iter, MESSAGE_KEY_CHECK_DATE+1)->value->int32);		
-	persist_write_int(MESSAGE_KEY_CHECK_DATE+2, dict_find(iter, MESSAGE_KEY_CHECK_DATE+2)->value->int32);
-	persist_write_int(MESSAGE_KEY_CHECK_DATE+3, dict_find(iter, MESSAGE_KEY_CHECK_DATE+3)->value->int32);
-	persist_write_int(MESSAGE_KEY_CHECK_DATE+4, dict_find(iter, MESSAGE_KEY_CHECK_DATE+4)->value->int32);
+	Tuple *dt0_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE);
+	if(dt0_check_t) { settings.CheckDate0 = dt0_check_t->value->int32 == 1; }
+	Tuple *dt1_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+1);
+	if(dt1_check_t) { settings.CheckDate1 = dt1_check_t->value->int32 == 1; }
+	Tuple *dt2_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+2);
+	if(dt2_check_t) { settings.CheckDate2 = dt2_check_t->value->int32 == 1; }
+	Tuple *dt3_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+3);
+	if(dt3_check_t) { settings.CheckDate3 = dt3_check_t->value->int32 == 1; }
+	Tuple *dt4_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+4);
+	if(dt4_check_t) { settings.CheckDate4 = dt4_check_t->value->int32 == 1; }
+	Tuple *dt5_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+5);
+	if(dt5_check_t) { settings.CheckDate5 = dt5_check_t->value->int32 == 1; }
 
 	battery_callback(battery_state_service_peek());
 	appStarted = false;
@@ -253,7 +260,8 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	appStarted = true;
 	setColours();
 	update_time();
-//	APP_LOG(APP_LOG_LEVEL_DEBUG, select_battery_percent);
+	
+	config_save();
 }
 
 void unobstructed_change(AnimationProgress progress, void* data) {
@@ -284,9 +292,10 @@ static void window_load(Window *window) {
 	s_font_date = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_28));
 	
 // Locations
-	#if PBL_DISPLAY_HEIGHT == 228			// EMERY
-		// TODO
-	#elif PBL_DISPLAY_HEIGHT == 180			// Round
+// 	#if PBL_DISPLAY_HEIGHT == 228			// EMERY
+// 		// TODO
+// 	#elif PBL_DISPLAY_HEIGHT == 180			// Round
+	#if PBL_DISPLAY_HEIGHT == 180			// Round
 		s_text_hour		= text_layer_create(GRect(			   10, bounds.size.h / 2 - 47, bounds.size.w/2-10, 75));
 		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2-10, 75));
 		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31+5, bounds.size.w,    30));
@@ -353,6 +362,8 @@ static void window_unload(Window *window) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void init() {
+	config_load();
+	
 	s_window = window_create();
 	window_set_window_handlers(s_window, (WindowHandlers) {
 		.load = window_load,
@@ -369,10 +380,8 @@ static void init() {
   		.pebble_app_connection_handler = bluetooth_callback
 	});
 
-	const int inbox_size = 256;
-	const int outbox_size = 256;
 	app_message_register_inbox_received(inbox_received_handler);
-	app_message_open(inbox_size, outbox_size);
+	app_message_open(256, 256);
 
 	battery_state_service_subscribe(battery_callback);
 	battery_callback(battery_state_service_peek());

@@ -17,11 +17,11 @@
             "COLOUR_MINUTE",
             "COLOUR_DATE",
             "COLOUR_BLUETOOTH",
-            "SELECT_BLUETOOTH_DISCONNECT",
+            "SELECT_BLUETOOTH",
             "SELECT_BATTERY_PERCENT",
             "TOGGLE_SUFFIX",
             "TOGGLE_WEEK",
-            "CHECK_DATE[5]"
+            "CHECK_DATE[6]"
         ],
         "projectType": "native",
         "resources": {

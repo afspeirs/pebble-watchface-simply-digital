@@ -67,19 +67,19 @@ module.exports = [
 				"options": [
 					{ 
 						"label": "None",
-						"value": "0" 
+						"value": "0"
 					},
 					{ 
 						"label": "Short",
-						"value": "1" 
+						"value": "1"
 					},
 					{ 
 						"label": "Long",
-						"value": "2" 
+						"value": "2"
 					},
 					{ 
 						"label": "Double",
-						"value": "3" 
+						"value": "3"
 					}
 				]
 			},
@@ -102,23 +102,23 @@ module.exports = [
 				"options": [
 					{
 						"label": "None",
-						"value": "0" 
+						"value": "0"
 					},
 					{
 						"label": "10%",
-						"value": "11" 
+						"value": "10"
 					},
 					{
 						"label": "20%",
-						"value": "21"
+						"value": "20"
 					},
 					{ 
 						"label": "30%",
-						"value": "31"
+						"value": "30"
 					},
 					{ 
 						"label": "Always show",
-						"value": "100" 
+						"value": "100"
 					}
 				]
 			},
@@ -149,8 +149,8 @@ module.exports = [
 				"type": "checkboxgroup",
 				"messageKey": "CHECK_DATE",
 				"label": "Select events to be displayed:",
-				"defaultValue": [false, false, false, false, false],
-				"options": ["New Year's Day", "Burns Night", "Halloween", "Christmas Day", "Boxing Day"]
+				"defaultValue": [false, false, false, false, false, false],
+				"options": ["New Year's Day", "Burns Night", "Halloween", "Thanksgiving", "Christmas Day", "Boxing Day"]
 			}
 		]
 	},
