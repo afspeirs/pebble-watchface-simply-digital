@@ -5,10 +5,6 @@ module.exports = [
 		"size": 1,
 	},
 	{
-		"type": "text",
-		"defaultValue": "0.65",
-	},
-	{
 		"type": "section",
 		"items": [
 			{
@@ -120,7 +116,7 @@ module.exports = [
 						"label": "30%",
 						"value": "30"
 					},
-					{ 
+					{
 						"label": "Always show",
 						"value": "100"
 					}
@@ -153,6 +149,10 @@ module.exports = [
 	{
 		"type": "submit",
 		"defaultValue": "Save"
-	}
+	},
+	{
+		"type": "text",
+		"defaultValue": " Version 0.65",
+	},
 ];
 
