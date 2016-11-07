@@ -5,6 +5,10 @@ module.exports = [
 		"size": 1,
 	},
 	{
+		"type": "text",
+		"defaultValue": "0.65",
+	},
+	{
 		"type": "section",
 		"items": [
 			{
@@ -144,13 +148,6 @@ module.exports = [
 				"defaultValue": false,
 				"capabilities": ["NOT_ROUND"],
 			},
-// 			{
-// 				"type": "checkboxgroup",
-// 				"messageKey": "CHECK_DATE",
-// 				"label": "Select events to be displayed:",
-// 				"defaultValue": [false, false, false, false, false],
-// 				"options": ["New Year's Day", "Burns Night", "Halloween", "Christmas Day", "Boxing Day"]
-// 			}
 		]
 	},
 	{

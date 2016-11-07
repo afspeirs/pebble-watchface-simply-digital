@@ -20,11 +20,6 @@ typedef struct ClaySettings {
 	char *SelectBatteryPercent;
 	bool ToggleSuffix;
 	bool ToggleWeek;
-// 	bool CheckDate0;
-// 	bool CheckDate1;
-// 	bool CheckDate2;
-// 	bool CheckDate3;
-// 	bool CheckDate4;
 } ClaySettings;						// Define our settings struct
 
 static ClaySettings settings;		// An instance of the struct
@@ -39,11 +34,6 @@ static void config_default() {
 	settings.SelectBatteryPercent = "0";
 	settings.ToggleSuffix		= false;
 	settings.ToggleWeek			= false;
-// 	settings.CheckDate0			= false;
-// 	settings.CheckDate1			= false;
-// 	settings.CheckDate2			= false;
-// 	settings.CheckDate3			= false;
-// 	settings.CheckDate4			= false;
 }
 
 static void config_load() {
@@ -69,7 +59,7 @@ void getBatteryIcon(int image_number) {
 }
 
 void setColours() {
-	window_set_background_color(s_window, settings.ColourBackground);	// Set Background Colour
+	window_set_background_color(s_window, settings.ColourBackground);																	// Set Background Colour
 	text_layer_set_text_color(s_text_hour, PBL_IF_BW_ELSE(gcolor_legible_over(settings.ColourBackground), settings.ColourHour));		// Set Hour Colour
 	text_layer_set_text_color(s_text_minute, PBL_IF_BW_ELSE(gcolor_legible_over(settings.ColourBackground), settings.ColourMinute));	// Set Minute Colour
 }
@@ -99,7 +89,7 @@ static void update_time() {
 	strftime(t_buffer, sizeof(t_buffer), "%A", tick_time);		// %A
 // Bottom
 	char char_buffer[16] = "";
-	if(strcmp("0104", date_current) == 0) {	// April Fools			Should this be hardcoded?
+	if(strcmp("0104", date_current) == 0) {	// April Fools		Should this be hardcoded?
 		strcpy(char_buffer, "April  Fools");
 	} else {
 // Day
@@ -118,7 +108,7 @@ static void update_time() {
 // Month
 		#if defined(PBL_RECT)
 			if(strlen(month_current) > 7 || settings.ToggleWeek) {
-				strcat(char_buffer,"  %b"); // Short
+				strcat(char_buffer,"  %b"); 	// Short
 				if(settings.ToggleWeek) {
 					strcat(char_buffer,"  W%V");
 				}
@@ -127,7 +117,7 @@ static void update_time() {
 			}
 		#elif defined(PBL_ROUND)
 			if(strlen(month_current) > 5) {
-				strcat(char_buffer,"  %b"); // Short
+				strcat(char_buffer,"  %b"); 	// Short
 			} else {
 				strcat(char_buffer,"  %B");
 			}
@@ -175,11 +165,11 @@ static void bluetooth_callback(bool connected) {
 		text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(settings.ColourBackground, settings.ColourBluetooth));	// Set Bottom Colour
 		if(appStarted) {
 			int select_bluetooth = atoi(settings.SelectBluetooth);	
-			if(select_bluetooth == 0) { }							// No vibration 
-			else if(select_bluetooth == 1) { vibes_short_pulse(); }	// Short vibration
-			else if(select_bluetooth == 2) { vibes_long_pulse(); }	// Long vibration
+			if(select_bluetooth == 0) { }								// No vibration 
+			else if(select_bluetooth == 1) { vibes_short_pulse(); }		// Short vibration
+			else if(select_bluetooth == 2) { vibes_long_pulse(); }		// Long vibration
 			else if(select_bluetooth == 3) { vibes_double_pulse(); }	// Double vibration
-			else { vibes_long_pulse(); }	// Default
+			else { vibes_long_pulse(); }					 // Default // Long Vibration
 		}
 	} else {
 		text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(gcolor_legible_over(settings.ColourBackground), settings.ColourDate));		// Set Top Colour
@@ -215,17 +205,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	if(su_toggle_t) { settings.ToggleSuffix = su_toggle_t->value->int32 == 1; }
 	Tuple *wk_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_WEEK);
 	if(wk_toggle_t) { settings.ToggleWeek = wk_toggle_t->value->int32 == 1;	}
-// Custom Text
-// 	Tuple *dt0_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE);
-// 	if(dt0_check_t) { settings.CheckDate0 = dt0_check_t->value->int32 == 1; }
-// 	Tuple *dt1_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+1);
-// 	if(dt1_check_t) { settings.CheckDate1 = dt1_check_t->value->int32 == 1; }
-// 	Tuple *dt2_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+2);
-// 	if(dt2_check_t) { settings.CheckDate2 = dt2_check_t->value->int32 == 1; }
-// 	Tuple *dt3_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+3);
-// 	if(dt3_check_t) { settings.CheckDate3 = dt3_check_t->value->int32 == 1; }
-// 	Tuple *dt4_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+4);
-// 	if(dt4_check_t) { settings.CheckDate4 = dt4_check_t->value->int32 == 1; }
+	
 
 	battery_callback(battery_state_service_peek());
 	appStarted = false;
@@ -256,8 +236,7 @@ void unobstructed_change(AnimationProgress progress, void* data) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void window_load(Window *window) {
-	Layer *window_layer = window_get_root_layer(window);
-	GRect bounds = layer_get_unobstructed_bounds(window_layer);
+	GRect bounds = layer_get_unobstructed_bounds(window_get_root_layer(window));
 	setlocale(LC_ALL, "");
 		
 // Fonts
@@ -313,11 +292,11 @@ static void window_load(Window *window) {
 	text_layer_set_background_color(s_text_bottom, GColorClear);
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_text_bottom));
 
-// Colours
+// Standard
 	appStarted = false;
 	bluetooth_callback(connection_service_peek_pebble_app_connection());		// Sets date colours (and detects if a phone is connected)
 	appStarted = true;
-	setColours();					// Sets background, hour and minute colours
+	setColours();
 	update_time();
 }
 
@@ -359,7 +338,6 @@ static void init() {
 	battery_state_service_subscribe(battery_callback);
 	battery_callback(battery_state_service_peek());
 
-	update_time();
 	tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
 }
 
