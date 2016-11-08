@@ -61,25 +61,25 @@ module.exports = [
 			},
 			{
 				"type": "select",
-				"messageKey": "SELECT_BLUETOOTH_DISCONNECT",
+				"messageKey": "SELECT_BLUETOOTH",
 				"defaultValue": "2",
 				"label": "Vibration",
 				"options": [
 					{ 
 						"label": "None",
-						"value": "0"
+						"value": "0" 
 					},
 					{ 
 						"label": "Short",
-						"value": "1"
+						"value": "1" 
 					},
 					{ 
 						"label": "Long",
-						"value": "2"
+						"value": "2" 
 					},
 					{ 
 						"label": "Double",
-						"value": "3"
+						"value": "3" 
 					}
 				]
 			},
@@ -102,11 +102,11 @@ module.exports = [
 				"options": [
 					{
 						"label": "None",
-						"value": "0"
+						"value": "0" 
 					},
 					{
 						"label": "10%",
-						"value": "10"
+						"value": "10" 
 					},
 					{
 						"label": "20%",
@@ -116,9 +116,9 @@ module.exports = [
 						"label": "30%",
 						"value": "30"
 					},
-					{
+					{ 
 						"label": "Always show",
-						"value": "100"
+						"value": "100" 
 					}
 				]
 			},
@@ -143,7 +143,7 @@ module.exports = [
 				"label": "Show calendar week",
 				"defaultValue": false,
 				"capabilities": ["NOT_ROUND"],
-			},
+			}
 		]
 	},
 	{

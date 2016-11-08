@@ -53,7 +53,7 @@ void getBatteryIcon(int image_number) {
 	if (gcolor_equal(gcolor_legible_over(settings.ColourBackground), GColorBlack)) {
 		s_bitmap_battery = gbitmap_create_with_resource(BatteryBlack[image_number]);
 	} else {
-			s_bitmap_battery = gbitmap_create_with_resource(BatteryWhite[image_number]);
+		s_bitmap_battery = gbitmap_create_with_resource(BatteryWhite[image_number]);
 	}
 	bitmap_layer_set_bitmap(s_layer_battery, s_bitmap_battery);
 }
@@ -165,6 +165,7 @@ static void bluetooth_callback(bool connected) {
 		text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(settings.ColourBackground, settings.ColourBluetooth));	// Set Bottom Colour
 		if(appStarted) {
 			int select_bluetooth = atoi(settings.SelectBluetooth);	
+
 			if(select_bluetooth == 0) { }								// No vibration 
 			else if(select_bluetooth == 1) { vibes_short_pulse(); }		// Short vibration
 			else if(select_bluetooth == 2) { vibes_long_pulse(); }		// Long vibration
@@ -193,7 +194,6 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	if(dt_colour_t) { settings.ColourDate = GColorFromHEX(dt_colour_t->value->int32); }
 	Tuple *bt_colour_t = dict_find(iter, MESSAGE_KEY_COLOUR_BLUETOOTH);
 	if(bt_colour_t) { settings.ColourBluetooth = GColorFromHEX(bt_colour_t->value->int32); }
-	
 // Bluetooth
 	Tuple *bt_select_t = dict_find(iter, MESSAGE_KEY_SELECT_BLUETOOTH);
 	if(bt_select_t) { settings.SelectBluetooth = bt_select_t->value->cstring; }
@@ -206,7 +206,6 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	Tuple *wk_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_WEEK);
 	if(wk_toggle_t) { settings.ToggleWeek = wk_toggle_t->value->int32 == 1;	}
 	
-
 	battery_callback(battery_state_service_peek());
 	appStarted = false;
 	bluetooth_callback(connection_service_peek_pebble_app_connection());		// Sets date colours (and detects if a phone is connected)
@@ -238,16 +237,16 @@ void unobstructed_change(AnimationProgress progress, void* data) {
 static void window_load(Window *window) {
 	GRect bounds = layer_get_unobstructed_bounds(window_get_root_layer(window));
 	setlocale(LC_ALL, "");
-		
+
 // Fonts
 	s_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_72));
 	s_font_date = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_28));
 	
 // Locations
-// 	#if PBL_DISPLAY_HEIGHT == 228			// EMERY
-// 		// TODO
-// 	#elif PBL_DISPLAY_HEIGHT == 180			// Round
-	#if PBL_DISPLAY_HEIGHT == 180			// Round
+//	#if PBL_DISPLAY_HEIGHT == 228			// EMERY
+		// Todo
+//	#elif PBL_DISPLAY_HEIGHT == 180			// Round
+ 	#if PBL_DISPLAY_HEIGHT == 180			// Round
 		s_text_hour		= text_layer_create(GRect(			   10, bounds.size.h / 2 - 47, bounds.size.w/2-10, 75));
 		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2-10, 75));
 		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31+5, bounds.size.w,    30));
@@ -315,7 +314,7 @@ static void window_unload(Window *window) {
 
 static void init() {
 	config_load();
-	
+
 	s_window = window_create();
 	window_set_window_handlers(s_window, (WindowHandlers) {
 		.load = window_load,
