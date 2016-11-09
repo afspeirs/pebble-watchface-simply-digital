@@ -353,3 +353,5 @@ int main(void) {
 	app_event_loop();
 	deinit();
 }
+
+//	APP_LOG(APP_LOG_LEVEL_DEBUG, select_battery_percent);
