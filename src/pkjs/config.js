@@ -98,7 +98,6 @@ module.exports = [
 				"messageKey": "SELECT_BATTERY_PERCENT",
 				"defaultValue": "0",
 				"label": "Show battery icon",
-// 				"description": "Selecting \"Always\" will show the battery icon based on the charge level of the watch",
 				"options": [
 					{
 						"label": "Never",
