@@ -36,6 +36,10 @@ static void config_default() {
 	settings.ToggleCalendarWeek	= false;
 }
 
+static void config_save() {
+  persist_write_data(SETTINGS_KEY, &settings, sizeof(settings));		// Write settings to persistent storage
+}
+
 static void config_load() {
 	config_default();													// Load the default settings
 	persist_read_data(SETTINGS_KEY, &settings, sizeof(settings));		// Read settings from persistent storage, if they exist
@@ -148,7 +152,7 @@ static void battery_callback(BatteryChargeState state) {
 		} else if( 0 < state.charge_percent && state.charge_percent <= 25) {
 			getBatteryIcon(0);
 		}
-		layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), false);	// Visible
+		layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), false);		// Visible
 	} else {
 		if(state.charge_percent <= select_battery_percent) {
 			getBatteryIcon(0);
@@ -178,10 +182,6 @@ static void bluetooth_callback(bool connected) {
 	}
 }
 
-static void config_save() {
-  persist_write_data(SETTINGS_KEY, &settings, sizeof(settings));
-}
-
 static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 // Colours
 	Tuple *bg_colour_t = dict_find(iter, MESSAGE_KEY_COLOUR_BACKGROUND);
@@ -206,14 +206,14 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	Tuple *wk_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_WEEK);
 	if(wk_toggle_t) { settings.ToggleCalendarWeek = wk_toggle_t->value->int32 == 1;	}
 	
+	config_save();
+	
 	battery_callback(battery_state_service_peek());
 	appStarted = false;
 	bluetooth_callback(connection_service_peek_pebble_app_connection());		// Sets date colours (and detects if a phone is connected)
 	appStarted = true;
 	setColours();
 	update_time();
-	
-	config_save();
 }
 
 void unobstructed_change(AnimationProgress progress, void* data) {
@@ -291,6 +291,7 @@ static void window_load(Window *window) {
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_text_bottom));
 
 // Standard
+	battery_callback(battery_state_service_peek());
 	appStarted = false;
 	bluetooth_callback(connection_service_peek_pebble_app_connection());		// Sets date colours (and detects if a phone is connected)
 	appStarted = true;
