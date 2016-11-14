@@ -54,7 +54,7 @@ module.exports = [
 			{
 				"type": "color",
 				"messageKey": "COLOUR_BLUETOOTH",
-				"label": "Blutooth Disconnection",
+				"label": "Date colour on disconnection",
 				"defaultValue": "FF0000",
 				"sunlight": true,
 				"capabilities": ["NOT_BW"],
@@ -63,7 +63,7 @@ module.exports = [
 				"type": "select",
 				"messageKey": "SELECT_BLUETOOTH",
 				"defaultValue": "2",
-				"label": "Vibration",
+				"label": "Vibration on disconnection",
 				"options": [
 					{ 
 						"label": "None",

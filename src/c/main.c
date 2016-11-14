@@ -19,7 +19,7 @@ typedef struct ClaySettings {
 	char *SelectBluetooth;
 	char *SelectBatteryPercent;
 	bool ToggleSuffix;
-	bool ToggleWeek;
+	bool ToggleCalendarWeek;
 } ClaySettings;						// Define our settings struct
 
 static ClaySettings settings;		// An instance of the struct
@@ -33,7 +33,7 @@ static void config_default() {
 	settings.SelectBluetooth	  = "2";
 	settings.SelectBatteryPercent = "0";
 	settings.ToggleSuffix		= false;
-	settings.ToggleWeek			= false;
+	settings.ToggleCalendarWeek	= false;
 }
 
 static void config_load() {
@@ -107,9 +107,9 @@ static void update_time() {
 		}
 // Month
 		#if defined(PBL_RECT)
-			if(strlen(month_current) > 7 || settings.ToggleWeek) {
+			if(strlen(month_current) > 7 || settings.ToggleCalendarWeek) {
 				strcat(char_buffer,"  %b"); 	// Short
-				if(settings.ToggleWeek) {
+				if(settings.ToggleCalendarWeek) {
 					strcat(char_buffer,"  W%V");
 				}
 			} else {
@@ -204,7 +204,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	Tuple *su_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_SUFFIX);
 	if(su_toggle_t) { settings.ToggleSuffix = su_toggle_t->value->int32 == 1; }
 	Tuple *wk_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_WEEK);
-	if(wk_toggle_t) { settings.ToggleWeek = wk_toggle_t->value->int32 == 1;	}
+	if(wk_toggle_t) { settings.ToggleCalendarWeek = wk_toggle_t->value->int32 == 1;	}
 	
 	battery_callback(battery_state_service_peek());
 	appStarted = false;
