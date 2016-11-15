@@ -206,6 +206,9 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	Tuple *wk_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_WEEK);
 	if(wk_toggle_t) { settings.ToggleCalendarWeek = wk_toggle_t->value->int32 == 1;	}
 	
+	APP_LOG(APP_LOG_LEVEL_DEBUG, settings.SelectBatteryPercent);	// This is retaining the correct value
+	
+	
 	config_save();
 	
 	battery_callback(battery_state_service_peek());
@@ -291,6 +294,7 @@ static void window_load(Window *window) {
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_text_bottom));
 
 // Standard
+	APP_LOG(APP_LOG_LEVEL_DEBUG, settings.SelectBatteryPercent);
 	battery_callback(battery_state_service_peek());
 	appStarted = false;
 	bluetooth_callback(connection_service_peek_pebble_app_connection());		// Sets date colours (and detects if a phone is connected)

@@ -155,7 +155,7 @@ module.exports = [
 	},
 	{
 		"type": "text",
-		"defaultValue": " Version 0.66",
+		"defaultValue": " Version 0.67",
 	},
 ];
 
