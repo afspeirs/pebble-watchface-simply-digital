@@ -16,8 +16,8 @@ typedef struct ClaySettings {
 	GColor ColourMinute;
 	GColor ColourDate;
 	GColor ColourBluetooth;
-	char *SelectBluetooth;
-	char *SelectBatteryPercent;
+	int SelectBluetooth;
+	int SelectBatteryPercent;
 	bool ToggleSuffix;
 	bool ToggleCalendarWeek;
 } ClaySettings;						// Define our settings struct
@@ -30,8 +30,8 @@ static void config_default() {
 	settings.ColourMinute		= GColorWhite;
 	settings.ColourDate			= GColorWhite;
 	settings.ColourBluetooth	= GColorRed;
-	settings.SelectBluetooth	  = "2";
-	settings.SelectBatteryPercent = "0";
+	settings.SelectBluetooth	  = 2;
+	settings.SelectBatteryPercent = 0;
 	settings.ToggleSuffix		= false;
 	settings.ToggleCalendarWeek	= false;
 }
@@ -141,8 +141,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void battery_callback(BatteryChargeState state) {
-	int select_battery_percent = atoi(settings.SelectBatteryPercent);	
-	if(select_battery_percent == 100) {
+	if(settings.SelectBatteryPercent == 100) {
 		if(75 < state.charge_percent && state.charge_percent <= 100) {
 			getBatteryIcon(3);
 		} else if(50 < state.charge_percent && state.charge_percent <= 75) {
@@ -154,7 +153,7 @@ static void battery_callback(BatteryChargeState state) {
 		}
 		layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), false);		// Visible
 	} else {
-		if(state.charge_percent <= select_battery_percent) {
+		if(state.charge_percent <= settings.SelectBatteryPercent) {
 			getBatteryIcon(0);
 			layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), false);	// Visible
 		} else {
@@ -168,12 +167,10 @@ static void bluetooth_callback(bool connected) {
 		text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(settings.ColourBackground, settings.ColourBluetooth));		// Set Top Colour
 		text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(settings.ColourBackground, settings.ColourBluetooth));	// Set Bottom Colour
 		if(appStarted) {
-			int select_bluetooth = atoi(settings.SelectBluetooth);	
-
-			if(select_bluetooth == 0) { }								// No vibration 
-			else if(select_bluetooth == 1) { vibes_short_pulse(); }		// Short vibration
-			else if(select_bluetooth == 2) { vibes_long_pulse(); }		// Long vibration
-			else if(select_bluetooth == 3) { vibes_double_pulse(); }	// Double vibration
+			if(settings.SelectBluetooth == 0) { }								// No vibration 
+			else if(settings.SelectBluetooth == 1) { vibes_short_pulse(); }		// Short vibration
+			else if(settings.SelectBluetooth == 2) { vibes_long_pulse(); }		// Long vibration
+			else if(settings.SelectBluetooth == 3) { vibes_double_pulse(); }	// Double vibration
 			else { vibes_long_pulse(); }					 // Default // Long Vibration
 		}
 	} else {
@@ -196,18 +193,17 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	if(bt_colour_t) { settings.ColourBluetooth = GColorFromHEX(bt_colour_t->value->int32); }
 // Bluetooth
 	Tuple *bt_select_t = dict_find(iter, MESSAGE_KEY_SELECT_BLUETOOTH);
-	if(bt_select_t) { settings.SelectBluetooth = bt_select_t->value->cstring; }
+	if(bt_select_t) { settings.SelectBluetooth = atoi(bt_select_t->value->cstring); }			// Pretty sure this shouldnt need to convert to a string
 // Battery
 	Tuple *bp_select_t = dict_find(iter, MESSAGE_KEY_SELECT_BATTERY_PERCENT);
-	if(bp_select_t) { settings.SelectBatteryPercent = bp_select_t->value->cstring; }
+	if(bp_select_t) { settings.SelectBatteryPercent = atoi(bp_select_t->value->cstring); }
 // Bottom Text
 	Tuple *su_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_SUFFIX);
 	if(su_toggle_t) { settings.ToggleSuffix = su_toggle_t->value->int32 == 1; }
 	Tuple *wk_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_WEEK);
 	if(wk_toggle_t) { settings.ToggleCalendarWeek = wk_toggle_t->value->int32 == 1;	}
 	
-	APP_LOG(APP_LOG_LEVEL_DEBUG, settings.SelectBatteryPercent);	// This is retaining the correct value
-	
+// 	APP_LOG(APP_LOG_LEVEL_DEBUG, "%d", settings.SelectBatteryPercent);
 	
 	config_save();
 	
@@ -294,7 +290,7 @@ static void window_load(Window *window) {
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_text_bottom));
 
 // Standard
-	APP_LOG(APP_LOG_LEVEL_DEBUG, settings.SelectBatteryPercent);
+// 	APP_LOG(APP_LOG_LEVEL_DEBUG, "%d", settings.SelectBatteryPercent);
 	battery_callback(battery_state_service_peek());
 	appStarted = false;
 	bluetooth_callback(connection_service_peek_pebble_app_connection());		// Sets date colours (and detects if a phone is connected)
