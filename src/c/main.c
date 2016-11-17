@@ -227,14 +227,17 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 void unobstructed_change(AnimationProgress progress, void* data) {
 	GRect bounds = layer_get_unobstructed_bounds(window_get_root_layer(s_window));
 
-// 	#if PBL_DISPLAY_HEIGHT == 228			// EMERY
-		// TODO
-// 	#else									// TIME and OG	
+	#if PBL_DISPLAY_HEIGHT == 228			// EMERY
+		layer_set_frame(text_layer_get_layer(s_text_hour),	GRect(				0, bounds.size.h / 2 - 47 - 10, bounds.size.w/2, 95));
+		layer_set_frame(text_layer_get_layer(s_text_minute),GRect(bounds.size.w/2, bounds.size.h / 2 - 47 - 10, bounds.size.w/2, 95));
+		layer_set_frame(text_layer_get_layer(s_text_top),	GRect(				0, bounds.size.h / 4 - 31 -  8, bounds.size.w,   40));
+		layer_set_frame(text_layer_get_layer(s_text_bottom),GRect(				0, bounds.size.h * 3/4 -5 -  3, bounds.size.w,   40));
+	#else									// TIME and OG	
 		layer_set_frame(text_layer_get_layer(s_text_hour),	GRect(				0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
 		layer_set_frame(text_layer_get_layer(s_text_minute),GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
 		layer_set_frame(text_layer_get_layer(s_text_top),	GRect(				0, bounds.size.h / 4 - 31, bounds.size.w,   30));
 		layer_set_frame(text_layer_get_layer(s_text_bottom),GRect(				0, bounds.size.h * 3/4 -5, bounds.size.w,   30));
-// 	#endif
+	#endif
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -252,8 +255,8 @@ static void window_load(Window *window) {
 	
 		s_text_hour		= text_layer_create(GRect(				0, bounds.size.h / 2 - 47 - 10, bounds.size.w/2, 95));
 		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47 - 10, bounds.size.w/2, 95));
-		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31 - 8, bounds.size.w,   40));
-		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4 -5 - 3, bounds.size.w,   40));
+		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31 -  8, bounds.size.w,   40));
+		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4 -5 -  3, bounds.size.w,   40));
 		s_layer_battery	= bitmap_layer_create(GRect(4, 4, 13, 6)); // battery
 	#elif PBL_DISPLAY_HEIGHT == 180			// Round
 // 	#if PBL_DISPLAY_HEIGHT == 180			// Round	
