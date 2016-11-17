@@ -26,7 +26,7 @@ static ClaySettings settings;		// An instance of the struct
 
 static void config_default() {
 	settings.ColourBackground	= GColorBlack;
-	settings.ColourHour			= GColorWhite;
+	settings.ColourHour			= PBL_IF_BW_ELSE(GColorWhite,GColorChromeYellow);
 	settings.ColourMinute		= GColorWhite;
 	settings.ColourDate			= GColorWhite;
 	settings.ColourBluetooth	= GColorRed;
