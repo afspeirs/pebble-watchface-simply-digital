@@ -236,21 +236,30 @@ static void window_load(Window *window) {
 	GRect bounds = layer_get_unobstructed_bounds(window_get_root_layer(window));
 	setlocale(LC_ALL, "");
 
-// Fonts
-	s_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_72));
-	s_font_date = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_28));
-
 // Locations
-// 	#if PBL_DISPLAY_HEIGHT == 228			// EMERY
-		// TODO
-// 	#elif PBL_DISPLAY_HEIGHT == 180			// Round
-	#if PBL_DISPLAY_HEIGHT == 180			// Round	
+	#if PBL_DISPLAY_HEIGHT == 228			// EMERY
+		s_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_86));
+		s_font_date = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_36));
+	
+		s_text_hour		= text_layer_create(GRect(				0, bounds.size.h / 2 - 47 - 9, bounds.size.w/2, 100));
+		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47 - 6, bounds.size.w/2, 100));
+		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31 - 6, bounds.size.w,   45));
+		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4 -5 - 6, bounds.size.w,   45));
+		s_layer_battery	= bitmap_layer_create(GRect(4, 4, 13, 6)); // battery
+	#elif PBL_DISPLAY_HEIGHT == 180			// Round
+// 	#if PBL_DISPLAY_HEIGHT == 180			// Round	
+		s_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_72));
+		s_font_date = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_28));
+	
 		s_text_hour		= text_layer_create(GRect(			   10, bounds.size.h / 2 - 47, bounds.size.w/2-10, 75));
 		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2-10, 75));
 		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31+5, bounds.size.w,    30));
 		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4 -5-5, bounds.size.w,    30));
 		s_layer_battery	= bitmap_layer_create(GRect(84, 4, 13, 6)); // battery
 	#else									// TIME and OG
+		s_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_72));
+		s_font_date = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_28));
+	
 		s_text_hour		= text_layer_create(GRect(				0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
 		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
 		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31, bounds.size.w,   30));

@@ -88,15 +88,43 @@
                 {
                     "characterRegex": "[0-9 a-zA-Z]",
                     "file": "fonts/Bebas Neue Regular",
+                    "name": "FONT_BEBAS_NEUE_REGULAR_36",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
+                    "type": "font"
+                },
+                {
+                    "characterRegex": "[0-9 a-zA-Z]",
+                    "file": "fonts/Bebas Neue Regular",
                     "name": "FONT_BEBAS_NEUE_REGULAR_28",
-                    "targetPlatforms": null,
+                    "targetPlatforms": [
+                        "aplite",
+                        "basalt",
+                        "chalk",
+                        "diorite"
+                    ],
+                    "type": "font"
+                },
+                {
+                    "characterRegex": "[0-9]",
+                    "file": "fonts/Bebas Neue Bold",
+                    "name": "FONT_BEBAS_NEUE_BOLD_86",
+                    "targetPlatforms": [
+                        "emery"
+                    ],
                     "type": "font"
                 },
                 {
                     "characterRegex": "[0-9]",
                     "file": "fonts/Bebas Neue Bold",
                     "name": "FONT_BEBAS_NEUE_BOLD_72",
-                    "targetPlatforms": null,
+                    "targetPlatforms": [
+                        "aplite",
+                        "basalt",
+                        "chalk",
+                        "diorite"
+                    ],
                     "type": "font"
                 }
             ]
@@ -106,12 +134,13 @@
             "aplite",
             "basalt",
             "chalk",
-            "diorite"
+            "diorite",
+            "emery"
         ],
         "uuid": "51c897b8-5ca6-4412-82db-11a4cf304ae1",
         "watchapp": {
             "watchface": true
         }
     },
-    "version": "0.67.0"
+    "version": "0.68.0"
 }
