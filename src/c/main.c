@@ -110,8 +110,8 @@ static void update_time() {
 			}
 		}
 // Month
-		#if defined(PBL_RECT)
-			if(strlen(month_current) > 7 || settings.ToggleCalendarWeek) {
+		#if PBL_DISPLAY_HEIGHT == 228			// EMERY
+			if(strlen(month_current) > 10 || settings.ToggleCalendarWeek) {
 				strcat(char_buffer,"  %b"); 	// Short
 				if(settings.ToggleCalendarWeek) {
 					strcat(char_buffer,"  W%V");
@@ -119,9 +119,18 @@ static void update_time() {
 			} else {
 				strcat(char_buffer,"  %B");
 			}
-		#elif defined(PBL_ROUND)
+		#elif PBL_DISPLAY_HEIGHT == 180			// Round
 			if(strlen(month_current) > 5) {
 				strcat(char_buffer,"  %b"); 	// Short
+			} else {
+				strcat(char_buffer,"  %B");
+			}
+		#else									// TIME and OG
+			if(strlen(month_current) > 7 || settings.ToggleCalendarWeek) {
+				strcat(char_buffer,"  %b"); 	// Short
+				if(settings.ToggleCalendarWeek) {
+					strcat(char_buffer,"  W%V");
+				}
 			} else {
 				strcat(char_buffer,"  %B");
 			}
@@ -238,13 +247,13 @@ static void window_load(Window *window) {
 
 // Locations
 	#if PBL_DISPLAY_HEIGHT == 228			// EMERY
-		s_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_86));
+		s_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_88));
 		s_font_date = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_36));
 	
-		s_text_hour		= text_layer_create(GRect(				0, bounds.size.h / 2 - 47 - 9, bounds.size.w/2, 100));
-		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47 - 6, bounds.size.w/2, 100));
-		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31 - 6, bounds.size.w,   45));
-		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4 -5 - 6, bounds.size.w,   45));
+		s_text_hour		= text_layer_create(GRect(				0, bounds.size.h / 2 - 47 - 10, bounds.size.w/2, 95));
+		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47 - 10, bounds.size.w/2, 95));
+		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31 - 8, bounds.size.w,   40));
+		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4 -5 - 3, bounds.size.w,   40));
 		s_layer_battery	= bitmap_layer_create(GRect(4, 4, 13, 6)); // battery
 	#elif PBL_DISPLAY_HEIGHT == 180			// Round
 // 	#if PBL_DISPLAY_HEIGHT == 180			// Round	

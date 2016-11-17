@@ -109,21 +109,21 @@
                 {
                     "characterRegex": "[0-9]",
                     "file": "fonts/Bebas Neue Bold",
-                    "name": "FONT_BEBAS_NEUE_BOLD_86",
-                    "targetPlatforms": [
-                        "emery"
-                    ],
-                    "type": "font"
-                },
-                {
-                    "characterRegex": "[0-9]",
-                    "file": "fonts/Bebas Neue Bold",
                     "name": "FONT_BEBAS_NEUE_BOLD_72",
                     "targetPlatforms": [
                         "aplite",
                         "basalt",
                         "chalk",
                         "diorite"
+                    ],
+                    "type": "font"
+                },
+                {
+                    "characterRegex": "[0-9]",
+                    "file": "fonts/Bebas Neue Bold",
+                    "name": "FONT_BEBAS_NEUE_BOLD_88",
+                    "targetPlatforms": [
+                        "emery"
                     ],
                     "type": "font"
                 }
