@@ -88,21 +88,21 @@
                 {
                     "characterRegex": "[0-9 a-zA-Z]",
                     "file": "fonts/Bebas Neue Regular",
-                    "name": "FONT_BEBAS_NEUE_REGULAR_36",
-                    "targetPlatforms": [
-                        "emery"
-                    ],
-                    "type": "font"
-                },
-                {
-                    "characterRegex": "[0-9 a-zA-Z]",
-                    "file": "fonts/Bebas Neue Regular",
                     "name": "FONT_BEBAS_NEUE_REGULAR_28",
                     "targetPlatforms": [
                         "aplite",
                         "basalt",
                         "chalk",
                         "diorite"
+                    ],
+                    "type": "font"
+                },
+                {
+                    "characterRegex": "[0-9 a-zA-Z]",
+                    "file": "fonts/Bebas Neue Regular",
+                    "name": "FONT_BEBAS_NEUE_REGULAR_34",
+                    "targetPlatforms": [
+                        "emery"
                     ],
                     "type": "font"
                 },
