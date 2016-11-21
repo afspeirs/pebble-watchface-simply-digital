@@ -80,11 +80,13 @@ static void update_time() {
 	strftime(month_current, sizeof(month_current), "%B", tick_time);
 
 // Time
-	if(clock_is_24h_style()) {
-		strftime(h_buffer, sizeof(h_buffer), "%H", tick_time);	//%H
-	} else {
-		strftime(h_buffer, sizeof(h_buffer), "%I", tick_time);	//%I
-	}
+// 	if(clock_is_24h_style()) {
+// 		strftime(h_buffer, sizeof(h_buffer), "%H", tick_time);	//%H
+// 	} else {
+// 		strftime(h_buffer, sizeof(h_buffer), "%I", tick_time);	//%I
+// 	}
+	
+	strftime(h_buffer, sizeof(h_buffer), clock_is_24h_style() ? "%H" : "%I", tick_time);
 	strftime(m_buffer, sizeof(m_buffer), "%M", tick_time);		//%M
 	text_layer_set_text(s_text_hour, h_buffer);
 	text_layer_set_text(s_text_minute, m_buffer);
