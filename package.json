@@ -18,6 +18,7 @@
             "COLOUR_DATE",
             "COLOUR_BLUETOOTH",
             "SELECT_BLUETOOTH",
+            "TOGGLE_BLUETOOTH_QUIET_TIME",
             "SELECT_BATTERY_PERCENT",
             "TOGGLE_SUFFIX",
             "TOGGLE_WEEK"
@@ -109,21 +110,21 @@
                 {
                     "characterRegex": "[0-9]",
                     "file": "fonts/Bebas Neue Bold",
-                    "name": "FONT_BEBAS_NEUE_BOLD_72",
+                    "name": "FONT_BEBAS_NEUE_BOLD_88",
                     "targetPlatforms": [
-                        "aplite",
-                        "basalt",
-                        "chalk",
-                        "diorite"
+                        "emery"
                     ],
                     "type": "font"
                 },
                 {
                     "characterRegex": "[0-9]",
                     "file": "fonts/Bebas Neue Bold",
-                    "name": "FONT_BEBAS_NEUE_BOLD_88",
+                    "name": "FONT_BEBAS_NEUE_BOLD_72",
                     "targetPlatforms": [
-                        "emery"
+                        "aplite",
+                        "basalt",
+                        "chalk",
+                        "diorite"
                     ],
                     "type": "font"
                 }
@@ -142,5 +143,5 @@
             "watchface": true
         }
     },
-    "version": "0.68.0"
+    "version": "0.69.0"
 }

@@ -16,6 +16,7 @@ typedef struct ClaySettings {
 	GColor ColourMinute;
 	GColor ColourDate;
 	GColor ColourBluetooth;
+	bool ToggleBluetoothQuietTime;
 	int SelectBluetooth;
 	int SelectBatteryPercent;
 	bool ToggleSuffix;
@@ -30,6 +31,7 @@ static void config_default() {
 	settings.ColourMinute		= GColorWhite;
 	settings.ColourDate			= GColorWhite;
 	settings.ColourBluetooth	= GColorRed;
+	settings.ToggleBluetoothQuietTime = false;
 	settings.SelectBluetooth	  = 2;
 	settings.SelectBatteryPercent = 0;
 	settings.ToggleSuffix		= false;
@@ -78,15 +80,8 @@ static void update_time() {
 	static char h_buffer[3], m_buffer[3], t_buffer[16], b_buffer[16];
 	strftime(date_current, sizeof(date_current), "%d%m", tick_time);
 	strftime(month_current, sizeof(month_current), "%B", tick_time);
-
-// Time
-// 	if(clock_is_24h_style()) {
-// 		strftime(h_buffer, sizeof(h_buffer), "%H", tick_time);	//%H
-// 	} else {
-// 		strftime(h_buffer, sizeof(h_buffer), "%I", tick_time);	//%I
-// 	}
 	
-	strftime(h_buffer, sizeof(h_buffer), clock_is_24h_style() ? "%H" : "%I", tick_time);
+	strftime(h_buffer, sizeof(h_buffer), clock_is_24h_style() ? "%H" : "%I", tick_time);	//%M %I
 	strftime(m_buffer, sizeof(m_buffer), "%M", tick_time);		//%M
 	text_layer_set_text(s_text_hour, h_buffer);
 	text_layer_set_text(s_text_minute, m_buffer);
@@ -173,11 +168,33 @@ static void battery_callback(BatteryChargeState state) {
 	}
 }
 
+// bool vibrateBool() {
+// 	if(quiet_time_is_active() && settings.ToggleBluetoothQuietTime) {					// True True
+// 		return true;
+// 	} else if(!quiet_time_is_active() && settings.ToggleBluetoothQuietTime) {			// False True
+// 		return true;
+// 	} else if(quiet_time_is_active() && !settings.ToggleBluetoothQuietTime) {			// True False
+// 		return false;
+// 	} else if(!quiet_time_is_active() && !settings.ToggleBluetoothQuietTime) {			// False False
+// 		return true;
+// 	} else {
+// 		return false;
+// 	}
+// }
+
+bool vibrateBool() {
+	if(quiet_time_is_active() && !settings.ToggleBluetoothQuietTime) {			// True False
+		return false;
+	} else {
+		return true;
+	}
+}
+
 static void bluetooth_callback(bool connected) {													  	
 	if(!connected) {
 		text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(settings.ColourBackground, settings.ColourBluetooth));		// Set Top Colour
 		text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(settings.ColourBackground, settings.ColourBluetooth));	// Set Bottom Colour
-		if(appStarted) {
+		if(appStarted && vibrateBool()) {	
 			if(settings.SelectBluetooth == 0) { }								// No vibration 
 			else if(settings.SelectBluetooth == 1) { vibes_short_pulse(); }		// Short vibration
 			else if(settings.SelectBluetooth == 2) { vibes_long_pulse(); }		// Long vibration
@@ -203,6 +220,8 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	Tuple *bt_colour_t = dict_find(iter, MESSAGE_KEY_COLOUR_BLUETOOTH);
 	if(bt_colour_t) { settings.ColourBluetooth = GColorFromHEX(bt_colour_t->value->int32); }
 // Bluetooth
+	Tuple *bq_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_BLUETOOTH_QUIET_TIME);
+	if(bq_toggle_t) { settings.ToggleBluetoothQuietTime = bq_toggle_t->value->int32 == 1; }
 	Tuple *bt_select_t = dict_find(iter, MESSAGE_KEY_SELECT_BLUETOOTH);
 	if(bt_select_t) { settings.SelectBluetooth = atoi(bt_select_t->value->cstring); }			// Pretty sure this shouldnt need to convert to a string
 // Battery

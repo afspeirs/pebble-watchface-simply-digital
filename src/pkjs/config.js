@@ -83,6 +83,12 @@ module.exports = [
 					}
 				]
 			},
+			{
+				"type": "toggle",
+				"messageKey": "TOGGLE_BLUETOOTH_QUIET_TIME",
+				"label": "Vibrate during Quiet Time",
+				"defaultValue": false,
+			},
 		]
  	},
 	
@@ -155,7 +161,7 @@ module.exports = [
 	},
 	{
 		"type": "text",
-		"defaultValue": " Version 0.68",
+		"defaultValue": " Version 0.69",
 	},
 ];
 
