@@ -70,6 +70,14 @@ void setColours() {
 	text_layer_set_text_color(s_text_minute, PBL_IF_BW_ELSE(gcolor_legible_over(settings.ColourBackground), settings.ColourMinute));	// Set Minute Colour
 }
 
+bool vibrateBool() {
+	if(quiet_time_is_active() && !settings.ToggleBluetoothQuietTime) {			// True False
+		return false;
+	} else {
+		return true;
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////// Time & Date /////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -165,28 +173,6 @@ static void battery_callback(BatteryChargeState state) {
 		} else {
 			layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), true);	// Hidden
 		}
-	}
-}
-
-// bool vibrateBool() {
-// 	if(quiet_time_is_active() && settings.ToggleBluetoothQuietTime) {					// True True
-// 		return true;
-// 	} else if(!quiet_time_is_active() && settings.ToggleBluetoothQuietTime) {			// False True
-// 		return true;
-// 	} else if(quiet_time_is_active() && !settings.ToggleBluetoothQuietTime) {			// True False
-// 		return false;
-// 	} else if(!quiet_time_is_active() && !settings.ToggleBluetoothQuietTime) {			// False False
-// 		return true;
-// 	} else {
-// 		return false;
-// 	}
-// }
-
-bool vibrateBool() {
-	if(quiet_time_is_active() && !settings.ToggleBluetoothQuietTime) {			// True False
-		return false;
-	} else {
-		return true;
 	}
 }
 
