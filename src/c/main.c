@@ -99,7 +99,7 @@ static void update_time() {
 	strftime(date_current, sizeof(date_current), "%d%m", tick_time);
 	strftime(month_current, sizeof(month_current), "%B", tick_time);
 	
-	strftime(h_buffer, sizeof(h_buffer), clock_is_24h_style() ? "%H" : "%I", tick_time);	//%M %I
+	strftime(h_buffer, sizeof(h_buffer), clock_is_24h_style() ? "%H" : "%I", tick_time);	//%H %I
 	strftime(m_buffer, sizeof(m_buffer), "%M", tick_time);		//%M
 	text_layer_set_text(s_text_hour, h_buffer);
 	text_layer_set_text(s_text_minute, m_buffer);
@@ -154,10 +154,6 @@ static void update_time() {
 	strftime(b_buffer, sizeof(char_buffer), char_buffer, tick_time);
 	text_layer_set_text(s_text_top, t_buffer);
 	text_layer_set_text(s_text_bottom, b_buffer);
-	
-// 	if(quiet_time_is_active()) {
-// 		text_layer_set_text(s_text_top, "twst");
-// 	}
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -242,8 +238,14 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	bluetooth_callback(connection_service_peek_pebble_app_connection());		// Sets date colours (and detects if a phone is connected)
 	appStarted = true;
 	setColours();
-	getQuietTimeIcon();
 	update_time();
+	
+	if(quiet_time_is_active()) {
+		getQuietTimeIcon();
+		layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false);		// Visible
+	} else {
+		layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), true);	// Hidden
+	}
 }
 
 void unobstructed_change(AnimationProgress progress, void* data) {
@@ -300,29 +302,24 @@ static void window_load(Window *window) {
 	// Show Quiet Time icon when active, and move battery 
 	if(quiet_time_is_active()) {
 		#if PBL_DISPLAY_HEIGHT == 180			// Round
-			s_layer_battery	= bitmap_layer_create(GRect(84, 4, 13, 6)); // battery
+			s_layer_battery	= bitmap_layer_create(GRect(84, 17, 13,  6));	// battery
+			s_layer_quiet	= bitmap_layer_create(GRect(86,  3, 10, 10));	// battery
 		#else									// TIME and OG
-			s_layer_battery	= bitmap_layer_create(GRect(20, 4, 13, 6)); // battery
-			s_layer_quiet	= bitmap_layer_create(GRect(6, 2, 10, 10)); // battery
+			s_layer_battery	= bitmap_layer_create(GRect(25, 4, 13,  6));	// battery
+			s_layer_quiet	= bitmap_layer_create(GRect( 6, 2, 10, 10));	// battery
 		#endif
 		getQuietTimeIcon();
-		layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false);	// Visible
+		layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false);		// Visible
 	} else {
 		#if PBL_DISPLAY_HEIGHT == 180			// Round
-			s_layer_battery	= bitmap_layer_create(GRect(84, 10, 13, 6)); // battery
+			s_layer_battery	= bitmap_layer_create(GRect(84, 10, 13,  6));	// battery
+			s_layer_quiet	= bitmap_layer_create(GRect(86,  2, 10, 10));	// battery
 		#else									// TIME and OG
-			s_layer_battery	= bitmap_layer_create(GRect(4, 4, 13, 6)); // battery
-			s_layer_quiet	= bitmap_layer_create(GRect(6, 2, 10, 10)); // battery
+			s_layer_battery	= bitmap_layer_create(GRect(4, 4, 13,  6));		// battery
+			s_layer_quiet	= bitmap_layer_create(GRect(6, 2, 10, 10));		// battery
 		#endif
 		layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), true);	// Hidden
 	}
-	
-// 			if(state.charge_percent <= settings.SelectBatteryPercent) {
-// 			getBatteryIcon(0);
-// 			layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), false);	// Visible
-// 		} else {
-// 			layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), true);	// Hidden
-// 		}
 
 // Battery Icon
 	layer_mark_dirty(bitmap_layer_get_layer(s_layer_battery));
@@ -370,9 +367,6 @@ static void window_load(Window *window) {
 	appStarted = true;
 	setColours();
 	update_time();
-	
-	
-
 }
 
 static void window_unload(Window *window) {
