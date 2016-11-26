@@ -144,6 +144,10 @@ static void update_time() {
 	strftime(b_buffer, sizeof(char_buffer), char_buffer, tick_time);
 	text_layer_set_text(s_text_top, t_buffer);
 	text_layer_set_text(s_text_bottom, b_buffer);
+	
+// 	if(quiet_time_is_active()) {
+// 		text_layer_set_text(s_text_top, "twst");
+// 	}
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -264,9 +268,7 @@ static void window_load(Window *window) {
 		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47 - 10, bounds.size.w/2, 95));
 		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31 -  7, bounds.size.w,   40));
 		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4 -5 -  1, bounds.size.w,   40));
-		s_layer_battery	= bitmap_layer_create(GRect(4, 4, 13, 6)); // battery
 	#elif PBL_DISPLAY_HEIGHT == 180			// Round
-// 	#if PBL_DISPLAY_HEIGHT == 180			// Round	
 		s_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_72));
 		s_font_date = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_28));
 	
@@ -274,7 +276,6 @@ static void window_load(Window *window) {
 		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2-10, 75));
 		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31+5, bounds.size.w,    30));
 		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4 -5-5, bounds.size.w,    30));
-		s_layer_battery	= bitmap_layer_create(GRect(84, 4, 13, 6)); // battery
 	#else									// TIME and OG
 		s_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_72));
 		s_font_date = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_28));
@@ -283,8 +284,22 @@ static void window_load(Window *window) {
 		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
 		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31, bounds.size.w,   30));
 		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4 -5, bounds.size.w,   30));
-		s_layer_battery	= bitmap_layer_create(GRect(4, 4, 13, 6)); // battery
 	#endif
+	
+	// Show Quiet Time icon when active, and move battery 
+	if(quiet_time_is_active()) {
+		#if PBL_DISPLAY_HEIGHT == 180			// Round
+			s_layer_battery	= bitmap_layer_create(GRect(84, 4, 13, 6)); // battery
+		#else									// TIME and OG
+			s_layer_battery	= bitmap_layer_create(GRect(15, 4, 13, 6)); // battery
+		#endif
+	} else {
+		#if PBL_DISPLAY_HEIGHT == 180			// Round
+			s_layer_battery	= bitmap_layer_create(GRect(84, 10, 13, 6)); // battery
+		#else									// TIME and OG
+			s_layer_battery	= bitmap_layer_create(GRect(4, 4, 13, 6)); // battery
+		#endif
+	}
 
 // Battery Image
 	layer_mark_dirty(bitmap_layer_get_layer(s_layer_battery));
@@ -325,6 +340,9 @@ static void window_load(Window *window) {
 	appStarted = true;
 	setColours();
 	update_time();
+	
+	
+
 }
 
 static void window_unload(Window *window) {
