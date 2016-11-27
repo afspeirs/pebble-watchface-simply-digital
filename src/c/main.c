@@ -64,8 +64,10 @@ void getBatteryIcon(int image_number) {
 	bitmap_layer_set_bitmap(s_layer_battery, s_bitmap_battery);
 }
 
-void getQuietTimeIcon() {
-	gbitmap_destroy(s_bitmap_quiet);
+void getQuietTimeIcon(bool destroy) {
+	if(destroy) {
+		gbitmap_destroy(s_bitmap_quiet);		
+	}
 	if (gcolor_equal(gcolor_legible_over(settings.ColourBackground), GColorBlack)) {
 		s_bitmap_quiet = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_QUIET_TIME_BLACK);
 	} else {
@@ -154,6 +156,13 @@ static void update_time() {
 	strftime(b_buffer, sizeof(char_buffer), char_buffer, tick_time);
 	text_layer_set_text(s_text_top, t_buffer);
 	text_layer_set_text(s_text_bottom, b_buffer);
+	
+	if(quiet_time_is_active()) {
+		getQuietTimeIcon(false);
+		layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false);		// Visible
+	} else {
+		layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), true);	// Hidden
+	}
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -241,7 +250,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	update_time();
 	
 	if(quiet_time_is_active()) {
-		getQuietTimeIcon();
+		getQuietTimeIcon(true);
 		layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false);		// Visible
 	} else {
 		layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), true);	// Hidden
@@ -308,7 +317,7 @@ static void window_load(Window *window) {
 			s_layer_battery	= bitmap_layer_create(GRect(25, 4, 13,  6));	// battery
 			s_layer_quiet	= bitmap_layer_create(GRect( 6, 2, 10, 10));	// battery
 		#endif
-		getQuietTimeIcon();
+		getQuietTimeIcon(true);
 		layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false);		// Visible
 	} else {
 		#if PBL_DISPLAY_HEIGHT == 180			// Round
