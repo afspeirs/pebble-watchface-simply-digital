@@ -33,7 +33,7 @@ static void config_default() {
 	settings.ColourBluetooth	= GColorRed;
 	settings.ToggleBluetoothQuietTime = false;
 	settings.SelectBluetooth	  = 2;
-	settings.SelectBatteryPercent = 10;
+	settings.SelectBatteryPercent = 0;
 	settings.ToggleSuffix		= false;
 	settings.ToggleCalendarWeek	= false;
 }
