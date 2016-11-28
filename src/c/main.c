@@ -33,7 +33,7 @@ static void config_default() {
 	settings.ColourBluetooth	= GColorRed;
 	settings.ToggleBluetoothQuietTime = false;
 	settings.SelectBluetooth	  = 2;
-	settings.SelectBatteryPercent = 0;
+	settings.SelectBatteryPercent = 10;
 	settings.ToggleSuffix		= false;
 	settings.ToggleCalendarWeek	= false;
 }
@@ -312,7 +312,7 @@ static void window_load(Window *window) {
 			s_layer_battery	= bitmap_layer_create(GRect(84, 17, 13,  6));	// battery
 			s_layer_quiet	= bitmap_layer_create(GRect(86,  3, 10, 10));	// battery
 		#else									// TIME and OG
-			s_layer_battery	= bitmap_layer_create(GRect(25, 4, 13,  6));	// battery
+			s_layer_battery	= bitmap_layer_create(GRect(22, 4, 13,  6));	// battery
 			s_layer_quiet	= bitmap_layer_create(GRect( 6, 2, 10, 10));	// battery
 		#endif
 		getQuietTimeIcon();
