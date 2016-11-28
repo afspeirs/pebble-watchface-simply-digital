@@ -125,7 +125,7 @@ static void update_time() {
 			}
 		}
 // Month
-		#if PBL_DISPLAY_HEIGHT == 228			// EMERY
+		#if PBL_DISPLAY_HEIGHT == 228			// Emery
 			if(strlen(month_current) > 9 || settings.ToggleCalendarWeek) {
 				strcat(char_buffer,"  %b"); 	// Short
 				if(settings.ToggleCalendarWeek) {
@@ -134,13 +134,13 @@ static void update_time() {
 			} else {
 				strcat(char_buffer,"  %B");
 			}
-		#elif PBL_DISPLAY_HEIGHT == 180			// Round
+		#elif PBL_DISPLAY_HEIGHT == 180			// Chalk
 			if(strlen(month_current) > 5) {
 				strcat(char_buffer,"  %b"); 	// Short
 			} else {
 				strcat(char_buffer,"  %B");
 			}
-		#else									// TIME and OG
+		#else									// Aplite, Basalt, Diorite
 			if(strlen(month_current) > 7 || settings.ToggleCalendarWeek) {
 				strcat(char_buffer,"  %b"); 	// Short
 				if(settings.ToggleCalendarWeek) {
@@ -157,7 +157,7 @@ static void update_time() {
 	
 	if(quiet_time_is_active()) {
 		getQuietTimeIcon();
-		layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false);		// Visible
+		layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false);	// Visible
 	} else {
 		layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), true);	// Hidden
 	}
@@ -236,8 +236,6 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	Tuple *wk_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_WEEK);
 	if(wk_toggle_t) { settings.ToggleCalendarWeek = wk_toggle_t->value->int32 == 1;	}
 	
-// 	APP_LOG(APP_LOG_LEVEL_DEBUG, "%d", settings.SelectBatteryPercent);
-	
 	config_save();
 	
 	battery_callback(battery_state_service_peek());
@@ -249,7 +247,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	
 	if(quiet_time_is_active()) {
 		getQuietTimeIcon();
-		layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false);		// Visible
+		layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false);	// Visible
 	} else {
 		layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), true);	// Hidden
 	}
@@ -258,12 +256,12 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 void unobstructed_change(AnimationProgress progress, void* data) {
 	GRect bounds = layer_get_unobstructed_bounds(window_get_root_layer(s_window));
 
-	#if PBL_DISPLAY_HEIGHT == 228			// EMERY
+	#if PBL_DISPLAY_HEIGHT == 228			// Emery
 		layer_set_frame(text_layer_get_layer(s_text_hour),	GRect(				0, bounds.size.h / 2 - 47 - 10, bounds.size.w/2, 95));
 		layer_set_frame(text_layer_get_layer(s_text_minute),GRect(bounds.size.w/2, bounds.size.h / 2 - 47 - 10, bounds.size.w/2, 95));
 		layer_set_frame(text_layer_get_layer(s_text_top),	GRect(				0, bounds.size.h / 4 - 31 -  7, bounds.size.w,   40));
 		layer_set_frame(text_layer_get_layer(s_text_bottom),GRect(				0, bounds.size.h * 3/4 -5 -  1, bounds.size.w,   40));
-	#else									// TIME and OG	
+	#else									// Aplite, Basalt, Diorite
 		layer_set_frame(text_layer_get_layer(s_text_hour),	GRect(				0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
 		layer_set_frame(text_layer_get_layer(s_text_minute),GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
 		layer_set_frame(text_layer_get_layer(s_text_top),	GRect(				0, bounds.size.h / 4 - 31, bounds.size.w,   30));
@@ -280,7 +278,7 @@ static void window_load(Window *window) {
 	setlocale(LC_ALL, "");
 
 // Locations
-	#if PBL_DISPLAY_HEIGHT == 228			// EMERY
+	#if PBL_DISPLAY_HEIGHT == 228			// Emery
 		s_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_88));
 		s_font_date = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_34));
 	
@@ -288,7 +286,7 @@ static void window_load(Window *window) {
 		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47 - 10, bounds.size.w/2, 95));
 		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31 -  7, bounds.size.w,   40));
 		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4 -5 -  1, bounds.size.w,   40));
-	#elif PBL_DISPLAY_HEIGHT == 180			// Round
+	#elif PBL_DISPLAY_HEIGHT == 180			// Chalk
 		s_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_72));
 		s_font_date = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_28));
 	
@@ -296,7 +294,7 @@ static void window_load(Window *window) {
 		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2-10, 75));
 		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31+5, bounds.size.w,    30));
 		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4 -5-5, bounds.size.w,    30));
-	#else									// TIME and OG
+	#else									// Aplite, Basalt, Diorite
 		s_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_72));
 		s_font_date = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_28));
 	
@@ -308,21 +306,21 @@ static void window_load(Window *window) {
 	
 	// Show Quiet Time icon when active, and move battery 
 	if(quiet_time_is_active()) {
-		#if PBL_DISPLAY_HEIGHT == 180			// Round
+		#if PBL_DISPLAY_HEIGHT == 180			// Chalk
 			s_layer_battery	= bitmap_layer_create(GRect(84, 17, 13,  6));	// battery
 			s_layer_quiet	= bitmap_layer_create(GRect(86,  3, 10, 10));	// battery
-		#else									// TIME and OG
+		#else									// Aplite, Basalt, Diorite and Emery
 			s_layer_battery	= bitmap_layer_create(GRect(22, 4, 13,  6));	// battery
 			s_layer_quiet	= bitmap_layer_create(GRect( 6, 2, 10, 10));	// battery
 		#endif
 		getQuietTimeIcon();
-		layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false);		// Visible
+		layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false);	// Visible
 	} else {
-		#if PBL_DISPLAY_HEIGHT == 180			// Round
+		#if PBL_DISPLAY_HEIGHT == 180			// Chalk
 			s_layer_battery	= bitmap_layer_create(GRect(84, 10, 13,  6));	// battery
 			s_layer_quiet	= bitmap_layer_create(GRect(86,  2, 10, 10));	// battery
-		#else									// TIME and OG
-			s_layer_battery	= bitmap_layer_create(GRect(4, 4, 13,  6));		// battery
+		#else									// Aplite, Basalt, Diorite and Emery
+			s_layer_battery	= bitmap_layer_create(GRect(6, 4, 13,  6));		// battery
 			s_layer_quiet	= bitmap_layer_create(GRect(6, 2, 10, 10));		// battery
 		#endif
 		layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), true);	// Hidden
@@ -367,7 +365,6 @@ static void window_load(Window *window) {
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_text_bottom));
 
 // Standard
-// 	APP_LOG(APP_LOG_LEVEL_DEBUG, "%d", settings.SelectBatteryPercent);
 	battery_callback(battery_state_service_peek());
 	appStarted = false;
 	bluetooth_callback(connection_service_peek_pebble_app_connection());		// Sets date colours (and detects if a phone is connected)
