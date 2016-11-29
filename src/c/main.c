@@ -154,6 +154,10 @@ static void update_time() {
 	strftime(b_buffer, sizeof(char_buffer), char_buffer, tick_time);
 	text_layer_set_text(s_text_top, t_buffer);
 	text_layer_set_text(s_text_bottom, b_buffer);
+}
+
+static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+	update_time();
 	
 	if(quiet_time_is_active()) {
 		getQuietTimeIcon();
@@ -161,10 +165,6 @@ static void update_time() {
 	} else {
 		layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), true);	// Hidden
 	}
-}
-
-static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-	update_time();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
