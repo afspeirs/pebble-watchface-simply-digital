@@ -5,8 +5,8 @@
 static Window *s_window;
 static TextLayer *s_text_hour, *s_text_minute, *s_text_top, *s_text_bottom;
 static GFont s_font_time, s_font_date;
-static BitmapLayer *s_layer_battery, *s_layer_quiet;
-static GBitmap *s_bitmap_battery, *s_bitmap_quiet;
+static BitmapLayer *s_layer_battery, *s_layer_bluetooth, *s_layer_quiet;
+static GBitmap *s_bitmap_battery, *s_bitmap_bluetooth, *s_bitmap_quiet;
 char date_current[5], month_current[16];
 static bool appStarted = false;
 
@@ -59,6 +59,16 @@ void getBatteryIcon() {
 		s_bitmap_battery = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATTERY_WHITE);
 	}
 	bitmap_layer_set_bitmap(s_layer_battery, s_bitmap_battery);
+}
+
+void getBluetoothIcon() {
+		gbitmap_destroy(s_bitmap_bluetooth);
+	if (gcolor_equal(gcolor_legible_over(settings.ColourBackground), GColorBlack)) {
+		s_bitmap_bluetooth = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATTERY_BLACK);
+	} else {
+		s_bitmap_bluetooth = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATTERY_WHITE);
+	}
+	bitmap_layer_set_bitmap(s_layer_bluetooth, s_bitmap_bluetooth);
 }
 
 void getQuietTimeIcon() {
@@ -177,6 +187,7 @@ static void battery_callback(BatteryChargeState state) {
 	}
 }
 
+//TODO change this to use image not text
 static void bluetooth_callback(bool connected) {													  	
 	if(!connected) {
 		text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(settings.ColourBackground, settings.ColourBluetooth));		// Set Top Colour
@@ -270,6 +281,7 @@ static void window_load(Window *window) {
 		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47 - 10, bounds.size.w/2, 95));
 		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31 -  7, bounds.size.w,   40));
 		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4 -5 -  1, bounds.size.w,   40));
+		s_layer_bluetooth = bitmap_layer_create(GRect(bounds.size.w-10, 3, 6,  9));	// bluetooth
 	#elif PBL_DISPLAY_HEIGHT == 180			// Chalk
 		s_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_72));
 		s_font_date = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_28));
@@ -278,6 +290,7 @@ static void window_load(Window *window) {
 		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2-10, 75));
 		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31+5, bounds.size.w,    30));
 		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4 -5-5, bounds.size.w,    30));
+		s_layer_bluetooth = bitmap_layer_create(GRect(bounds.size.w/2-3, bounds.size.h-15, 6,  9));	// bluetooth										// TODO: fix this value
 	#else									// Aplite, Basalt, Diorite
 		s_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_72));
 		s_font_date = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_28));
@@ -286,29 +299,32 @@ static void window_load(Window *window) {
 		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
 		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31, bounds.size.w,   30));
 		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4 -5, bounds.size.w,   30));
+		s_layer_bluetooth = bitmap_layer_create(GRect(bounds.size.w-10, 3, 6,  9));	// bluetooth
 	#endif
 	
 	// Show Quiet Time icon when active, and move battery 
 	if(quiet_time_is_active()) {
 		#if PBL_DISPLAY_HEIGHT == 180			// Chalk
 			s_layer_battery	= bitmap_layer_create(GRect(84, 17, 13,  6));	// battery
-			s_layer_quiet	= bitmap_layer_create(GRect(86,  3, 10, 10));	// battery
+			s_layer_quiet	= bitmap_layer_create(GRect(86,  3, 10, 10));	// quiet
 		#else									// Aplite, Basalt, Diorite and Emery
-			s_layer_battery	= bitmap_layer_create(GRect(22, 4, 13,  6));	// battery
-			s_layer_quiet	= bitmap_layer_create(GRect( 6, 2, 10, 10));	// battery
+			s_layer_battery		= bitmap_layer_create(GRect(22, 4, 13,  6));	// battery
+			s_layer_quiet		= bitmap_layer_create(GRect( 6, 2, 10, 10));	// quiet
 		#endif
 		getQuietTimeIcon();
 		layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false);	// Visible
 	} else {
 		#if PBL_DISPLAY_HEIGHT == 180			// Chalk
 			s_layer_battery	= bitmap_layer_create(GRect(84, 10, 13,  6));	// battery
-			s_layer_quiet	= bitmap_layer_create(GRect(86,  2, 10, 10));	// battery
+			s_layer_quiet	= bitmap_layer_create(GRect(86,  2, 10, 10));	// quiet
 		#else									// Aplite, Basalt, Diorite and Emery
 			s_layer_battery	= bitmap_layer_create(GRect(6, 4, 13,  6));		// battery
-			s_layer_quiet	= bitmap_layer_create(GRect(6, 2, 10, 10));		// battery
+			s_layer_quiet	= bitmap_layer_create(GRect(6, 2, 10, 10));		// quiet
 		#endif
 		layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), true);	// Hidden
 	}
+	
+	
 
 // Battery Icon
 	layer_mark_dirty(bitmap_layer_get_layer(s_layer_battery));
@@ -316,7 +332,14 @@ static void window_load(Window *window) {
 		bitmap_layer_set_compositing_mode(s_layer_battery, GCompOpSet);	
 	#endif
 	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_layer_battery));
-		
+	
+// Battery Icon
+	layer_mark_dirty(bitmap_layer_get_layer(s_layer_bluetooth));
+	#if defined(PBL_COLOR)
+		bitmap_layer_set_compositing_mode(s_layer_bluetooth, GCompOpSet);	
+	#endif
+	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_layer_bluetooth));
+	
 // Quiet Time Icon
 	layer_mark_dirty(bitmap_layer_get_layer(s_layer_quiet));
 	#if defined(PBL_COLOR)
@@ -400,8 +423,10 @@ static void init() {
 
 static void deinit() {
 	gbitmap_destroy(s_bitmap_battery);
+	gbitmap_destroy(s_bitmap_bluetooth);
 	gbitmap_destroy(s_bitmap_quiet);
 	bitmap_layer_destroy(s_layer_battery);
+	bitmap_layer_destroy(s_layer_bluetooth);
 	bitmap_layer_destroy(s_layer_quiet);
 	
 	tick_timer_service_unsubscribe();
