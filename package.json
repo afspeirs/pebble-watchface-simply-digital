@@ -27,6 +27,19 @@
         "resources": {
             "media": [
                 {
+                    "file": "images/BatteryBlack.png",
+                    "name": "IMAGE_BATTERY_BLACK",
+                    "storageFormat": "png",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/BatteryWhite.png",
+                    "name": "IMAGE_BATTERY_WHITE",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
                     "file": "images/QuietTime_Black.png",
                     "name": "IMAGE_QUIET_TIME_BLACK",
                     "storageFormat": "png",
@@ -37,58 +50,6 @@
                     "file": "images/MenuImage.png",
                     "menuIcon": true,
                     "name": "IMAGE_MENU_IMAGE",
-                    "storageFormat": "png",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/BatteryWhite_4.png",
-                    "name": "IMAGE_BATTERY_WHITE_4",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/BatteryWhite_3.png",
-                    "name": "IMAGE_BATTERY_WHITE_3",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/BatteryWhite_2.png",
-                    "name": "IMAGE_BATTERY_WHITE_2",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/BatteryWhite_1.png",
-                    "name": "IMAGE_BATTERY_WHITE_1",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/BatteryBlack_4.png",
-                    "name": "IMAGE_BATTERY_BLACK_4",
-                    "storageFormat": "png",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/BatteryBlack_3.png",
-                    "name": "IMAGE_BATTERY_BLACK_3",
-                    "storageFormat": "png",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/BatteryBlack_2.png",
-                    "name": "IMAGE_BATTERY_BLACK_2",
-                    "storageFormat": "png",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/BatteryBlack_1.png",
-                    "name": "IMAGE_BATTERY_BLACK_1",
                     "storageFormat": "png",
                     "targetPlatforms": null,
                     "type": "bitmap"
@@ -156,5 +117,5 @@
             "watchface": true
         }
     },
-    "version": "0.71.0"
+    "version": "0.72.0"
 }

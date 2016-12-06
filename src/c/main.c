@@ -51,15 +51,12 @@ static void config_load() {
 //////////// Methods /////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void getBatteryIcon(int image_number) {
-	int BatteryBlack[] = {RESOURCE_ID_IMAGE_BATTERY_BLACK_1, RESOURCE_ID_IMAGE_BATTERY_BLACK_2, RESOURCE_ID_IMAGE_BATTERY_BLACK_3, RESOURCE_ID_IMAGE_BATTERY_BLACK_4};
-	int BatteryWhite[] = {RESOURCE_ID_IMAGE_BATTERY_WHITE_1, RESOURCE_ID_IMAGE_BATTERY_WHITE_2, RESOURCE_ID_IMAGE_BATTERY_WHITE_3, RESOURCE_ID_IMAGE_BATTERY_WHITE_4};
-	
+void getBatteryIcon() {
 	gbitmap_destroy(s_bitmap_battery);
 	if (gcolor_equal(gcolor_legible_over(settings.ColourBackground), GColorBlack)) {
-		s_bitmap_battery = gbitmap_create_with_resource(BatteryBlack[image_number]);
+		s_bitmap_battery = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATTERY_BLACK);
 	} else {
-		s_bitmap_battery = gbitmap_create_with_resource(BatteryWhite[image_number]);
+		s_bitmap_battery = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATTERY_WHITE);
 	}
 	bitmap_layer_set_bitmap(s_layer_battery, s_bitmap_battery);
 }
@@ -172,24 +169,11 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void battery_callback(BatteryChargeState state) {
-	if(settings.SelectBatteryPercent == 100) {
-		if(75 < state.charge_percent && state.charge_percent <= 100) {
-			getBatteryIcon(3);
-		} else if(50 < state.charge_percent && state.charge_percent <= 75) {
-			getBatteryIcon(2);
-		} else if(25 < state.charge_percent && state.charge_percent <= 50) {
-			getBatteryIcon(1);
-		} else if( 0 < state.charge_percent && state.charge_percent <= 25) {
-			getBatteryIcon(0);
-		}
-		layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), false);		// Visible
+	if(state.charge_percent <= settings.SelectBatteryPercent) {
+		getBatteryIcon();
+		layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), false);	// Visible
 	} else {
-		if(state.charge_percent <= settings.SelectBatteryPercent) {
-			getBatteryIcon(0);
-			layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), false);	// Visible
-		} else {
-			layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), true);	// Hidden
-		}
+		layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), true);	// Hidden
 	}
 }
 
