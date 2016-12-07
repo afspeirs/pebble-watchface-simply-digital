@@ -27,19 +27,6 @@
         "resources": {
             "media": [
                 {
-                    "file": "images/IMG_Bluetooth_White.png",
-                    "name": "IMAGE_BLUETOOTH_WHITE",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/IMG_Bluetooth_Black.png",
-                    "name": "IMAGE_BLUETOOTH_BLACK",
-                    "storageFormat": "png",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
                     "file": "images/IMG_QuietTime_White.png",
                     "name": "IMAGE_QUIET_TIME_WHITE",
                     "targetPlatforms": null,
@@ -77,42 +64,14 @@
                     "characterRegex": "[0-9 a-zA-Z]",
                     "file": "fonts/Bebas Neue Regular",
                     "name": "FONT_BEBAS_NEUE_REGULAR_28",
-                    "targetPlatforms": [
-                        "aplite",
-                        "basalt",
-                        "chalk",
-                        "diorite"
-                    ],
-                    "type": "font"
-                },
-                {
-                    "characterRegex": "[0-9 a-zA-Z]",
-                    "file": "fonts/Bebas Neue Regular",
-                    "name": "FONT_BEBAS_NEUE_REGULAR_34",
-                    "targetPlatforms": [
-                        "emery"
-                    ],
-                    "type": "font"
-                },
-                {
-                    "characterRegex": "[0-9]",
-                    "file": "fonts/Bebas Neue Bold",
-                    "name": "FONT_BEBAS_NEUE_BOLD_88",
-                    "targetPlatforms": [
-                        "emery"
-                    ],
+                    "targetPlatforms": null,
                     "type": "font"
                 },
                 {
                     "characterRegex": "[0-9]",
                     "file": "fonts/Bebas Neue Bold",
                     "name": "FONT_BEBAS_NEUE_BOLD_72",
-                    "targetPlatforms": [
-                        "aplite",
-                        "basalt",
-                        "chalk",
-                        "diorite"
-                    ],
+                    "targetPlatforms": null,
                     "type": "font"
                 }
             ]
@@ -122,13 +81,12 @@
             "aplite",
             "basalt",
             "chalk",
-            "diorite",
-            "emery"
+            "diorite"
         ],
         "uuid": "51c897b8-5ca6-4412-82db-11a4cf304ae1",
         "watchapp": {
             "watchface": true
         }
     },
-    "version": "0.72.0"
+    "version": "1.0.0"
 }

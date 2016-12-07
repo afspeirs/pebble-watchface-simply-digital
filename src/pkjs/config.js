@@ -125,10 +125,10 @@ module.exports = [
 						"label": "40%",
 						"value": "40"
 					},
-					{ 
-						"label": "Always",
-						"value": "100" 
-					}
+// 					{ 
+// 						"label": "Always",
+// 						"value": "100" 
+// 					}
 				]
 			},
 		]
@@ -161,7 +161,7 @@ module.exports = [
 	},
 	{
 		"type": "text",
-		"defaultValue": " Version 0.72",
+		"defaultValue": " Version 1.0",
 	},
 ];
 
