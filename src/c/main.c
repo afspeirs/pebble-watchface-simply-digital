@@ -64,9 +64,9 @@ void getBatteryIcon() {
 void getBluetoothIcon() {
 		gbitmap_destroy(s_bitmap_bluetooth);
 	if (gcolor_equal(gcolor_legible_over(settings.ColourBackground), GColorBlack)) {
-		s_bitmap_bluetooth = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATTERY_BLACK);
+		s_bitmap_bluetooth = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BLUETOOTH_BLACK);
 	} else {
-		s_bitmap_bluetooth = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATTERY_WHITE);
+		s_bitmap_bluetooth = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BLUETOOTH_WHITE);
 	}
 	bitmap_layer_set_bitmap(s_layer_bluetooth, s_bitmap_bluetooth);
 }
@@ -94,6 +94,9 @@ bool vibrateBool() {
 		return true;
 	}
 }
+
+
+// !(quiet_time_is_active() && !settings.ToggleBluetoothQuietTime)		// im pretty sure that this is the same as vibrateBool()
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////// Time & Date /////////////////////////////////////////////////////////////////////////////
@@ -199,10 +202,14 @@ static void bluetooth_callback(bool connected) {
 			else if(settings.SelectBluetooth == 3) { vibes_double_pulse(); }	// Double vibration
 			else { vibes_long_pulse(); }					 // Default // Long Vibration
 		}
+		getBluetoothIcon();
+		layer_set_hidden(bitmap_layer_get_layer(s_layer_bluetooth), false);	// Visible
 	} else {
 		text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(gcolor_legible_over(settings.ColourBackground), settings.ColourDate));		// Set Top Colour
 		text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(gcolor_legible_over(settings.ColourBackground), settings.ColourDate));	// Set Bottom Colour
+		layer_set_hidden(bitmap_layer_get_layer(s_layer_bluetooth), true);	// Hidden
 	}
+	
 }
 
 static void inbox_received_handler(DictionaryIterator *iter, void *context) {
