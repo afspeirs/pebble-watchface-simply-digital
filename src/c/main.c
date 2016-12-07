@@ -77,16 +77,6 @@ void setColours() {
 	text_layer_set_text_color(s_text_minute, PBL_IF_BW_ELSE(gcolor_legible_over(settings.ColourBackground), settings.ColourMinute));	// Set Minute Colour
 }
 
-bool vibrateBool() {
-	if(quiet_time_is_active() && !settings.ToggleBluetoothQuietTime) {			// True False
-		return false;
-	} else {
-		return true;
-	}
-}
-
-
-// !(quiet_time_is_active() && !settings.ToggleBluetoothQuietTime)		// im pretty sure that this is the same as vibrateBool()
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////// Time & Date /////////////////////////////////////////////////////////////////////////////
@@ -108,7 +98,7 @@ static void update_time() {
 	strftime(t_buffer, sizeof(t_buffer), "%A", tick_time);		// %A
 // Bottom
 	char char_buffer[16] = "";
-	if(strcmp("0104", date_current) == 0) {	// April Fools		Should this be hardcoded?
+	if(strcmp("0104", date_current) == 0) {	// April Fools
 		strcpy(char_buffer, "April  Fools");
 	} else {
 // Day
@@ -175,7 +165,7 @@ static void bluetooth_callback(bool connected) {
 	if(!connected) {
 		text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(settings.ColourBackground, settings.ColourBluetooth));		// Set Top Colour
 		text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(settings.ColourBackground, settings.ColourBluetooth));	// Set Bottom Colour
-		if(appStarted && vibrateBool()) {	
+		if(appStarted && !(quiet_time_is_active() && !settings.ToggleBluetoothQuietTime)) {
 			if(settings.SelectBluetooth == 0) { }								// No vibration 
 			else if(settings.SelectBluetooth == 1) { vibes_short_pulse(); }		// Short vibration
 			else if(settings.SelectBluetooth == 2) { vibes_long_pulse(); }		// Long vibration
