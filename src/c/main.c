@@ -159,6 +159,21 @@ static void battery_callback(BatteryChargeState state) {
 	} else {
 		layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), true);	// Hidden
 	}
+	
+	// Move battery when in quiet time, and move to original location if not
+	if(quiet_time_is_active()) {
+		#if PBL_DISPLAY_HEIGHT == 180			// Chalk
+			layer_set_frame(bitmap_layer_get_layer(s_layer_battery),GRect(84, 17, 13,  6));	// battery
+		#else									// Aplite, Basalt, Diorite
+			layer_set_frame(bitmap_layer_get_layer(s_layer_battery),GRect(22, 4, 13,  6));	// battery
+		#endif
+	} else {
+		#if PBL_DISPLAY_HEIGHT == 180			// Chalk
+			layer_set_frame(bitmap_layer_get_layer(s_layer_battery),GRect(84, 10, 13,  6));	// battery
+		#else									// Aplite, Basalt, Diorite
+			layer_set_frame(bitmap_layer_get_layer(s_layer_battery),GRect(6, 4, 13,  6));	// battery
+		#endif
+	}
 }
 
 static void bluetooth_callback(bool connected) {													  	
@@ -175,8 +190,7 @@ static void bluetooth_callback(bool connected) {
 	} else {
 		text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(gcolor_legible_over(settings.ColourBackground), settings.ColourDate));		// Set Top Colour
 		text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(gcolor_legible_over(settings.ColourBackground), settings.ColourDate));	// Set Bottom Colour
-	}
-	
+	}	
 }
 
 static void inbox_received_handler(DictionaryIterator *iter, void *context) {
