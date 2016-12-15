@@ -21,7 +21,12 @@
             "TOGGLE_BLUETOOTH_QUIET_TIME",
             "SELECT_BATTERY_PERCENT",
             "TOGGLE_SUFFIX",
-            "TOGGLE_WEEK"
+            "TOGGLE_WEEK",
+            "CHECK_DATE_0",
+            "CHECK_DATE_1",
+            "CHECK_DATE_2",
+            "CHECK_DATE_3",
+            "CHECK_DATE_4"
         ],
         "projectType": "native",
         "resources": {
