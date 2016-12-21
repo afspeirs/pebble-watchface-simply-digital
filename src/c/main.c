@@ -41,7 +41,7 @@ static void config_default() {
 	settings.SelectBatteryPercent = 0;
 	settings.ToggleSuffix		= false;
 	settings.ToggleCalendarWeek	= false;
-	settings.CheckDate0			= false;
+	settings.CheckDate0			= true;
 	settings.CheckDate1			= false;
 	settings.CheckDate2			= false;
 	settings.CheckDate3			= false;
