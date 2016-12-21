@@ -172,57 +172,23 @@ module.exports = [
 				"label": "Show calendar week",
 				"defaultValue": false,
 				"capabilities": ["NOT_ROUND"],
-			}
-		]
-	},
-	{
- 		"type": "section",
- 		"items": [
-			{
-				"type": "heading",
-				"defaultValue": "Custom Text"
 			},
-			{
-				"type": "text",
-				"defaultValue": "Select events to be displayed:",
-			},
-			{
-				"type": "toggle",
-				"messageKey": "CHECK_DATE_0",
-				"label": "New Year's Day",
-				"defaultValue": false,
-			},
-			{
-				"type": "toggle",
-				"messageKey": "CHECK_DATE_1",
-				"label": "Burns Night",
-				"defaultValue": false,
-			},
-			{
-				"type": "toggle",
-				"messageKey": "CHECK_DATE_2",
-				"label": "Halloween",
-				"defaultValue": false,
-			},
-			{
-				"type": "toggle",
-				"messageKey": "CHECK_DATE_3",
-				"label": "Christmas Day",
-				"defaultValue": false,
-			},
-			{
-				"type": "toggle",
-				"messageKey": "CHECK_DATE_4",
-				"label": "Boxing Day",
-				"defaultValue": false,
-			},
+// 		]
+// 	},
+// 	{
+//  		"type": "section",
+//  		"items": [
 // 			{
-// 				"type": "checkboxgroup",
-// 				"messageKey": "CHECK_DATE",
-// 				"label": "Select events to be displayed:",
-// 				"defaultValue": [false, false, false, false, false],
-// 				"options": ["New Year's Day", "Burns Night", "Halloween", "Christmas Day", "Boxing Day"]
-// 			}
+// 				"type": "heading",
+// 				"defaultValue": "Custom Text"
+// 			},
+			{
+				"type": "checkboxgroup",
+				"messageKey": "CHECK_DATE",
+				"label": "Select events to be displayed:",
+				"defaultValue": [false, false, false, false, false],
+				"options": ["New Year's Day", "Burns Night", "Halloween", "Christmas Day", "Boxing Day"]
+			}
 		]
 	},
 	{

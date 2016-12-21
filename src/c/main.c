@@ -103,7 +103,6 @@ static void update_time() {
 	strftime(m_buffer, sizeof(m_buffer), "%M", tick_time);		//%M
 	text_layer_set_text(s_text_hour, h_buffer);
 	text_layer_set_text(s_text_minute, m_buffer);
-
 	
 // 	APP_LOG(APP_LOG_LEVEL_DEBUG, "checkdate0: %d", settings.CheckDate0);
 // 	APP_LOG(APP_LOG_LEVEL_DEBUG, "checkdate3: %d", settings.CheckDate3);
@@ -255,17 +254,17 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	Tuple *wk_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_WEEK);
 	if(wk_toggle_t) { settings.ToggleCalendarWeek = wk_toggle_t->value->int32 == 1;	}
 // Custom Text
-	Tuple *dt0_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE_0);
-	if(dt0_check_t) { settings.CheckDate0 = dt0_check_t->value->int32 == 1; }
-	Tuple *dt1_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE_1);
-	if(dt1_check_t) { settings.CheckDate1 = dt1_check_t->value->int32 == 1; }
-	Tuple *dt2_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE_2);
-	if(dt2_check_t) { settings.CheckDate2 = dt2_check_t->value->int32 == 1; }
-	Tuple *dt3_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE_3);
-	if(dt3_check_t) { settings.CheckDate3 = dt3_check_t->value->int32 == 1; }
-	Tuple *dt4_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE_4);
-	if(dt4_check_t) { settings.CheckDate4 = dt4_check_t->value->int32 == 1; }
-
+	Tuple *dt0_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE);
+	if(dt0_check_t) { settings.CheckDate0 = dt0_check_t->value->uint16; }
+	Tuple *dt1_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+1);
+	if(dt1_check_t) { settings.CheckDate1 = dt1_check_t->value->uint16; }
+	Tuple *dt2_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+2);
+	if(dt2_check_t) { settings.CheckDate2 = dt2_check_t->value->uint16; }
+	Tuple *dt3_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+3);
+	if(dt3_check_t) { settings.CheckDate3 = dt3_check_t->value->uint16; }
+	Tuple *dt4_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+4);
+	if(dt4_check_t) { settings.CheckDate4 = dt4_check_t->value->uint16; }
+	
 	config_save();
 	
 	battery_callback(battery_state_service_peek());
@@ -281,6 +280,10 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	} else {
 		layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), true);	// Hidden
 	}
+		
+// 	APP_LOG(APP_LOG_LEVEL_DEBUG,"CheckDate0: %u", dt0_check_t->value->uint16);
+// 	APP_LOG(APP_LOG_LEVEL_DEBUG, "checkdate0: %d", settings.CheckDate0);
+
 }
 
 void unobstructed_change(AnimationProgress progress, void* data) {
