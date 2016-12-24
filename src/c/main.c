@@ -26,6 +26,7 @@ typedef struct ClaySettings {
 	bool CheckDate2;
 	bool CheckDate3;
 	bool CheckDate4;
+	bool CheckDate5;
 } ClaySettings;						// Define our settings struct
 
 static ClaySettings settings;		// An instance of the struct
@@ -46,10 +47,7 @@ static void config_default() {
 	settings.CheckDate2			= false;
 	settings.CheckDate3			= false;
 	settings.CheckDate4			= false;
-}
-
-static void config_save() {
-  persist_write_data(SETTINGS_KEY, &settings, sizeof(settings));		// Write settings to persistent storage
+	settings.CheckDate4			= false;
 }
 
 static void config_load() {
@@ -120,10 +118,16 @@ static void update_time() {
 	} else if(strcmp("2501", date_current) == 0 && settings.CheckDate1) { // Burns Night
 		strcpy(char_buffer, "Burns  Night");
 	} else if(strcmp("3110", date_current) == 0 && settings.CheckDate2) { // Halloween
-		strcpy(char_buffer, "Halloween");
-	} else if(strcmp("2512", date_current) == 0 && settings.CheckDate3) { // Christmas
+		strcpy(char_buffer, "Halloween");	
+	} else if(strcmp("2412", date_current) == 0 && settings.CheckDate3) { // Christmas Eve
+		#if PBL_DISPLAY_HEIGHT == 180			// Chalk
+			strcpy(char_buffer, "xmas  Eve");
+		#else
+			strcpy(char_buffer, "Christmas  Eve");
+		#endif
+	} else if(strcmp("2512", date_current) == 0 && settings.CheckDate4) { // Christmas
 		strcpy(char_buffer, "Christmas");
-	} else if(strcmp("2612", date_current) == 0 && settings.CheckDate4) { // Boxing Day
+	} else if(strcmp("2612", date_current) == 0 && settings.CheckDate5) { // Boxing Day
 		strcpy(char_buffer, "Boxing  Day");
 		
 // Mother's Day US			May ish
@@ -264,8 +268,10 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	if(dt3_check_t) { settings.CheckDate3 = dt3_check_t->value->uint16; }
 	Tuple *dt4_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+4);
 	if(dt4_check_t) { settings.CheckDate4 = dt4_check_t->value->uint16; }
+	Tuple *dt5_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+5);
+	if(dt5_check_t) { settings.CheckDate4 = dt5_check_t->value->uint16; }
 	
-	config_save();
+  	persist_write_data(SETTINGS_KEY, &settings, sizeof(settings));		// Write settings to persistent storage
 	
 	battery_callback(battery_state_service_peek());
 	appStarted = false;
@@ -311,8 +317,8 @@ static void window_load(Window *window) {
 	#if PBL_DISPLAY_HEIGHT == 180			// Chalk
 		s_text_hour		= text_layer_create(GRect(			   10, bounds.size.h / 2 - 47, bounds.size.w/2-10, 75));
 		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2-10, 75));
-		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31+5, bounds.size.w,    30));
-		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4 -5-5, bounds.size.w,    30));
+		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 26, bounds.size.w,    30));
+		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4-10, bounds.size.w,    30));
 	#else									// Aplite, Basalt, Diorite
 		s_text_hour		= text_layer_create(GRect(				0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
 		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
