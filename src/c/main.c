@@ -269,7 +269,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	Tuple *dt4_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+4);
 	if(dt4_check_t) { settings.CheckDate4 = dt4_check_t->value->uint16; }
 	Tuple *dt5_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+5);
-	if(dt5_check_t) { settings.CheckDate4 = dt5_check_t->value->uint16; }
+	if(dt5_check_t) { settings.CheckDate5 = dt5_check_t->value->uint16; }
 	
   	persist_write_data(SETTINGS_KEY, &settings, sizeof(settings));		// Write settings to persistent storage
 	
