@@ -20,6 +20,7 @@
             "SELECT_BLUETOOTH",
             "TOGGLE_BLUETOOTH_QUIET_TIME",
             "SELECT_BATTERY_PERCENT",
+            "TOGGLE_POWER_SAVE",
             "TOGGLE_SUFFIX",
             "TOGGLE_WEEK",
             "CHECK_DATE[6]"

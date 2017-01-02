@@ -41,7 +41,7 @@ module.exports = [
 				"defaultValue": "FFFFFF",
 				"sunlight": true,
 				"capabilities": ["NOT_BW"],
-			},
+			}
 		]
 	},
 	{
@@ -57,14 +57,6 @@ module.exports = [
 				"label": "Show bluetooth icon on disconnection",
 				"defaultValue": true,
 			},
-// 			{
-// 				"type": "color",
-// 				"messageKey": "COLOUR_BLUETOOTH",
-// 				"label": "Date colour on disconnection",
-// 				"defaultValue": "FF0000",
-// 				"sunlight": true,
-// 				"capabilities": ["NOT_BW"],
-// 			},
 			{
 				"type": "select",
 				"messageKey": "SELECT_BLUETOOTH",
@@ -94,7 +86,7 @@ module.exports = [
 				"messageKey": "TOGGLE_BLUETOOTH_QUIET_TIME",
 				"label": "Vibrate during Quiet Time",
 				"defaultValue": false,
-			},
+			}
 		]
  	},
 	
@@ -157,6 +149,13 @@ module.exports = [
 // 					}
 				]
 			},
+			{
+				"type": "toggle",
+				"messageKey": "TOGGLE_POWER_SAVE",
+				"label": "Power saver mode",
+				"description": "Hides the display until a flick/shake/tap of the watch",
+				"defaultValue": false,
+			}
 		]
  	},
  	{
@@ -179,15 +178,6 @@ module.exports = [
 				"defaultValue": false,
 				"capabilities": ["NOT_ROUND"],
 			},
-// 		]
-// 	},
-// 	{
-//  		"type": "section",
-//  		"items": [
-// 			{
-// 				"type": "heading",
-// 				"defaultValue": "Custom Text"
-// 			},
 			{
 				"type": "checkboxgroup",
 				"messageKey": "CHECK_DATE",

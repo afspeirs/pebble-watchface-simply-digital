@@ -18,6 +18,7 @@ typedef struct ClaySettings {
 	bool ToggleBluetoothQuietTime;
 	int SelectBluetooth;
 	int SelectBatteryPercent;
+	bool TogglePowerSave;
 	bool ToggleSuffix;
 	bool ToggleCalendarWeek;
 	bool CheckDate0;
@@ -39,6 +40,7 @@ static void config_default() {
 	settings.ToggleBluetoothQuietTime = false;
 	settings.SelectBluetooth	  = 2;
 	settings.SelectBatteryPercent = 0;
+	settings.TogglePowerSave	= false;
 	settings.ToggleSuffix		= false;
 	settings.ToggleCalendarWeek	= false;
 	settings.CheckDate0			= true;
@@ -97,6 +99,19 @@ void setColours() {
 	text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(settings.ColourBackground, settings.ColourDate));	// Set Bottom Colour
 }
 
+static void textHide() {
+	layer_set_hidden(text_layer_get_layer(s_text_hour), true);
+	layer_set_hidden(text_layer_get_layer(s_text_minute), true);
+	layer_set_hidden(text_layer_get_layer(s_text_top), true);
+	layer_set_hidden(text_layer_get_layer(s_text_bottom), true);
+}
+
+static void textShow() {
+	layer_set_hidden(text_layer_get_layer(s_text_hour), false);
+	layer_set_hidden(text_layer_get_layer(s_text_minute), false);
+	layer_set_hidden(text_layer_get_layer(s_text_top), false);
+	layer_set_hidden(text_layer_get_layer(s_text_bottom), false);
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 ////  Time & Date  ///////////////////////////////////////////////////////////////////////////////////
@@ -119,10 +134,6 @@ static void update_date() {
 	static char date_current[5], month_current[16], t_buffer[16], b_buffer[16];
 	strftime(date_current, sizeof(date_current), "%d%m", tick_time);
 	strftime(month_current, sizeof(month_current), "%B", tick_time);
-	
-	// 	APP_LOG(APP_LOG_LEVEL_DEBUG, "checkdate0: %d", settings.CheckDate0);
-	// 	APP_LOG(APP_LOG_LEVEL_DEBUG, "checkdate3: %d", settings.CheckDate3);
-	// 	APP_LOG(APP_LOG_LEVEL_DEBUG, "toggleSuffix: %d", settings.ToggleSuffix);
 	
 // Top
 	strftime(t_buffer, sizeof(t_buffer), "%A", tick_time);		// %A
@@ -147,14 +158,14 @@ static void update_date() {
 	} else if(strcmp("2612", date_current) == 0 && settings.CheckDate5) { // Boxing Day
 		strcpy(char_buffer, "Boxing  Day");
 		
-// Mother's Day US			May ish
-// Mother's Day UK			March ish
-// Father's Day US			
-// Father's Day UK			June ish
-// Independence Day (US)	4th July
-// Thanksgiving				A Thursday between the 22nd and the 28th
-// Black friday				Day after Thanksgiving
-// Rememberence Sunday (UK) A sunday from the 8th to the 14th november
+// Mother's Day US				May ish
+// Mother's Day UK				March ish
+// Father's Day US
+// Father's Day UK				June ish
+// Independence Day (US)		4th July
+// Thanksgiving					A Thursday between the 22nd and the 28th
+// Black friday					Day after Thanksgiving
+// Rememberence Sunday (UK)		A sunday from the 8th to the 14th november
 			
 	} else {
 // Day
@@ -194,8 +205,10 @@ static void update_date() {
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-	if(MINUTE_UNIT) {
-		update_time();
+	if(MINUTE_UNIT && units_changed) {
+		if(!settings.TogglePowerSave) {
+			update_time();	
+		}
 		if(quiet_time_is_active()) {
 			getQuietTimeIcon();
 			layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false);	// Visible
@@ -203,14 +216,23 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 			layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), true);	// Hidden
 		}
 	}
-	if(DAY_UNIT) {
-		update_date();	
+	if(DAY_UNIT && units_changed && !settings.TogglePowerSave) {
+		update_date();
 	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 ////  Callbacks  /////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
+
+static void accel_tap_handler(AccelAxisType axis, int32_t direction) {
+	if(settings.TogglePowerSave) {
+		update_time();
+		update_date();
+		textShow();
+		AppTimer *updateTimer = app_timer_register(5000, (AppTimerCallback) textHide, NULL);
+	}
+}
 
 static void battery_callback(BatteryChargeState state) {
 	if(state.charge_percent <= settings.SelectBatteryPercent) {
@@ -274,6 +296,8 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 // Battery
 	Tuple *bp_select_t = dict_find(iter, MESSAGE_KEY_SELECT_BATTERY_PERCENT);
 	if(bp_select_t) { settings.SelectBatteryPercent = atoi(bp_select_t->value->cstring); }
+	Tuple *bd_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_POWER_SAVE);
+	if(bd_toggle_t) { settings.TogglePowerSave = bd_toggle_t->value->int32 == 1; }
 // Bottom Text
 	Tuple *su_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_SUFFIX);
 	if(su_toggle_t) { settings.ToggleSuffix = su_toggle_t->value->int32 == 1; }
@@ -300,10 +324,16 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	appStarted = false;
 	bluetooth_callback(connection_service_peek_pebble_app_connection());
 	appStarted = true;
-	setColours();
-// 	update_time();
-	update_date();
-	
+
+	if(settings.TogglePowerSave) {
+		textHide();
+	} else {
+		setColours();
+// 		update_time();
+		update_date();
+		textShow();
+	}
+
 	if(quiet_time_is_active()) {
 		getQuietTimeIcon();
 		layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false);	// Visible
@@ -426,6 +456,12 @@ static void window_load(Window *window) {
 	setColours();
 	update_time();
 	update_date();
+	
+	if(settings.TogglePowerSave) {
+		textHide();
+	} else {
+		textShow();
+	}
 }
 
 static void window_unload(Window *window) {
@@ -460,6 +496,8 @@ static void init() {
   		.pebble_app_connection_handler = bluetooth_callback
 	});
 
+	accel_tap_service_subscribe(accel_tap_handler);
+	
 	app_message_register_inbox_received(inbox_received_handler);
 	app_message_open(256, 256);
 
