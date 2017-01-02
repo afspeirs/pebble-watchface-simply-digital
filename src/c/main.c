@@ -93,19 +93,24 @@ void setColours() {
 static void update_time() {
 	time_t temp = time(NULL); 
 	struct tm *tick_time = localtime(&temp);
-	static char h_buffer[3], m_buffer[3], t_buffer[16], b_buffer[16];
-	strftime(date_current, sizeof(date_current), "%d%m", tick_time);
-	strftime(month_current, sizeof(month_current), "%B", tick_time);
+	static char h_buffer[3], m_buffer[3];
 	
 	strftime(h_buffer, sizeof(h_buffer), clock_is_24h_style() ? "%H" : "%I", tick_time);	//%H %I
 	strftime(m_buffer, sizeof(m_buffer), "%M", tick_time);		//%M
 	text_layer_set_text(s_text_hour, h_buffer);
 	text_layer_set_text(s_text_minute, m_buffer);
-	
-// 	APP_LOG(APP_LOG_LEVEL_DEBUG, "checkdate0: %d", settings.CheckDate0);
-// 	APP_LOG(APP_LOG_LEVEL_DEBUG, "checkdate3: %d", settings.CheckDate3);
-// 	APP_LOG(APP_LOG_LEVEL_DEBUG, "toggleSuffix: %d", settings.ToggleSuffix);
+}
 
+static void update_date() {
+	time_t temp = time(NULL);
+	struct tm *tick_time = localtime(&temp);
+	static char t_buffer[16], b_buffer[16];
+	strftime(date_current, sizeof(date_current), "%d%m", tick_time);
+	strftime(month_current, sizeof(month_current), "%B", tick_time);
+	
+	// 	APP_LOG(APP_LOG_LEVEL_DEBUG, "checkdate0: %d", settings.CheckDate0);
+	// 	APP_LOG(APP_LOG_LEVEL_DEBUG, "checkdate3: %d", settings.CheckDate3);
+	// 	APP_LOG(APP_LOG_LEVEL_DEBUG, "toggleSuffix: %d", settings.ToggleSuffix);
 	
 // Top
 	strftime(t_buffer, sizeof(t_buffer), "%A", tick_time);		// %A
@@ -177,13 +182,18 @@ static void update_time() {
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-	update_time();
+	if (MINUTE_UNIT) {
+		update_time();
 	
-	if(quiet_time_is_active()) {
-		getQuietTimeIcon();
-		layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false);	// Visible
-	} else {
-		layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), true);	// Hidden
+		if(quiet_time_is_active()) {
+			getQuietTimeIcon();
+			layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false);	// Visible
+		} else {
+			layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), true);	// Hidden
+		}
+	}
+	if (DAY_UNIT) {
+		update_date();
 	}
 }
 
@@ -273,12 +283,14 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	
   	persist_write_data(SETTINGS_KEY, &settings, sizeof(settings));		// Write settings to persistent storage
 	
+// Update watchface with new settings
 	battery_callback(battery_state_service_peek());
 	appStarted = false;
 	bluetooth_callback(connection_service_peek_pebble_app_connection());
 	appStarted = true;
 	setColours();
-	update_time();
+// 	update_time();
+	update_date();
 	
 	if(quiet_time_is_active()) {
 		getQuietTimeIcon();
@@ -289,7 +301,6 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 		
 // 	APP_LOG(APP_LOG_LEVEL_DEBUG,"CheckDate0: %u", dt0_check_t->value->uint16);
 // 	APP_LOG(APP_LOG_LEVEL_DEBUG, "checkdate0: %d", settings.CheckDate0);
-
 }
 
 void unobstructed_change(AnimationProgress progress, void* data) {
@@ -393,6 +404,7 @@ static void window_load(Window *window) {
 	appStarted = true;
 	setColours();
 	update_time();
+	update_date();
 }
 
 static void window_unload(Window *window) {
@@ -433,7 +445,7 @@ static void init() {
 	battery_state_service_subscribe(battery_callback);
 	battery_callback(battery_state_service_peek());
 
-	tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
+	tick_timer_service_subscribe(MINUTE_UNIT | DAY_UNIT, tick_handler); 
 }
 
 static void deinit() {
