@@ -5,9 +5,8 @@
 static Window *s_window;
 static TextLayer *s_text_hour, *s_text_minute, *s_text_top, *s_text_bottom;
 static GFont s_font_time, s_font_date;
-static BitmapLayer *s_layer_battery, *s_layer_quiet;
-static GBitmap *s_bitmap_battery, *s_bitmap_quiet;
-char date_current[5], month_current[16];
+static BitmapLayer *s_layer_battery, *s_layer_bluetooth, *s_layer_quiet;
+static GBitmap *s_bitmap_battery, *s_bitmap_bluetooth, *s_bitmap_quiet;
 static bool appStarted = false;
 
 typedef struct ClaySettings {
@@ -15,7 +14,7 @@ typedef struct ClaySettings {
 	GColor ColourHour;
 	GColor ColourMinute;
 	GColor ColourDate;
-	GColor ColourBluetooth;
+	bool ToggleBluetooth;
 	bool ToggleBluetoothQuietTime;
 	int SelectBluetooth;
 	int SelectBatteryPercent;
@@ -36,7 +35,7 @@ static void config_default() {
 	settings.ColourHour			= PBL_IF_BW_ELSE(GColorWhite,GColorChromeYellow);
 	settings.ColourMinute		= GColorWhite;
 	settings.ColourDate			= GColorWhite;
-	settings.ColourBluetooth	= GColorRed;
+	settings.ToggleBluetooth	= true;
 	settings.ToggleBluetoothQuietTime = false;
 	settings.SelectBluetooth	  = 2;
 	settings.SelectBatteryPercent = 0;
@@ -55,8 +54,9 @@ static void config_load() {
 	persist_read_data(SETTINGS_KEY, &settings, sizeof(settings));		// Read settings from persistent storage, if they exist
 }
 
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////// Methods /////////////////////////////////////////////////////////////////////////////////
+////  Methods  ///////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void getBatteryIcon() {
@@ -67,6 +67,16 @@ void getBatteryIcon() {
 		s_bitmap_battery = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BATTERY_WHITE);
 	}
 	bitmap_layer_set_bitmap(s_layer_battery, s_bitmap_battery);
+}
+
+void getBluetoothIcon() {
+	gbitmap_destroy(s_bitmap_bluetooth);
+	if (gcolor_equal(gcolor_legible_over(settings.ColourBackground), GColorBlack)) {
+		s_bitmap_bluetooth = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BLUETOOTH_BLACK);
+	} else {
+		s_bitmap_bluetooth = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_BLUETOOTH_WHITE);
+	}
+	bitmap_layer_set_bitmap(s_layer_bluetooth, s_bitmap_bluetooth);
 }
 
 void getQuietTimeIcon() {
@@ -83,11 +93,13 @@ void setColours() {
 	window_set_background_color(s_window, settings.ColourBackground);																	// Set Background Colour
 	text_layer_set_text_color(s_text_hour, PBL_IF_BW_ELSE(gcolor_legible_over(settings.ColourBackground), settings.ColourHour));		// Set Hour Colour
 	text_layer_set_text_color(s_text_minute, PBL_IF_BW_ELSE(gcolor_legible_over(settings.ColourBackground), settings.ColourMinute));	// Set Minute Colour
+	text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(settings.ColourBackground, settings.ColourDate));		// Set Top Colour
+	text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(settings.ColourBackground, settings.ColourDate));	// Set Bottom Colour
 }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////// Time & Date /////////////////////////////////////////////////////////////////////////////
+////  Time & Date  ///////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void update_time() {
@@ -104,7 +116,7 @@ static void update_time() {
 static void update_date() {
 	time_t temp = time(NULL);
 	struct tm *tick_time = localtime(&temp);
-	static char t_buffer[16], b_buffer[16];
+	static char date_current[5], month_current[16], t_buffer[16], b_buffer[16];
 	strftime(date_current, sizeof(date_current), "%d%m", tick_time);
 	strftime(month_current, sizeof(month_current), "%B", tick_time);
 	
@@ -182,9 +194,8 @@ static void update_date() {
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-	if (MINUTE_UNIT) {
+	if(MINUTE_UNIT) {
 		update_time();
-	
 		if(quiet_time_is_active()) {
 			getQuietTimeIcon();
 			layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false);	// Visible
@@ -192,13 +203,13 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 			layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), true);	// Hidden
 		}
 	}
-	if (DAY_UNIT) {
-		update_date();
+	if(DAY_UNIT) {
+		update_date();	
 	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////// Callbacks ///////////////////////////////////////////////////////////////////////////////
+////  Callbacks  /////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void battery_callback(BatteryChargeState state) {
@@ -227,8 +238,6 @@ static void battery_callback(BatteryChargeState state) {
 
 static void bluetooth_callback(bool connected) {													  	
 	if(!connected) {
-		text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(settings.ColourBackground, settings.ColourBluetooth));		// Set Top Colour
-		text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(settings.ColourBackground, settings.ColourBluetooth));	// Set Bottom Colour
 		if(appStarted && !(quiet_time_is_active() && !settings.ToggleBluetoothQuietTime)) {
 			if(settings.SelectBluetooth == 0) { }								// No vibration 
 			else if(settings.SelectBluetooth == 1) { vibes_short_pulse(); }		// Short vibration
@@ -236,9 +245,12 @@ static void bluetooth_callback(bool connected) {
 			else if(settings.SelectBluetooth == 3) { vibes_double_pulse(); }	// Double vibration
 			else { vibes_long_pulse(); }					 // Default			// Long Vibration
 		}
+		if(settings.ToggleBluetooth) {
+			getBluetoothIcon();
+			layer_set_hidden(bitmap_layer_get_layer(s_layer_bluetooth), false);	// Visible	
+		}
 	} else {
-		text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(gcolor_legible_over(settings.ColourBackground), settings.ColourDate));		// Set Top Colour
-		text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(gcolor_legible_over(settings.ColourBackground), settings.ColourDate));	// Set Bottom Colour
+		layer_set_hidden(bitmap_layer_get_layer(s_layer_bluetooth), true);	// Hidden
 	}	
 }
 
@@ -252,9 +264,9 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	if(mn_colour_t) { settings.ColourMinute = GColorFromHEX(mn_colour_t->value->int32); }
 	Tuple *dt_colour_t = dict_find(iter, MESSAGE_KEY_COLOUR_DATE);
 	if(dt_colour_t) { settings.ColourDate = GColorFromHEX(dt_colour_t->value->int32); }
-	Tuple *bt_colour_t = dict_find(iter, MESSAGE_KEY_COLOUR_BLUETOOTH);
-	if(bt_colour_t) { settings.ColourBluetooth = GColorFromHEX(bt_colour_t->value->int32); }
 // Bluetooth
+	Tuple *bt_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_BLUETOOTH);
+	if(bt_toggle_t) { settings.ToggleBluetooth = bt_toggle_t->value->int32 == 1; }
 	Tuple *bq_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_BLUETOOTH_QUIET_TIME);
 	if(bq_toggle_t) { settings.ToggleBluetoothQuietTime = bq_toggle_t->value->int32 == 1; }
 	Tuple *bt_select_t = dict_find(iter, MESSAGE_KEY_SELECT_BLUETOOTH);
@@ -313,7 +325,7 @@ void unobstructed_change(AnimationProgress progress, void* data) {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////// Window //////////////////////////////////////////////////////////////////////////////////
+////  Window  ////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void window_load(Window *window) {
@@ -328,13 +340,15 @@ static void window_load(Window *window) {
 	#if PBL_DISPLAY_HEIGHT == 180			// Chalk
 		s_text_hour		= text_layer_create(GRect(			   10, bounds.size.h / 2 - 47, bounds.size.w/2-10, 75));
 		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2-10, 75));
-		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 26, bounds.size.w,    30));
-		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4-10, bounds.size.w,    30));
+		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 26, bounds.size.w,	   30));
+		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4-10, bounds.size.w,	   30));
+		s_layer_bluetooth = bitmap_layer_create(GRect(bounds.size.w/2-3, bounds.size.h-15, 7,  11));			// bluetooth										// TODO: fix this value
 	#else									// Aplite, Basalt, Diorite
 		s_text_hour		= text_layer_create(GRect(				0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
 		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
 		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 31, bounds.size.w,   30));
 		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4 -5, bounds.size.w,   30));
+		s_layer_bluetooth = bitmap_layer_create(GRect(bounds.size.w-13, 3, 7,  11));							// bluetooth
 	#endif
 	
 	// Show Quiet Time icon when active, and move battery 
@@ -365,6 +379,13 @@ static void window_load(Window *window) {
 		bitmap_layer_set_compositing_mode(s_layer_battery, GCompOpSet);	
 	#endif
 	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_layer_battery));
+
+// Battery Icon
+	layer_mark_dirty(bitmap_layer_get_layer(s_layer_bluetooth));
+	#if defined(PBL_COLOR)
+		bitmap_layer_set_compositing_mode(s_layer_bluetooth, GCompOpSet);	
+	#endif
+	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_layer_bluetooth));
 	
 // Quiet Time Icon
 	layer_mark_dirty(bitmap_layer_get_layer(s_layer_quiet));
@@ -417,7 +438,7 @@ static void window_unload(Window *window) {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////// Other ///////////////////////////////////////////////////////////////////////////////////
+////  Other  /////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void init() {
@@ -450,8 +471,10 @@ static void init() {
 
 static void deinit() {
 	gbitmap_destroy(s_bitmap_battery);
+	gbitmap_destroy(s_bitmap_bluetooth);
 	gbitmap_destroy(s_bitmap_quiet);
 	bitmap_layer_destroy(s_layer_battery);
+	bitmap_layer_destroy(s_layer_bluetooth);
 	bitmap_layer_destroy(s_layer_quiet);
 	
 	tick_timer_service_unsubscribe();
@@ -465,3 +488,7 @@ int main(void) {
 }
 
 //	APP_LOG(APP_LOG_LEVEL_DEBUG, select_battery_percent);
+
+///////////////////////////////////////////////////////////////////////////
+////  End  ////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////

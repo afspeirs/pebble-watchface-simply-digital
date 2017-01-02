@@ -16,7 +16,7 @@
             "COLOUR_HOUR",
             "COLOUR_MINUTE",
             "COLOUR_DATE",
-            "COLOUR_BLUETOOTH",
+            "TOGGLE_BLUETOOTH",
             "SELECT_BLUETOOTH",
             "TOGGLE_BLUETOOTH_QUIET_TIME",
             "SELECT_BATTERY_PERCENT",
@@ -27,6 +27,19 @@
         "projectType": "native",
         "resources": {
             "media": [
+                {
+                    "file": "images/IMG_Bluetooth_White.png",
+                    "name": "IMAGE_BLUETOOTH_WHITE",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/IMG_Bluetooth_Black.png",
+                    "name": "IMAGE_BLUETOOTH_BLACK",
+                    "storageFormat": "png",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
                 {
                     "file": "images/IMG_QuietTime_White.png",
                     "name": "IMAGE_QUIET_TIME_WHITE",

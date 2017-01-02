@@ -52,13 +52,19 @@ module.exports = [
 				"defaultValue": "Bluetooth"
 			},
 			{
-				"type": "color",
-				"messageKey": "COLOUR_BLUETOOTH",
-				"label": "Date colour on disconnection",
-				"defaultValue": "FF0000",
-				"sunlight": true,
-				"capabilities": ["NOT_BW"],
+				"type": "toggle",
+				"messageKey": "TOGGLE_BLUETOOTH",
+				"label": "Show bluetooth icon on disconnection",
+				"defaultValue": true,
 			},
+// 			{
+// 				"type": "color",
+// 				"messageKey": "COLOUR_BLUETOOTH",
+// 				"label": "Date colour on disconnection",
+// 				"defaultValue": "FF0000",
+// 				"sunlight": true,
+// 				"capabilities": ["NOT_BW"],
+// 			},
 			{
 				"type": "select",
 				"messageKey": "SELECT_BLUETOOTH",
