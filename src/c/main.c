@@ -95,8 +95,8 @@ void setColours() {
 	window_set_background_color(s_window, settings.ColourBackground);																	// Set Background Colour
 	text_layer_set_text_color(s_text_hour, PBL_IF_BW_ELSE(gcolor_legible_over(settings.ColourBackground), settings.ColourHour));		// Set Hour Colour
 	text_layer_set_text_color(s_text_minute, PBL_IF_BW_ELSE(gcolor_legible_over(settings.ColourBackground), settings.ColourMinute));	// Set Minute Colour
-	text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(settings.ColourBackground, settings.ColourDate));		// Set Top Colour
-	text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(settings.ColourBackground, settings.ColourDate));	// Set Bottom Colour
+	text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(gcolor_legible_over(settings.ColourBackground), settings.ColourDate));		// Set Top Colour
+	text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(gcolor_legible_over(settings.ColourBackground), settings.ColourDate));	// Set Bottom Colour
 }
 
 static void textHide() {
