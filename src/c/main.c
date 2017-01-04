@@ -8,6 +8,7 @@ static GFont s_font_time, s_font_date;
 static BitmapLayer *s_layer_battery, *s_layer_bluetooth, *s_layer_quiet;
 static GBitmap *s_bitmap_battery, *s_bitmap_bluetooth, *s_bitmap_quiet;
 static bool appStarted = false;
+char b_buffer[16], b_bufferCustom[16];
 
 typedef struct ClaySettings {
 	GColor ColourBackground;
@@ -99,6 +100,13 @@ void setColours() {
 	text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(gcolor_legible_over(settings.ColourBackground), settings.ColourDate));	// Set Bottom Colour
 }
 
+// static void textVisible(bool visible) {
+// 	layer_set_hidden(text_layer_get_layer(s_text_hour), !visible);
+// 	layer_set_hidden(text_layer_get_layer(s_text_minute), !visible);
+// 	layer_set_hidden(text_layer_get_layer(s_text_top), !visible);
+// 	layer_set_hidden(text_layer_get_layer(s_text_bottom), !visible);
+// }
+
 static void textHide() {
 	layer_set_hidden(text_layer_get_layer(s_text_hour), true);
 	layer_set_hidden(text_layer_get_layer(s_text_minute), true);
@@ -112,6 +120,11 @@ static void textShow() {
 	layer_set_hidden(text_layer_get_layer(s_text_top), false);
 	layer_set_hidden(text_layer_get_layer(s_text_bottom), false);
 }
+
+static void dateResetToCustom() {
+	text_layer_set_text(s_text_bottom, b_bufferCustom);
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 ////  Time & Date  ///////////////////////////////////////////////////////////////////////////////////
@@ -131,33 +144,35 @@ static void update_time() {
 static void update_date() {
 	time_t temp = time(NULL);
 	struct tm *tick_time = localtime(&temp);
-	static char date_current[5], month_current[16], t_buffer[16], b_buffer[16];
+	static char date_current[5], month_current[16], t_buffer[16];
 	strftime(date_current, sizeof(date_current), "%d%m", tick_time);
 	strftime(month_current, sizeof(month_current), "%B", tick_time);
-	
+
 // Top
 	strftime(t_buffer, sizeof(t_buffer), "%A", tick_time);		// %A
 // Bottom
-	char char_buffer[16] = "";
 	if(strcmp("0104", date_current) == 0) {	// April Fools
-		strcpy(char_buffer, "April  Fools");
+		strcpy(b_bufferCustom, "April  Fools");
 	} else if(strcmp("0101", date_current) == 0 && settings.CheckDate0) { // New Year's Day
-		strcpy(char_buffer, "Happy  %Y");
+		strftime(b_bufferCustom, sizeof(b_bufferCustom), "Happy  %Y", tick_time);
 	} else if(strcmp("2501", date_current) == 0 && settings.CheckDate1) { // Burns Night
-		strcpy(char_buffer, "Burns  Night");
+		strcpy(b_bufferCustom, "Burns  Night");
 	} else if(strcmp("3110", date_current) == 0 && settings.CheckDate2) { // Halloween
-		strcpy(char_buffer, "Halloween");	
+		strcpy(b_bufferCustom, "Halloween");
 	} else if(strcmp("2412", date_current) == 0 && settings.CheckDate3) { // Christmas Eve
 		#if PBL_DISPLAY_HEIGHT == 180			// Chalk
-			strcpy(char_buffer, "xmas  Eve");
+			strcpy(b_bufferCustom, "xmas  Eve");
 		#else
-			strcpy(char_buffer, "Christmas  Eve");
+			strcpy(b_bufferCustom, "Christmas  Eve");
 		#endif
 	} else if(strcmp("2512", date_current) == 0 && settings.CheckDate4) { // Christmas
-		strcpy(char_buffer, "Christmas");
+		strcpy(b_bufferCustom, "Christmas");
 	} else if(strcmp("2612", date_current) == 0 && settings.CheckDate5) { // Boxing Day
-		strcpy(char_buffer, "Boxing  Day");
-		
+		strcpy(b_bufferCustom, "Boxing  Day");
+	} else {
+		strcpy(b_bufferCustom, "");
+	}
+			
 // Mother's Day US				May ish
 // Mother's Day UK				March ish
 // Father's Day US
@@ -166,42 +181,48 @@ static void update_date() {
 // Thanksgiving					A Thursday between the 22nd and the 28th
 // Black friday					Day after Thanksgiving
 // Rememberence Sunday (UK)		A sunday from the 8th to the 14th november
-			
-	} else {
+
 // Day
-		strcpy(char_buffer,"%e");
-		if(settings.ToggleSuffix) {
-			if (strncmp(date_current, "01", 2) == 0 || strncmp(date_current, "21", 2) == 0 || strncmp(date_current,"31",2) == 0) { 
-				strcat(char_buffer,"st");
-			} else if (strncmp(date_current, "02", 2) == 0 || strncmp(date_current, "22", 2) == 0) {
-				strcat(char_buffer,"nd");
-			} else if (strncmp(date_current, "03", 2) == 0 || strncmp(date_current, "23", 2) == 0) { 
-				strcat(char_buffer,"rd");
-			} else {
-				strcat(char_buffer,"th");
-			}
+	char char_buffer[16] = "%e";
+	if(settings.ToggleSuffix) {
+		if (strncmp(date_current, "01", 2) == 0 || strncmp(date_current, "21", 2) == 0 || strncmp(date_current,"31",2) == 0) { 
+			strcat(char_buffer,"st");
+		} else if (strncmp(date_current, "02", 2) == 0 || strncmp(date_current, "22", 2) == 0) {
+			strcat(char_buffer,"nd");
+		} else if (strncmp(date_current, "03", 2) == 0 || strncmp(date_current, "23", 2) == 0) { 
+			strcat(char_buffer,"rd");
+		} else {
+			strcat(char_buffer,"th");
 		}
-// Month
-		#if PBL_DISPLAY_HEIGHT == 180			// Chalk
-			if(strlen(month_current) > 5) {
-				strcat(char_buffer,"  %b"); 	// Short
-			} else {
-				strcat(char_buffer,"  %B");
-			}
-		#else									// Aplite, Basalt, Diorite
-			if(strlen(month_current) > 7 || settings.ToggleCalendarWeek) {
-				strcat(char_buffer,"  %b"); 	// Short
-				if(settings.ToggleCalendarWeek) {
-					strcat(char_buffer,"  W%V");
-				}
-			} else {
-				strcat(char_buffer,"  %B");
-			}
-		#endif
 	}
+// Month
+	#if PBL_DISPLAY_HEIGHT == 180			// Chalk
+		if(strlen(month_current) > 5) {
+			strcat(char_buffer,"  %b"); 	// Short
+		} else {
+			strcat(char_buffer,"  %B");
+		}
+	#else									// Aplite, Basalt, Diorite
+		if(strlen(month_current) > 7 || settings.ToggleCalendarWeek) {
+			strcat(char_buffer,"  %b"); 	// Short
+			if(settings.ToggleCalendarWeek) {
+				strcat(char_buffer,"  W%V");
+			}
+		} else {
+			strcat(char_buffer,"  %B");
+		}
+	#endif
 	strftime(b_buffer, sizeof(char_buffer), char_buffer, tick_time);
+	
 	text_layer_set_text(s_text_top, t_buffer);
-	text_layer_set_text(s_text_bottom, b_buffer);
+	if(strcmp(b_bufferCustom, "\0") != 0) {
+		text_layer_set_text(s_text_bottom, b_bufferCustom);
+	} else {
+		text_layer_set_text(s_text_bottom, b_buffer);
+	}
+		
+// 	APP_LOG(APP_LOG_LEVEL_DEBUG, b_buffer);
+// 	APP_LOG(APP_LOG_LEVEL_DEBUG, b_bufferCustom);
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -221,6 +242,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 	}
 }
 
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 ////  Callbacks  /////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -230,7 +252,12 @@ static void accel_tap_handler(AccelAxisType axis, int32_t direction) {
 		update_time();
 		update_date();
 		textShow();
-		AppTimer *updateTimer = app_timer_register(5000, (AppTimerCallback) textHide, NULL);
+		AppTimer *updateTimer = app_timer_register(4000, (AppTimerCallback) textHide, NULL);
+	} else {
+		if(strcmp(b_bufferCustom, "\0") != 0) {
+			text_layer_set_text(s_text_bottom, b_buffer);
+			AppTimer *updateTimer = app_timer_register(4000, (AppTimerCallback) dateResetToCustom, NULL);
+		}
 	}
 }
 
@@ -354,6 +381,7 @@ void unobstructed_change(AnimationProgress progress, void* data) {
 	layer_set_frame(text_layer_get_layer(s_text_bottom),GRect(				0, bounds.size.h * 3/4 -5, bounds.size.w,   30));
 }
 
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 ////  Window  ////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -473,6 +501,7 @@ static void window_unload(Window *window) {
 	fonts_unload_custom_font(s_font_date);
 }
 
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 ////  Other  /////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -525,7 +554,8 @@ int main(void) {
 	deinit();
 }
 
-//	APP_LOG(APP_LOG_LEVEL_DEBUG, select_battery_percent);
+//	APP_LOG(APP_LOG_LEVEL_DEBUG, char_bufferCustom);
+
 
 ///////////////////////////////////////////////////////////////////////////
 ////  End  ////////////////////////////////////////////////////////////////
