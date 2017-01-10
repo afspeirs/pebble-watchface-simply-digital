@@ -193,7 +193,7 @@ module.exports = [
 	},
 	{
 		"type": "text",
-		"defaultValue": " Version 1.6",
+		"defaultValue": " Version 1.7",
 	},
 ];
 

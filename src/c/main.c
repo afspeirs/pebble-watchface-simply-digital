@@ -351,11 +351,11 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	appStarted = false;
 	bluetooth_callback(connection_service_peek_pebble_app_connection());
 	appStarted = true;
-
+	setColours();
+	
 	if(settings.TogglePowerSave) {
 		textHide();
 	} else {
-		setColours();
 // 		update_time();
 		update_date();
 		textShow();
