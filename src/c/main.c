@@ -76,29 +76,15 @@ void setColours() {
 	window_set_background_color(s_window, settings.ColourBackground);																	// Set Background Colour
 	text_layer_set_text_color(s_text_hour, PBL_IF_BW_ELSE(gcolor_legible_over(settings.ColourBackground), settings.ColourHour));		// Set Hour Colour
 	text_layer_set_text_color(s_text_minute, PBL_IF_BW_ELSE(gcolor_legible_over(settings.ColourBackground), settings.ColourMinute));	// Set Minute Colour
-	text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(gcolor_legible_over(settings.ColourBackground), settings.ColourDate));		// Set Top Colour
-	text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(gcolor_legible_over(settings.ColourBackground), settings.ColourDate));	// Set Bottom Colour
+	text_layer_set_text_color(s_text_top, PBL_IF_BW_ELSE(gcolor_legible_over(settings.ColourBackground), settings.ColourDate));			// Set Top Colour
+	text_layer_set_text_color(s_text_bottom, PBL_IF_BW_ELSE(gcolor_legible_over(settings.ColourBackground), settings.ColourDate));		// Set Bottom Colour
 }
 
-// static void textVisible(bool visible) {
-// 	layer_set_hidden(text_layer_get_layer(s_text_hour), !visible);
-// 	layer_set_hidden(text_layer_get_layer(s_text_minute), !visible);
-// 	layer_set_hidden(text_layer_get_layer(s_text_top), !visible);
-// 	layer_set_hidden(text_layer_get_layer(s_text_bottom), !visible);
-// }
-
-static void textHide() {
-	layer_set_hidden(text_layer_get_layer(s_text_hour), true);
-	layer_set_hidden(text_layer_get_layer(s_text_minute), true);
-	layer_set_hidden(text_layer_get_layer(s_text_top), true);
-	layer_set_hidden(text_layer_get_layer(s_text_bottom), true);
-}
-
-static void textShow() {
-	layer_set_hidden(text_layer_get_layer(s_text_hour), false);
-	layer_set_hidden(text_layer_get_layer(s_text_minute), false);
-	layer_set_hidden(text_layer_get_layer(s_text_top), false);
-	layer_set_hidden(text_layer_get_layer(s_text_bottom), false);
+void textToggle(bool hide) {
+	layer_set_hidden(text_layer_get_layer(s_text_hour), !hide);
+	layer_set_hidden(text_layer_get_layer(s_text_minute), !hide);
+	layer_set_hidden(text_layer_get_layer(s_text_top), !hide);
+	layer_set_hidden(text_layer_get_layer(s_text_bottom), !hide);
 }
 
 static void dateResetToCustom() {
@@ -231,12 +217,12 @@ static void accel_tap_handler(AccelAxisType axis, int32_t direction) {
 	if(settings.TogglePowerSave) {
 		update_time();
 		update_date();
-		textShow();
-		AppTimer *updateTimer = app_timer_register(4000, (AppTimerCallback) textHide, NULL);
+		textToggle(true);     //Show
+		AppTimer *updateTimer = app_timer_register(3500, (AppTimerCallback) textToggle, false); // Hide after 3 seconds
 	} else {
 		if(strcmp(b_bufferCustom, "\0") != 0) {
 			text_layer_set_text(s_text_bottom, b_buffer);
-			AppTimer *updateTimer = app_timer_register(4000, (AppTimerCallback) dateResetToCustom, NULL);
+			AppTimer *updateTimer = app_timer_register(3500, (AppTimerCallback) dateResetToCustom, NULL);
 		}
 	}
 }
@@ -334,11 +320,11 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	setColours();
 	
 	if(settings.TogglePowerSave) {
-		textHide();
+		textToggle(false);    // Hide
 	} else {
 // 		update_time();
 		update_date();
-		textShow();
+		textToggle(true);     // Show
 	}
 
 	if(quiet_time_is_active()) {
@@ -348,7 +334,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 		layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), true);	// Hidden
 	}
 		
-// 	APP_LOG(APP_LOG_LEVEL_DEBUG,"CheckDate0: %u", dt0_check_t->value->uint16);
+// 	APP_LOG(APP_LOG_LEVEL_DEBUG, "CheckDate0: %u", dt0_check_t->value->uint16);
 // 	APP_LOG(APP_LOG_LEVEL_DEBUG, "checkdate0: %d", settings.CheckDate0);
 }
 
@@ -466,9 +452,9 @@ static void window_load(Window *window) {
 	update_date();
 	
 	if(settings.TogglePowerSave) {
-		textHide();
+		textToggle(false);    // Hide
 	} else {
-		textShow();
+		textToggle(true);     // Show
 	}
 }
 
