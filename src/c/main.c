@@ -201,6 +201,11 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 			layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false);	// Visible
 		} else {
 			layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), true);	// Hidden
+			#if PBL_DISPLAY_HEIGHT == 180			// Chalk
+				layer_set_frame(bitmap_layer_get_layer(s_layer_battery),GRect(84, 10, 13,  6));	// battery
+			#else									// Aplite, Basalt, Diorite
+				layer_set_frame(bitmap_layer_get_layer(s_layer_battery),GRect(6, 4, 13,  6));	// battery
+			#endif
 		}
 	}
 	if(DAY_UNIT && units_changed && !settings.TogglePowerSave) {
