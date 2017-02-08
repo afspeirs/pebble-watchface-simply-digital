@@ -152,7 +152,7 @@ module.exports = [
 			{
 				"type": "toggle",
 				"messageKey": "TOGGLE_POWER_SAVE",
-				"label": "Power saver mode",
+				"label": "Enable \"Power Save\" mode",
 				"description": "Hides the display until a flick/shake/tap of the watch",
 				"defaultValue": false,
 			}

@@ -178,7 +178,7 @@ static void update_date() {
 			strcat(char_buffer,"  %B");
 		}
 	#endif
-	strftime(b_buffer, sizeof(char_buffer), char_buffer, tick_time);
+	strftime(b_buffer, sizeof(char_buffer), char_buffer, tick_time);	
 	
 	text_layer_set_text(s_text_top, t_buffer);
 	if(strcmp(b_bufferCustom, "\0") != 0) {
