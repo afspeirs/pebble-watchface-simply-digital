@@ -69,7 +69,7 @@ void getIcon(GBitmap *bitmap, BitmapLayer *bitmapLayer, int imageBlack, int imag
 	} else {
 		bitmap = gbitmap_create_with_resource(imageWhite);
 	}
-	bitmap_layer_set_bitmap(bitmapLayer, bitmap);	
+	bitmap_layer_set_bitmap(bitmapLayer, bitmap);
 }
 
 void setColours() {
@@ -97,10 +97,10 @@ static void dateResetToCustom() {
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void update_time() {
-	time_t temp = time(NULL); 
+	time_t temp = time(NULL);
 	struct tm *tick_time = localtime(&temp);
 	static char h_buffer[3], m_buffer[3];
-	
+
 	strftime(h_buffer, sizeof(h_buffer), clock_is_24h_style() ? "%H" : "%I", tick_time);	//%H %I
 	strftime(m_buffer, sizeof(m_buffer), "%M", tick_time);		//%M
 	text_layer_set_text(s_text_hour, h_buffer);
@@ -138,7 +138,7 @@ static void update_date() {
 	} else {
 		strcpy(b_bufferCustom, "");
 	}
-			
+
 // Mother's Day US				May ish
 // Mother's Day UK				March ish
 // Father's Day US
@@ -151,11 +151,11 @@ static void update_date() {
 // Day
 	char char_buffer[16] = "%e";
 	if(settings.ToggleSuffix) {
-		if (strncmp(date_current, "01", 2) == 0 || strncmp(date_current, "21", 2) == 0 || strncmp(date_current,"31",2) == 0) { 
+		if (strncmp(date_current, "01", 2) == 0 || strncmp(date_current, "21", 2) == 0 || strncmp(date_current,"31",2) == 0) {
 			strcat(char_buffer,"st");
 		} else if (strncmp(date_current, "02", 2) == 0 || strncmp(date_current, "22", 2) == 0) {
 			strcat(char_buffer,"nd");
-		} else if (strncmp(date_current, "03", 2) == 0 || strncmp(date_current, "23", 2) == 0) { 
+		} else if (strncmp(date_current, "03", 2) == 0 || strncmp(date_current, "23", 2) == 0) {
 			strcat(char_buffer,"rd");
 		} else {
 			strcat(char_buffer,"th");
@@ -178,23 +178,23 @@ static void update_date() {
 			strcat(char_buffer,"  %B");
 		}
 	#endif
-	strftime(b_buffer, sizeof(char_buffer), char_buffer, tick_time);	
-	
+	strftime(b_buffer, sizeof(char_buffer), char_buffer, tick_time);
+
 	text_layer_set_text(s_text_top, t_buffer);
 	if(strcmp(b_bufferCustom, "\0") != 0) {
 		text_layer_set_text(s_text_bottom, b_bufferCustom);
 	} else {
 		text_layer_set_text(s_text_bottom, b_buffer);
 	}
-		
-// 	APP_LOG(APP_LOG_LEVEL_DEBUG, b_buffer);
-// 	APP_LOG(APP_LOG_LEVEL_DEBUG, b_bufferCustom);
+
+	// APP_LOG(APP_LOG_LEVEL_DEBUG, b_buffer);
+	// APP_LOG(APP_LOG_LEVEL_DEBUG, b_bufferCustom);
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 	if(MINUTE_UNIT && units_changed) {
 		if(!settings.TogglePowerSave) {
-			update_time();	
+			update_time();
 		}
 		if(quiet_time_is_active()) {
 			getIcon(s_bitmap_quiet, s_layer_quiet, RESOURCE_ID_IMAGE_QUIET_TIME_BLACK, RESOURCE_ID_IMAGE_QUIET_TIME_WHITE);
@@ -222,7 +222,7 @@ static void accel_tap_handler(AccelAxisType axis, int32_t direction) {
 	if(settings.TogglePowerSave) {
 		update_time();
 		update_date();
-		textToggle(true);     //Show
+		textToggle(true);		//Show
 		AppTimer *updateTimer = app_timer_register(3500, (AppTimerCallback) textToggle, false); // Hide after 3 seconds
 	} else {
 		if(strcmp(b_bufferCustom, "\0") != 0) {
@@ -239,7 +239,7 @@ static void battery_callback(BatteryChargeState state) {
 	} else {
 		layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), true);	// Hidden
 	}
-	
+
 	// Move battery when in quiet time, and move to original location if not
 	if(quiet_time_is_active()) {
 		#if PBL_DISPLAY_HEIGHT == 180			// Chalk
@@ -256,10 +256,10 @@ static void battery_callback(BatteryChargeState state) {
 	}
 }
 
-static void bluetooth_callback(bool connected) {													  	
+static void bluetooth_callback(bool connected) {
 	if(!connected) {
 		if(appStarted && !(quiet_time_is_active() && !settings.ToggleBluetoothQuietTime)) {
-			if(settings.SelectBluetooth == 0) { }								// No vibration 
+			if(settings.SelectBluetooth == 0) { }								// No vibration
 			else if(settings.SelectBluetooth == 1) { vibes_short_pulse(); }		// Short vibration
 			else if(settings.SelectBluetooth == 2) { vibes_long_pulse(); }		// Long vibration
 			else if(settings.SelectBluetooth == 3) { vibes_double_pulse(); }	// Double vibration
@@ -267,11 +267,11 @@ static void bluetooth_callback(bool connected) {
 		}
 		if(settings.ToggleBluetooth) {
 			getIcon(s_bitmap_bluetooth, s_layer_bluetooth, RESOURCE_ID_IMAGE_BLUETOOTH_BLACK, RESOURCE_ID_IMAGE_BLUETOOTH_WHITE);
-			layer_set_hidden(bitmap_layer_get_layer(s_layer_bluetooth), false);	// Visible	
+			layer_set_hidden(bitmap_layer_get_layer(s_layer_bluetooth), false);	// Visible
 		}
 	} else {
 		layer_set_hidden(bitmap_layer_get_layer(s_layer_bluetooth), true);	// Hidden
-	}	
+	}
 }
 
 static void inbox_received_handler(DictionaryIterator *iter, void *context) {
@@ -314,33 +314,33 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 	if(dt4_check_t) { settings.CheckDate4 = dt4_check_t->value->uint16; }
 	Tuple *dt5_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE+5);
 	if(dt5_check_t) { settings.CheckDate5 = dt5_check_t->value->uint16; }
-	
-  	persist_write_data(SETTINGS_KEY, &settings, sizeof(settings));		// Write settings to persistent storage
-	
+
+	persist_write_data(SETTINGS_KEY, &settings, sizeof(settings));		// Write settings to persistent storage
+
 // Update watchface with new settings
 	battery_callback(battery_state_service_peek());
 	appStarted = false;
 	bluetooth_callback(connection_service_peek_pebble_app_connection());
 	appStarted = true;
 	setColours();
-	
+
 	if(settings.TogglePowerSave) {
-		textToggle(false);    // Hide
+		textToggle(false);		// Hide
 	} else {
-// 		update_time();
+		// update_time();
 		update_date();
-		textToggle(true);     // Show
+		textToggle(true);		// Show
 	}
 
 	if(quiet_time_is_active()) {
 		getIcon(s_bitmap_quiet, s_layer_quiet, RESOURCE_ID_IMAGE_QUIET_TIME_BLACK, RESOURCE_ID_IMAGE_QUIET_TIME_WHITE);
-		layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false);	// Visible
+		layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false);		// Visible
 	} else {
-		layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), true);	// Hidden
+		layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), true);		// Hidden
 	}
-		
-// 	APP_LOG(APP_LOG_LEVEL_DEBUG, "CheckDate0: %u", dt0_check_t->value->uint16);
-// 	APP_LOG(APP_LOG_LEVEL_DEBUG, "checkdate0: %d", settings.CheckDate0);
+
+	// APP_LOG(APP_LOG_LEVEL_DEBUG, "CheckDate0: %u", dt0_check_t->value->uint16);
+	// APP_LOG(APP_LOG_LEVEL_DEBUG, "checkdate0: %d", settings.CheckDate0);
 }
 
 void unobstructed_change(AnimationProgress progress, void* data) {
@@ -364,10 +364,10 @@ static void window_load(Window *window) {
 //Fonts
 	s_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_72));
 	s_font_date = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_28));
-	
+
 // Locations
 	#if PBL_DISPLAY_HEIGHT == 180			// Chalk
-		s_text_hour		= text_layer_create(GRect(			   10, bounds.size.h / 2 - 47, bounds.size.w/2-10, 75));
+		s_text_hour		= text_layer_create(GRect(				10, bounds.size.h / 2 - 47, bounds.size.w/2-10, 75));
 		s_text_minute	= text_layer_create(GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2-10, 75));
 		s_text_top		= text_layer_create(GRect(				0, bounds.size.h / 4 - 26, bounds.size.w,	   30));
 		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4-10, bounds.size.w,	   30));
@@ -379,8 +379,8 @@ static void window_load(Window *window) {
 		s_text_bottom	= text_layer_create(GRect(				0, bounds.size.h * 3/4 -5, bounds.size.w,   30));
 		s_layer_bluetooth = bitmap_layer_create(GRect(bounds.size.w-13, 3, 7,  11));							// bluetooth
 	#endif
-	
-	// Show Quiet Time icon when active, and move battery 
+
+	// Show Quiet Time icon when active, and move battery
 	if(quiet_time_is_active()) {
 		#if PBL_DISPLAY_HEIGHT == 180			// Chalk
 			s_layer_battery	= bitmap_layer_create(GRect(84, 17, 13,  6));	// battery
@@ -405,30 +405,30 @@ static void window_load(Window *window) {
 // Battery Icon
 	layer_mark_dirty(bitmap_layer_get_layer(s_layer_battery));
 	#if defined(PBL_COLOR)
-		bitmap_layer_set_compositing_mode(s_layer_battery, GCompOpSet);	
+		bitmap_layer_set_compositing_mode(s_layer_battery, GCompOpSet);
 	#endif
 	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_layer_battery));
 
 // Battery Icon
 	layer_mark_dirty(bitmap_layer_get_layer(s_layer_bluetooth));
 	#if defined(PBL_COLOR)
-		bitmap_layer_set_compositing_mode(s_layer_bluetooth, GCompOpSet);	
+		bitmap_layer_set_compositing_mode(s_layer_bluetooth, GCompOpSet);
 	#endif
 	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_layer_bluetooth));
-	
+
 // Quiet Time Icon
 	layer_mark_dirty(bitmap_layer_get_layer(s_layer_quiet));
 	#if defined(PBL_COLOR)
-		bitmap_layer_set_compositing_mode(s_layer_quiet, GCompOpSet);	
+		bitmap_layer_set_compositing_mode(s_layer_quiet, GCompOpSet);
 	#endif
 	layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_layer_quiet));
-	
+
 // Hour
 	text_layer_set_font(s_text_hour, s_font_time);
 	text_layer_set_text_alignment(s_text_hour, GTextAlignmentCenter);
 	text_layer_set_background_color(s_text_hour, GColorClear);
 	layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_text_hour));
-	
+
 // Minutes
 	text_layer_set_font(s_text_minute, s_font_time);
 	text_layer_set_text_alignment(s_text_minute, GTextAlignmentCenter);
@@ -455,11 +455,11 @@ static void window_load(Window *window) {
 	setColours();
 	update_time();
 	update_date();
-	
+
 	if(settings.TogglePowerSave) {
-		textToggle(false);    // Hide
+		textToggle(false);		// Hide
 	} else {
-		textToggle(true);     // Show
+		textToggle(true);		// Show
 	}
 }
 
@@ -493,18 +493,18 @@ static void init() {
 	unobstructed_area_service_subscribe(handlers, NULL);
 
 	connection_service_subscribe((ConnectionHandlers) {
-  		.pebble_app_connection_handler = bluetooth_callback
+		.pebble_app_connection_handler = bluetooth_callback
 	});
 
 	accel_tap_service_subscribe(accel_tap_handler);
-	
+
 	app_message_register_inbox_received(inbox_received_handler);
 	app_message_open(256, 256);
 
 	battery_state_service_subscribe(battery_callback);
 	battery_callback(battery_state_service_peek());
 
-	tick_timer_service_subscribe(MINUTE_UNIT | DAY_UNIT, tick_handler); 
+	tick_timer_service_subscribe(MINUTE_UNIT | DAY_UNIT, tick_handler);
 }
 
 static void deinit() {
@@ -514,7 +514,7 @@ static void deinit() {
 	bitmap_layer_destroy(s_layer_battery);
 	bitmap_layer_destroy(s_layer_bluetooth);
 	bitmap_layer_destroy(s_layer_quiet);
-	
+
 	tick_timer_service_unsubscribe();
 	window_destroy(s_window);
 }
@@ -525,7 +525,7 @@ int main(void) {
 	deinit();
 }
 
-//	APP_LOG(APP_LOG_LEVEL_DEBUG, char_bufferCustom);
+// APP_LOG(APP_LOG_LEVEL_DEBUG, char_bufferCustom);
 
 
 ///////////////////////////////////////////////////////////////////////////
