@@ -182,3 +182,5 @@
 - Quiet Time logic improved
 - Simplify methods
 - Minor text amends
+## 1.9
+- Update images to work on Pebble 2

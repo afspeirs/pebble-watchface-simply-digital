@@ -1,6 +1,6 @@
 module.exports = [
-	{ 
-    	"type": "heading", 
+	{
+    	"type": "heading",
     	"defaultValue": "Simply Digital",
 		"size": 1,
 	},
@@ -63,21 +63,21 @@ module.exports = [
 				"defaultValue": "2",
 				"label": "Vibration on disconnection",
 				"options": [
-					{ 
+					{
 						"label": "None",
-						"value": "0" 
+						"value": "0"
 					},
-					{ 
+					{
 						"label": "Short",
-						"value": "1" 
+						"value": "1"
 					},
-					{ 
+					{
 						"label": "Long",
-						"value": "2" 
+						"value": "2"
 					},
-					{ 
+					{
 						"label": "Double",
-						"value": "3" 
+						"value": "3"
 					}
 				]
 			},
@@ -89,7 +89,7 @@ module.exports = [
 			}
 		]
  	},
-	
+
 	{
 		"type": "section",
 		"items": [
@@ -105,17 +105,17 @@ module.exports = [
 				"options": [
 					{
 						"label": "Never",
-						"value": "0" 
+						"value": "0"
 					},
 					{
 						"label": "10%",
-						"value": "10" 
+						"value": "10"
 					},
 					{
 						"label": "20%",
 						"value": "20"
 					},
-					{ 
+					{
 						"label": "30%",
 						"value": "30"
 					},
@@ -143,9 +143,9 @@ module.exports = [
 // 						"label": "90%",
 // 						"value": "90"
 // 					},
-// 					{ 
+// 					{
 // 						"label": "Always",
-// 						"value": "100" 
+// 						"value": "100"
 // 					}
 				]
 			},
@@ -193,7 +193,7 @@ module.exports = [
 	},
 	{
 		"type": "text",
-		"defaultValue": " Version 1.8",
+		"defaultValue": " Version 1.9",
 	},
 ];
 
