@@ -20,23 +20,28 @@ Features:
 
 ### Aplite
 
-![Aplite1](https://raw.githubusercontent.com/afspeirs/SimplyDigital/master/screens/0.33_Aplite_1.png)
-![Aplite2](https://raw.githubusercontent.com/afspeirs/SimplyDigital/master/screens/0.33_Aplite_2.png)
-![Aplite3](https://raw.githubusercontent.com/afspeirs/SimplyDigital/master/screens/0.33_Aplite_3.png)
-![Aplite4](https://raw.githubusercontent.com/afspeirs/SimplyDigital/master/screens/0.52_Aplite_2.png)
-![Aplite5](https://raw.githubusercontent.com/afspeirs/SimplyDigital/master/screens/0.70_Aplite_1.png)
-![Aplite6](https://raw.githubusercontent.com/afspeirs/SimplyDigital/master/screens/0.70_Aplite_2.png)
+![Aplite1](./screens/screen_aplite_1.png)
+![Aplite2](./screens/screen_aplite_2.png)
+![Aplite3](./screens/screen_aplite_3.png)
+![Aplite4](./screens/screen_aplite_4.png)
 
 ### Basalt
 
-![Basalt1](https://raw.githubusercontent.com/afspeirs/SimplyDigital/master/screens/0.33_Basalt_1.png)
-![Basalt2](https://raw.githubusercontent.com/afspeirs/SimplyDigital/master/screens/0.33_Basalt_2.png)
-![Basalt3](https://raw.githubusercontent.com/afspeirs/SimplyDigital/master/screens/0.52_Basalt_1.png)
-![Basalt4](https://raw.githubusercontent.com/afspeirs/SimplyDigital/master/screens/0.70_Basalt_1.png)
-![Basalt5](https://raw.githubusercontent.com/afspeirs/SimplyDigital/master/screens/0.70_Basalt_2.png)
+![Basalt1](./screens/screen_basalt_1.png)
+![Basalt2](./screens/screen_basalt_2.png)
+![Basalt3](./screens/screen_basalt_3.png)
+![Basalt4](./screens/screen_basalt_4.png)
 
 ### Chalk
 
-![Chalk1](https://raw.githubusercontent.com/afspeirs/SimplyDigital/master/screens/0.33_Chalk_1.png)
-![Chalk2](https://raw.githubusercontent.com/afspeirs/SimplyDigital/master/screens/0.33_Chalk_2.png)
-![Chalk3](https://raw.githubusercontent.com/afspeirs/SimplyDigital/master/screens/0.70_Chalk_1.png)
+![Chalk1](./screens/screen_chalk_1.png)
+![Chalk2](./screens/screen_chalk_2.png)
+![Chalk3](./screens/screen_chalk_3.png)
+<!-- ![Chalk4](./screens/screen_chalk_4.png) -->
+
+### Emery
+
+![Emery1](./screens/screen_emery_1.png)
+![Emery2](./screens/screen_emery_2.png)
+![Emery3](./screens/screen_emery_3.png)
+![Emery4](./screens/screen_emery_4.png)
