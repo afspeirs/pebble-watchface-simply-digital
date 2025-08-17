@@ -1,6 +1,6 @@
 {
   "name": "simply-digital",
-  "version": "1.11.0",
+  "version": "1.12.0",
   "author": "AFSpeirs",
   "keywords": [],
   "scripts": {
@@ -92,28 +92,44 @@
           "characterRegex": "[\\d a-zA-Z]",
           "file": "fonts/Bebas Neue Regular.ttf",
           "name": "FONT_BEBAS_NEUE_REGULAR_28",
-          "targetPlatforms": ["aplite", "basalt", "chalk", "diorite", "emery"],
+          "targetPlatforms": [
+            "aplite",
+            "basalt",
+            "chalk",
+            "diorite",
+            "emery"
+          ],
           "type": "font"
         },
         {
           "characterRegex": "[\\d a-zA-Z]",
           "file": "fonts/Bebas Neue Regular.ttf",
           "name": "FONT_BEBAS_NEUE_REGULAR_38",
-          "targetPlatforms": ["emery"],
+          "targetPlatforms": [
+            "emery"
+          ],
           "type": "font"
         },
         {
           "characterRegex": "[\\d]",
           "file": "fonts/Bebas Neue Bold.ttf",
           "name": "FONT_BEBAS_NEUE_BOLD_72",
-          "targetPlatforms": ["aplite", "basalt", "chalk", "diorite", "emery"],
+          "targetPlatforms": [
+            "aplite",
+            "basalt",
+            "chalk",
+            "diorite",
+            "emery"
+          ],
           "type": "font"
         },
         {
           "characterRegex": "[\\d]",
           "file": "fonts/Bebas Neue Bold.ttf",
           "name": "FONT_BEBAS_NEUE_BOLD_100",
-          "targetPlatforms": ["emery"],
+          "targetPlatforms": [
+            "emery"
+          ],
           "type": "font"
         }
       ]
