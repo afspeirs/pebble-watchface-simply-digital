@@ -116,10 +116,10 @@ static void update_icon_positions() {
   GRect battery_frame;
   GRect quiet_frame;
 
-  #if PBL_DISPLAY_HEIGHT == 180 // Chalk
+  #if defined(PBL_ROUND)
     battery_frame = quiet_time ? GRect(84, 17, 13, 6) : GRect(84, 10, 13, 6);
     quiet_frame = GRect(86, 3, 10, 10);
-  #else // Other platforms
+  #else
     battery_frame = quiet_time ? GRect(22, 4, 13, 6) : GRect(6, 4, 13, 6);
     quiet_frame = GRect(6, 2, 10, 10);
   #endif
@@ -163,6 +163,8 @@ static void update_time(struct tm *tick_time) {
 
   strftime(h_buffer, sizeof(h_buffer), clock_is_24h_style() ? "%H" : "%I", tick_time);
   strftime(m_buffer, sizeof(m_buffer), "%M", tick_time);
+  // strftime(h_buffer, sizeof(h_buffer), clock_is_24h_style() ? "10" : "%I", tick_time);
+  // strftime(m_buffer, sizeof(m_buffer), "08", tick_time);
   text_layer_set_text(s_text_hour, h_buffer);
   text_layer_set_text(s_text_minute, m_buffer);
 }
@@ -228,13 +230,13 @@ static void update_date(struct tm *tick_time) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Day string: %s", temp_day_str);
 
   // 2. Format Month (short or full)
-  #if PBL_DISPLAY_HEIGHT == 180 // Chalk
+  #if defined(PBL_ROUND)
     if (strlen(month_full_name) > 5) {
       strftime(temp_month_str, sizeof(temp_month_str), "%b", tick_time); // Abbreviated month
     } else {
       strftime(temp_month_str, sizeof(temp_month_str), "%B", tick_time); // Full month
     }
-  #else // Aplite, Basalt, Diorite
+  #else
     if (strlen(month_full_name) > 7 || settings.ToggleCalendarWeek) {
       strftime(temp_month_str, sizeof(temp_month_str), "%b", tick_time); // Abbreviated month
     } else {
@@ -439,10 +441,35 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 
 void unobstructed_change(AnimationProgress progress, void* data) {
   GRect bounds = layer_get_unobstructed_bounds(window_get_root_layer(s_window));
-  layer_set_frame(text_layer_get_layer(s_text_hour),   GRect(              0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
-  layer_set_frame(text_layer_get_layer(s_text_minute), GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
-  layer_set_frame(text_layer_get_layer(s_text_top),    GRect(              0, bounds.size.h / 4 - 31, bounds.size.w,   30));
-  layer_set_frame(text_layer_get_layer(s_text_bottom), GRect(              0, bounds.size.h * 3/4 -5, bounds.size.w,   30));
+
+  // Declare variables for layout. We'll assign them values in the sections below.
+  int16_t time_offset;
+  int16_t time_height;
+  int16_t date_offset_top;
+  int16_t date_offset_bottom;
+  int16_t date_height;
+
+  #if PBL_PLATFORM_EMERY // Emery has a 228px high screen
+    time_height = 102;
+    date_height = 40;
+
+    time_offset = 65;
+    date_offset_top = 42;
+    date_offset_bottom = 7;
+  #else // Aplite, Basalt, Diorite, Chalk
+    time_height = 74;
+    date_height = 30;
+
+    time_offset = 46;
+    date_offset_top = 30;
+    date_offset_bottom = 5;
+  #endif
+
+  // Now, use the variables to set the layer frames
+  layer_set_frame(text_layer_get_layer(s_text_hour),   GRect(                0, bounds.size.h / 2 - time_offset, bounds.size.w / 2, time_height));
+  layer_set_frame(text_layer_get_layer(s_text_minute), GRect(bounds.size.w / 2, bounds.size.h / 2 - time_offset, bounds.size.w / 2, time_height));
+  layer_set_frame(text_layer_get_layer(s_text_top),    GRect(                0, bounds.size.h / 4 - date_offset_top, bounds.size.w, date_height));
+  layer_set_frame(text_layer_get_layer(s_text_bottom), GRect(                0, bounds.size.h * 3 / 4 - date_offset_bottom, bounds.size.w, date_height));
 }
 
 // --- WINDOW LOAD & UNLOAD ---
@@ -452,8 +479,13 @@ static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
 
   // Fonts
-  s_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_72));
-  s_font_date = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_28));
+  #if PBL_DISPLAY_HEIGHT == 228 // Emery
+    s_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_100));
+    s_font_date = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_38));
+  #else // Aplite, Basalt, Diorite, Chalk
+    s_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_72));
+    s_font_date = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_28));
+  #endif
 
   // Create layers with dummy GRects; positions will be set later
   s_text_hour     = text_layer_create(GRectZero);
@@ -462,9 +494,9 @@ static void window_load(Window *window) {
   s_text_bottom   = text_layer_create(GRectZero);
   s_layer_battery = bitmap_layer_create(GRectZero);
   s_layer_quiet   = bitmap_layer_create(GRectZero);
-  #if PBL_DISPLAY_HEIGHT == 180 // Chalk
+  #if defined(PBL_ROUND)
     s_layer_bluetooth = bitmap_layer_create(GRect(84, 150, 7, 11));
-  #else // Aplite, Basalt, Diorite
+  #else
     s_layer_bluetooth = bitmap_layer_create(GRect(130, 3, 7, 11));
   #endif
 
