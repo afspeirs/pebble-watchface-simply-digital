@@ -140,10 +140,10 @@ static void update_date() {
   strftime(date_current, sizeof(date_current), "%d%m", tick_time);
   strftime(month_full_name, sizeof(month_full_name), "%B", tick_time); // e.g., "September"
 
-// Top (Day of Week)
+  // Top (Day of Week)
   strftime(t_buffer, sizeof(t_buffer), "%A", tick_time);
 
-// Bottom (Custom Dates)
+  // Bottom (Custom Dates)
   s_b_buffer_custom[0] = '\0'; // Clear custom buffer at the start of update
 
   if (strcmp("0104", date_current) == 0) { // April Fools
@@ -166,7 +166,7 @@ static void update_date() {
     strcpy(s_b_buffer_custom, "Boxing  Day");
   }
 
-// --- Main Date Formatting (Day, Suffix, Month, Week) ---
+  // --- Main Date Formatting (Day, Suffix, Month, Week) ---
   char temp_day_str[6]; // e.g., "1st", "23rd"
   char temp_month_str[8]; // e.g., "Sep", "September" (up to 7 chars + null for short)
   char temp_week_str[5]; // e.g., " W30"
@@ -217,8 +217,8 @@ static void update_date() {
   // 4. Combine all parts into s_b_buffer
   int written = snprintf(s_b_buffer, sizeof(s_b_buffer), "%s  %s%s", temp_day_str, temp_month_str, temp_week_str);
   if (written < 0 || (size_t)written >= sizeof(s_b_buffer)) {
-      APP_LOG(APP_LOG_LEVEL_ERROR, "Buffer overflow for main date string!");
-      s_b_buffer[0] = '\0'; // Clear buffer if overflowed
+    APP_LOG(APP_LOG_LEVEL_ERROR, "Buffer overflow for main date string!");
+    s_b_buffer[0] = '\0'; // Clear buffer if overflowed
   }
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Final main date buffer: %s", s_b_buffer); // DEBUG LOG
 
@@ -388,11 +388,11 @@ void unobstructed_change(AnimationProgress progress, void* data) {
 static void window_load(Window *window) {
   setlocale(LC_ALL, "");
 
-//Fonts
+  //Fonts
   s_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_72));
   s_font_date = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_28));
 
-// Locations - Initialize text layers with dummy GRects; actual positions set by unobstructed_change
+  // Locations - Initialize text layers with dummy GRects; actual positions set by unobstructed_change
   #if PBL_DISPLAY_HEIGHT == 180 // Chalk
     s_text_hour     = text_layer_create(GRect(0, 0, 0, 0));
     s_text_minute   = text_layer_create(GRect(0, 0, 0, 0));
@@ -429,52 +429,52 @@ static void window_load(Window *window) {
     layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), true); // Hidden
   }
 
-// Battery Icon Layer
+  // Battery Icon Layer
   layer_mark_dirty(bitmap_layer_get_layer(s_layer_battery));
   #if defined(PBL_COLOR)
     bitmap_layer_set_compositing_mode(s_layer_battery, GCompOpSet);
   #endif
   layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_layer_battery));
 
-// Bluetooth Icon Layer
+  // Bluetooth Icon Layer
   layer_mark_dirty(bitmap_layer_get_layer(s_layer_bluetooth));
   #if defined(PBL_COLOR)
     bitmap_layer_set_compositing_mode(s_layer_bluetooth, GCompOpSet);
   #endif
   layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_layer_bluetooth));
 
-// Quiet Time Icon Layer
+  // Quiet Time Icon Layer
   layer_mark_dirty(bitmap_layer_get_layer(s_layer_quiet));
   #if defined(PBL_COLOR)
     bitmap_layer_set_compositing_mode(s_layer_quiet, GCompOpSet);
   #endif
   layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_layer_quiet));
 
-// Hour Text Layer
+  // Hour Text Layer
   text_layer_set_font(s_text_hour, s_font_time);
   text_layer_set_text_alignment(s_text_hour, GTextAlignmentCenter);
   text_layer_set_background_color(s_text_hour, GColorClear);
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_text_hour));
 
-// Minutes Text Layer
+  // Minutes Text Layer
   text_layer_set_font(s_text_minute, s_font_time);
   text_layer_set_text_alignment(s_text_minute, GTextAlignmentCenter);
   text_layer_set_background_color(s_text_minute, GColorClear);
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_text_minute));
 
-// Top Text Layer
+  // Top Text Layer
   text_layer_set_font(s_text_top, s_font_date);
   text_layer_set_text_alignment(s_text_top, GTextAlignmentCenter);
   text_layer_set_background_color(s_text_top, GColorClear);
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_text_top));
 
-// Bottom Text Layer
+  // Bottom Text Layer
   text_layer_set_font(s_text_bottom, s_font_date);
   text_layer_set_text_alignment(s_text_bottom, GTextAlignmentCenter);
   text_layer_set_background_color(s_text_bottom, GColorClear);
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_text_bottom));
 
-// Initial update of content based on current state and settings
+  // Initial update of content based on current state and settings
   battery_callback(battery_state_service_peek());
   s_app_started = false;
   bluetooth_callback(connection_service_peek_pebble_app_connection());
