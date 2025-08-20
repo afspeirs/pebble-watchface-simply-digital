@@ -343,7 +343,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
   if (bt_toggle_t) settings.ToggleBluetooth = bt_toggle_t->value->int32 == 1;
   Tuple *bq_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_BLUETOOTH_QUIET_TIME);
   if (bq_toggle_t) settings.ToggleBluetoothQuietTime = bq_toggle_t->value->int32 == 1;
-  Tuple *bt_select_t = dict_find(iter, MESSAGE_KEY_SELECT_BLUETOOTH);
+  Tuple *bt_select_t = dict_find(iter, MESSAGE_KEY_SELECT_BLUETOOTH_VIBRATION);
   if (bt_select_t) settings.SelectBluetooth = bt_select_t->value->int32;
 
   // Battery

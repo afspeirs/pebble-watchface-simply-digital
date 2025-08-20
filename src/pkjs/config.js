@@ -1,8 +1,7 @@
 module.exports = [
   {
     "type": "heading",
-    "defaultValue": "Simply Digital",
-    "size": 1,
+    "defaultValue": "Simply Digital Settings",
   },
   {
     "type": "section",
@@ -54,14 +53,14 @@ module.exports = [
       {
         "type": "toggle",
         "messageKey": "TOGGLE_BLUETOOTH",
-        "label": "Show bluetooth icon on disconnection",
+        "label": "Show Bluetooth icon on disconnection",
         "defaultValue": true,
       },
       {
         "type": "select",
-        "messageKey": "SELECT_BLUETOOTH",
+        "messageKey": "SELECT_BLUETOOTH_VIBRATION",
         "defaultValue": "2",
-        "label": "Vibration on disconnection",
+        "label": "Bluetooth disconnection Vibration",
         "options": [
           {
             "label": "None",
@@ -101,7 +100,7 @@ module.exports = [
         "type": "select",
         "messageKey": "SELECT_BATTERY_PERCENT",
         "defaultValue": "0",
-        "label": "Show battery icon",
+        "label": "Show battery icon below %",
         "options": [
           {
             "label": "Never",
@@ -123,37 +122,37 @@ module.exports = [
             "label": "40%",
             "value": "40"
           },
-          // {
-          //   "label": "50%",
-          //   "value": "50"
-          // },
-          // {
-          //   "label": "60%",
-          //   "value": "60"
-          // },
-          // {
-          //   "label": "70%",
-          //   "value": "70"
-          // },
-          // {
-          //   "label": "80%",
-          //   "value": "80"
-          // },
-          // {
-          //   "label": "90%",
-          //   "value": "90"
-          // },
-          // {
-          //   "label": "Always",
-          //   "value": "100"
-          // }
+          {
+            "label": "50%",
+            "value": "50"
+          },
+          {
+            "label": "60%",
+            "value": "60"
+          },
+          {
+            "label": "70%",
+            "value": "70"
+          },
+          {
+            "label": "80%",
+            "value": "80"
+          },
+          {
+            "label": "90%",
+            "value": "90"
+          },
+          {
+            "label": "100%",
+            "value": "100"
+          }
         ]
       },
       {
         "type": "toggle",
         "messageKey": "TOGGLE_POWER_SAVE",
         "label": "Enable \"Power Save\" mode",
-        "description": "Hides the display until a flick/shake/tap of the watch",
+        "description": "Turn off the display until a flick/shake/tap of the watch",
         "defaultValue": false,
       }
     ]
@@ -168,13 +167,13 @@ module.exports = [
       {
         "type": "toggle",
         "messageKey": "TOGGLE_SUFFIX",
-        "label": "Show suffix",
+        "label": "Show date suffix (1st, 2nd, 3rd, 4th)",
         "defaultValue": false,
       },
       {
         "type": "toggle",
         "messageKey": "TOGGLE_WEEK",
-        "label": "Show calendar week",
+        "label": "Show calendar week (W52)",
         "defaultValue": false,
         "capabilities": ["NOT_ROUND"],
       },

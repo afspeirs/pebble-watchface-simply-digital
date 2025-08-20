@@ -1,7 +1,7 @@
 {
   "author": "AFSpeirs",
   "dependencies": {
-    "pebble-clay": "^1.0.0"
+    "pebble-clay": "^1.0.4"
   },
   "keywords": [],
   "name": "simply-digital",
@@ -17,13 +17,13 @@
       "COLOUR_MINUTE",
       "COLOUR_DATE",
       "TOGGLE_BLUETOOTH",
-      "SELECT_BLUETOOTH",
+      "SELECT_BLUETOOTH_VIBRATION",
       "TOGGLE_BLUETOOTH_QUIET_TIME",
       "SELECT_BATTERY_PERCENT",
       "TOGGLE_POWER_SAVE",
       "TOGGLE_SUFFIX",
       "TOGGLE_WEEK",
-      "CHECK_DATE[6]"
+      "CHECK_DATE"
     ],
     "projectType": "native",
     "resources": {
@@ -96,7 +96,8 @@
       "aplite",
       "basalt",
       "chalk",
-      "diorite"
+      "diorite",
+      "emery"
     ],
     "uuid": "51c897b8-5ca6-4412-82db-11a4cf304ae1",
     "watchapp": {
