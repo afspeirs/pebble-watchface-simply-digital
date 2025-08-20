@@ -2,12 +2,19 @@
 
 #define SETTINGS_KEY 1 // Persistent storage key
 
-// Named constants for magic numbers
+// Named constants
 #define APP_MESSAGE_INBOX_SIZE 256
 #define APP_MESSAGE_OUTBOX_SIZE 256
-#define ACCEL_TAP_HIDE_DELAY_MS 3500 // For textToggle hide
-#define ACCEL_TAP_RESET_DATE_DELAY_MS 3500 // For dateResetToCustom
+#define ACCEL_TAP_HIDE_DELAY_MS 3500
+#define ACCEL_TAP_RESET_DATE_DELAY_MS 3500
 
+// Forward declarations
+static void update_time(struct tm *tick_time);
+static void update_date(struct tm *tick_time);
+static void update_icon_positions();
+static void getIcon(GBitmap **bitmap_ptr, BitmapLayer *bitmapLayer, int imageBlack, int imageWhite);
+
+// Global static variables
 static Window *s_window;
 static TextLayer *s_text_hour, *s_text_minute, *s_text_top, *s_text_bottom;
 static GFont s_font_time, s_font_date;
@@ -16,6 +23,7 @@ static GBitmap *s_bitmap_battery, *s_bitmap_bluetooth, *s_bitmap_quiet;
 static bool s_app_started = false;
 char s_b_buffer[32], s_b_buffer_custom[32];
 
+// Clay settings struct
 typedef struct ClaySettings {
   GColor ColourBackground;
   GColor ColourHour;
@@ -34,9 +42,18 @@ typedef struct ClaySettings {
   bool CheckDate3;
   bool CheckDate4;
   bool CheckDate5;
-} ClaySettings; // Define our settings struct
+} ClaySettings;
 
-static ClaySettings settings; // An instance of the struct
+static ClaySettings settings;
+
+// Struct for handling special dates
+typedef struct {
+  const char* date_str; // "DDMM"
+  const char* display_str;
+  const bool* setting_flag;
+} SpecialDate;
+
+// --- CONFIGURATION ---
 
 static void config_default() {
   settings.ColourBackground         = GColorBlack;
@@ -59,7 +76,7 @@ static void config_default() {
 }
 
 static void config_load() {
-  config_default(); // Load the default settings
+  config_default();
 
   // Read settings from persistent storage. Check return value.
   if (persist_read_data(SETTINGS_KEY, &settings, sizeof(settings)) == S_SUCCESS) {
@@ -69,34 +86,47 @@ static void config_load() {
   }
 }
 
-// Corrected getIcon function to properly manage GBitmap memory
+// --- UI & HELPERS ---
+
 void getIcon(GBitmap **bitmap_ptr, BitmapLayer *bitmapLayer, int imageBlack, int imageWhite) {
-  // 1. Destroy the old GBitmap if it exists
   if (*bitmap_ptr) {
     gbitmap_destroy(*bitmap_ptr);
-    *bitmap_ptr = NULL; // Crucial: Set the now-invalidated pointer to NULL
+    *bitmap_ptr = NULL;
   }
-
-  // 2. Create the new GBitmap based on background color
   if (gcolor_equal(gcolor_legible_over(settings.ColourBackground), GColorBlack)) {
     *bitmap_ptr = gbitmap_create_with_resource(imageBlack);
   } else {
     *bitmap_ptr = gbitmap_create_with_resource(imageWhite);
   }
-
-  // 3. Set the bitmap on the layer (this requires the layer to exist already)
   bitmap_layer_set_bitmap(bitmapLayer, *bitmap_ptr);
+}
+
+static void update_icon_positions() {
+  bool quiet_time = quiet_time_is_active();
+  GRect battery_frame;
+  GRect quiet_frame;
+
+  #if PBL_DISPLAY_HEIGHT == 180 // Chalk
+    battery_frame = quiet_time ? GRect(84, 17, 13, 6) : GRect(84, 10, 13, 6);
+    quiet_frame = GRect(86, 3, 10, 10);
+  #else // Other platforms
+    battery_frame = quiet_time ? GRect(22, 4, 13, 6) : GRect(6, 4, 13, 6);
+    quiet_frame = GRect(6, 2, 10, 10);
+  #endif
+
+  layer_set_frame(bitmap_layer_get_layer(s_layer_battery), battery_frame);
+  layer_set_frame(bitmap_layer_get_layer(s_layer_quiet), quiet_frame);
 }
 
 void setColours() {
   window_set_background_color(s_window, settings.ColourBackground);
-  // Using explicit #ifdef for clarity with PBL_IF_BW_ELSE behavior
+
   #ifdef PBL_COLOR
     text_layer_set_text_color(s_text_hour, settings.ColourHour);
     text_layer_set_text_color(s_text_minute, settings.ColourMinute);
     text_layer_set_text_color(s_text_top, settings.ColourDate);
     text_layer_set_text_color(s_text_bottom, settings.ColourDate);
-  #else // PBL_BW
+  #else
     GColor legible_color = gcolor_legible_over(settings.ColourBackground);
     text_layer_set_text_color(s_text_hour, legible_color);
     text_layer_set_text_color(s_text_minute, legible_color);
@@ -116,11 +146,9 @@ static void dateResetToCustom() {
   text_layer_set_text(s_text_bottom, s_b_buffer_custom);
 }
 
-// Time & Date
+// --- TIME & DATE LOGIC ---
 
-static void update_time() {
-  time_t temp = time(NULL);
-  struct tm *tick_time = localtime(&temp);
+static void update_time(struct tm *tick_time) {
   static char h_buffer[3], m_buffer[3];
 
   strftime(h_buffer, sizeof(h_buffer), clock_is_24h_style() ? "%H" : "%I", tick_time);
@@ -129,41 +157,42 @@ static void update_time() {
   text_layer_set_text(s_text_minute, m_buffer);
 }
 
-static void update_date() {
-  time_t temp = time(NULL);
-  struct tm *tick_time = localtime(&temp);
+static void update_date(struct tm *tick_time) {
   static char date_current[5]; // Stores "DDMM"
   static char month_full_name[16]; // Stores full month name, e.g., "September"
   static char t_buffer[16]; // Stores day of week, e.g., "Friday"
 
   // Always get full month name to determine length for abbreviation logic
   strftime(date_current, sizeof(date_current), "%d%m", tick_time);
-  strftime(month_full_name, sizeof(month_full_name), "%B", tick_time); // e.g., "September"
+  strftime(month_full_name, sizeof(month_full_name), "%B", tick_time);
 
   // Top (Day of Week)
   strftime(t_buffer, sizeof(t_buffer), "%A", tick_time);
 
-  // Bottom (Custom Dates)
-  s_b_buffer_custom[0] = '\0'; // Clear custom buffer at the start of update
+  // --- Handle Custom Dates (Data-Driven Approach) ---
+  const SpecialDate special_dates[] = {
+    {"0104", "April  Fools", NULL},
+    {"0101", "Happy  %Y", &settings.CheckDate0},
+    {"2501", "Burns  Night", &settings.CheckDate1},
+    {"3110", "Halloween", &settings.CheckDate2},
+    {"2412", PBL_IF_ROUND_ELSE("xmas  Eve", "Christmas  Eve"), &settings.CheckDate3},
+    {"2512", "Christmas", &settings.CheckDate4},
+    {"2612", "Boxing  Day", &settings.CheckDate5},
+  };
 
-  if (strcmp("0104", date_current) == 0) { // April Fools
-    strcpy(s_b_buffer_custom, "April  Fools");
-  } else if (strcmp("0101", date_current) == 0 && settings.CheckDate0) { // New Year's Day
-    strftime(s_b_buffer_custom, sizeof(s_b_buffer_custom), "Happy  %Y", tick_time);
-  } else if (strcmp("2501", date_current) == 0 && settings.CheckDate1) { // Burns Night
-    strcpy(s_b_buffer_custom, "Burns  Night");
-  } else if (strcmp("3110", date_current) == 0 && settings.CheckDate2) { // Halloween
-    strcpy(s_b_buffer_custom, "Halloween");
-  } else if (strcmp("2412", date_current) == 0 && settings.CheckDate3) { // Christmas Eve
-    #if PBL_DISPLAY_HEIGHT == 180 // Chalk
-      strcpy(s_b_buffer_custom, "xmas  Eve");
-    #else
-      strcpy(s_b_buffer_custom, "Christmas  Eve");
-    #endif
-  } else if (strcmp("2512", date_current) == 0 && settings.CheckDate4) { // Christmas
-    strcpy(s_b_buffer_custom, "Christmas");
-  } else if (strcmp("2612", date_current) == 0 && settings.CheckDate5) { // Boxing Day
-    strcpy(s_b_buffer_custom, "Boxing  Day");
+  s_b_buffer_custom[0] = '\0';
+  for (size_t i = 0; i < ARRAY_LENGTH(special_dates); i++) {
+    if (
+      strcmp(special_dates[i].date_str, date_current) == 0 &&
+      (special_dates[i].setting_flag == NULL || *special_dates[i].setting_flag)
+    ) {
+      if (strstr(special_dates[i].display_str, "%Y")) {
+        strftime(s_b_buffer_custom, sizeof(s_b_buffer_custom), special_dates[i].display_str, tick_time);
+      } else {
+        strcpy(s_b_buffer_custom, special_dates[i].display_str);
+      }
+      break;
+    }
   }
 
   // --- Main Date Formatting (Day, Suffix, Month, Week) ---
@@ -175,29 +204,27 @@ static void update_date() {
   int day_of_month = tick_time->tm_mday;
   const char *suffix = "";
   if (settings.ToggleSuffix) {
-    if (day_of_month == 1 || day_of_month == 21 || day_of_month == 31) {
+    if (day_of_month % 10 == 1 && day_of_month != 11) {
       suffix = "st";
-    } else if (day_of_month == 2 || day_of_month == 22) {
+    } else if (day_of_month % 10 == 2 && day_of_month != 12) {
       suffix = "nd";
-    } else if (day_of_month == 3 || day_of_month == 23) {
+    } else if (day_of_month % 10 == 3 && day_of_month != 13) {
       suffix = "rd";
     } else {
       suffix = "th";
     }
   }
   snprintf(temp_day_str, sizeof(temp_day_str), "%d%s", day_of_month, suffix);
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Day string: %s", temp_day_str); // DEBUG LOG
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Day string: %s", temp_day_str);
 
   // 2. Format Month (short or full)
   #if PBL_DISPLAY_HEIGHT == 180 // Chalk
-    // On Chalk, if month name is > 5 chars, use %b (short), otherwise %B (full)
     if (strlen(month_full_name) > 5) {
       strftime(temp_month_str, sizeof(temp_month_str), "%b", tick_time); // Abbreviated month
     } else {
       strftime(temp_month_str, sizeof(temp_month_str), "%B", tick_time); // Full month
     }
   #else // Aplite, Basalt, Diorite
-    // On other platforms, if month name is > 7 chars OR calendar week is toggled, use %b
     if (strlen(month_full_name) > 7 || settings.ToggleCalendarWeek) {
       strftime(temp_month_str, sizeof(temp_month_str), "%b", tick_time); // Abbreviated month
     } else {
@@ -207,64 +234,63 @@ static void update_date() {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Month string: %s", temp_month_str); // DEBUG LOG
 
   // 3. Format Calendar Week (if enabled)
-  temp_week_str[0] = '\0'; // Clear week string by default
+  temp_week_str[0] = '\0';
   if (settings.ToggleCalendarWeek) {
     strftime(temp_week_str, sizeof(temp_week_str), " W%V", tick_time);
   }
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Week string: %s", temp_week_str); // DEBUG LOG
-
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Week string: %s", temp_week_str);
 
   // 4. Combine all parts into s_b_buffer
   int written = snprintf(s_b_buffer, sizeof(s_b_buffer), "%s  %s%s", temp_day_str, temp_month_str, temp_week_str);
   if (written < 0 || (size_t)written >= sizeof(s_b_buffer)) {
     APP_LOG(APP_LOG_LEVEL_ERROR, "Buffer overflow for main date string!");
-    s_b_buffer[0] = '\0'; // Clear buffer if overflowed
+    s_b_buffer[0] = '\0';
   }
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Final main date buffer: %s", s_b_buffer); // DEBUG LOG
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Final main date buffer: %s", s_b_buffer);
 
   text_layer_set_text(s_text_top, t_buffer); // Day of Week
   if (s_b_buffer_custom[0] != '\0') {
     text_layer_set_text(s_text_bottom, s_b_buffer_custom); // Custom text (e.g., "Christmas")
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Displaying custom date: %s", s_b_buffer_custom); // DEBUG LOG
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Displaying custom date: %s", s_b_buffer_custom);
   } else {
     text_layer_set_text(s_text_bottom, s_b_buffer); // Normal date (e.g., "25th December")
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Displaying normal date: %s", s_b_buffer); // DEBUG LOG
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Displaying normal date: %s", s_b_buffer);
   }
 }
+
+// --- EVENT HANDLERS ---
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   if (MINUTE_UNIT & units_changed) {
     if (!settings.TogglePowerSave) {
-      update_time();
+      update_time(tick_time);
     }
     if (quiet_time_is_active()) {
       getIcon(&s_bitmap_quiet, s_layer_quiet, RESOURCE_ID_IMAGE_QUIET_TIME_BLACK, RESOURCE_ID_IMAGE_QUIET_TIME_WHITE);
-      layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false); // Visible
+      layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false);
     } else {
-      layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), true); // Hidden
-      // Reset battery icon position when quiet time is inactive
-      #if PBL_DISPLAY_HEIGHT == 180 // Chalk
-        layer_set_frame(bitmap_layer_get_layer(s_layer_battery), GRect(84, 10, 13, 6)); // battery
-      #else // Aplite, Basalt, Diorite
-        layer_set_frame(bitmap_layer_get_layer(s_layer_battery), GRect(6, 4, 13, 6)); // battery
-      #endif
+      layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), true);
     }
+    update_icon_positions();
   }
   if ((DAY_UNIT & units_changed) && !settings.TogglePowerSave) {
-    update_date();
+    update_date(tick_time);
   }
 }
 
 static void accel_tap_handler(AccelAxisType axis, int32_t direction) {
   if (settings.TogglePowerSave) {
-    update_time();
-    update_date();
-    textToggle(true); //Show
+    time_t temp = time(NULL);
+    struct tm *tick_time = localtime(&temp);
+
+    update_time(tick_time);
+    update_date(tick_time);
+    textToggle(true);
     AppTimer *updateTimer = app_timer_register(ACCEL_TAP_HIDE_DELAY_MS, (AppTimerCallback) textToggle, (void*)false);
     (void)updateTimer; // Suppress unused variable warning
   } else {
-    if (s_b_buffer_custom[0] != '\0') { // Check if custom buffer is not empty
-      text_layer_set_text(s_text_bottom, s_b_buffer); // Display normal date
+    if (s_b_buffer_custom[0] != '\0') {
+      text_layer_set_text(s_text_bottom, s_b_buffer);
       AppTimer *updateTimer = app_timer_register(ACCEL_TAP_RESET_DATE_DELAY_MS, (AppTimerCallback) dateResetToCustom, NULL);
       (void)updateTimer; // Suppress unused variable warning
     }
@@ -274,25 +300,11 @@ static void accel_tap_handler(AccelAxisType axis, int32_t direction) {
 static void battery_callback(BatteryChargeState state) {
   if (state.charge_percent <= settings.SelectBatteryPercent) {
     getIcon(&s_bitmap_battery, s_layer_battery, RESOURCE_ID_IMAGE_BATTERY_BLACK, RESOURCE_ID_IMAGE_BATTERY_WHITE);
-    layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), false); // Visible
+    layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), false);
   } else {
-    layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), true); // Hidden
+    layer_set_hidden(bitmap_layer_get_layer(s_layer_battery), true);
   }
-
-  // Move battery when in quiet time, and move to original location if not
-  if (quiet_time_is_active()) {
-    #if PBL_DISPLAY_HEIGHT == 180 // Chalk
-      layer_set_frame(bitmap_layer_get_layer(s_layer_battery), GRect(84, 17, 13, 6)); // battery
-    #else // Aplite, Basalt, Diorite
-      layer_set_frame(bitmap_layer_get_layer(s_layer_battery), GRect(22, 4, 13, 6)); // battery
-    #endif
-  } else {
-    #if PBL_DISPLAY_HEIGHT == 180 // Chalk
-      layer_set_frame(bitmap_layer_get_layer(s_layer_battery), GRect(84, 10, 13, 6)); // battery
-    #else // Aplite, Basalt, Diorite
-      layer_set_frame(bitmap_layer_get_layer(s_layer_battery), GRect(6, 4, 13, 6)); // battery
-    #endif
-  }
+  update_icon_positions();
 }
 
 static void bluetooth_callback(bool connected) {
@@ -303,193 +315,163 @@ static void bluetooth_callback(bool connected) {
         case 1: vibes_short_pulse(); break;
         case 2: vibes_long_pulse(); break;
         case 3: vibes_double_pulse(); break;
-        default: vibes_long_pulse(); break; // Default in case of unexpected value
+        default: vibes_long_pulse(); break;
       }
     }
     if (settings.ToggleBluetooth) {
       getIcon(&s_bitmap_bluetooth, s_layer_bluetooth, RESOURCE_ID_IMAGE_BLUETOOTH_BLACK, RESOURCE_ID_IMAGE_BLUETOOTH_WHITE);
-      layer_set_hidden(bitmap_layer_get_layer(s_layer_bluetooth), false);  // Visible
+      layer_set_hidden(bitmap_layer_get_layer(s_layer_bluetooth), false);
     }
   } else {
-    layer_set_hidden(bitmap_layer_get_layer(s_layer_bluetooth), true);       // Hidden
+    layer_set_hidden(bitmap_layer_get_layer(s_layer_bluetooth), true);
   }
 }
 
 static void inbox_received_handler(DictionaryIterator *iter, void *context) {
   // Colours
   Tuple *bg_colour_t = dict_find(iter, MESSAGE_KEY_COLOUR_BACKGROUND);
-  if (bg_colour_t) { settings.ColourBackground = GColorFromHEX(bg_colour_t->value->int32); }
+  if (bg_colour_t) settings.ColourBackground = GColorFromHEX(bg_colour_t->value->int32);
   Tuple *hr_colour_t = dict_find(iter, MESSAGE_KEY_COLOUR_HOUR);
-  if (hr_colour_t) { settings.ColourHour = GColorFromHEX(hr_colour_t->value->int32); }
+  if (hr_colour_t) settings.ColourHour = GColorFromHEX(hr_colour_t->value->int32);
   Tuple *mn_colour_t = dict_find(iter, MESSAGE_KEY_COLOUR_MINUTE);
-  if (mn_colour_t) { settings.ColourMinute = GColorFromHEX(mn_colour_t->value->int32); }
+  if (mn_colour_t) settings.ColourMinute = GColorFromHEX(mn_colour_t->value->int32);
   Tuple *dt_colour_t = dict_find(iter, MESSAGE_KEY_COLOUR_DATE);
-  if (dt_colour_t) { settings.ColourDate = GColorFromHEX(dt_colour_t->value->int32); }
+  if (dt_colour_t) settings.ColourDate = GColorFromHEX(dt_colour_t->value->int32);
+
   // Bluetooth
   Tuple *bt_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_BLUETOOTH);
-  if (bt_toggle_t) { settings.ToggleBluetooth = bt_toggle_t->value->int32 == 1; }
+  if (bt_toggle_t) settings.ToggleBluetooth = bt_toggle_t->value->int32 == 1;
   Tuple *bq_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_BLUETOOTH_QUIET_TIME);
-  if (bq_toggle_t) { settings.ToggleBluetoothQuietTime = bq_toggle_t->value->int32 == 1; }
+  if (bq_toggle_t) settings.ToggleBluetoothQuietTime = bq_toggle_t->value->int32 == 1;
   Tuple *bt_select_t = dict_find(iter, MESSAGE_KEY_SELECT_BLUETOOTH);
-  if (bt_select_t) { settings.SelectBluetooth = bt_select_t->value->int32; } // Assuming int is sent directly
+  if (bt_select_t) settings.SelectBluetooth = bt_select_t->value->int32;
+
   // Battery
   Tuple *bp_select_t = dict_find(iter, MESSAGE_KEY_SELECT_BATTERY_PERCENT);
-  if (bp_select_t) { settings.SelectBatteryPercent = bp_select_t->value->int32; } // Assuming int is sent directly
+  if (bp_select_t) settings.SelectBatteryPercent = bp_select_t->value->int32;
   Tuple *bd_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_POWER_SAVE);
-  if (bd_toggle_t) { settings.TogglePowerSave = bd_toggle_t->value->int32 == 1; }
+  if (bd_toggle_t) settings.TogglePowerSave = bd_toggle_t->value->int32 == 1;
+
   // Bottom Text
   Tuple *su_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_SUFFIX);
-  if (su_toggle_t) { settings.ToggleSuffix = su_toggle_t->value->int32 == 1; }
+  if (su_toggle_t) settings.ToggleSuffix = su_toggle_t->value->int32 == 1;
   Tuple *wk_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_WEEK);
-  if (wk_toggle_t) { settings.ToggleCalendarWeek = wk_toggle_t->value->int32 == 1;  }
-  // Custom Text - using a loop for CheckDateX
-  for (uint16_t i = 0; i < 6; ++i) { // Iterate from 0 to 5
+  if (wk_toggle_t) settings.ToggleCalendarWeek = wk_toggle_t->value->int32 == 1;
+
+  // Custom Text
+  for (uint16_t i = 0; i < 6; ++i) {
     Tuple *dt_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE + i);
     if (dt_check_t) {
-      // Access the boolean members of the struct as an array of bools
-      ((bool*)&settings.CheckDate0)[i] = dt_check_t->value->uint16;
+      bool value = dt_check_t->value->uint16;
+      switch (i) {
+        case 0: settings.CheckDate0 = value; break;
+        case 1: settings.CheckDate1 = value; break;
+        case 2: settings.CheckDate2 = value; break;
+        case 3: settings.CheckDate3 = value; break;
+        case 4: settings.CheckDate4 = value; break;
+        case 5: settings.CheckDate5 = value; break;
+      }
     }
   }
 
-  persist_write_data(SETTINGS_KEY, &settings, sizeof(settings)); // Write settings to persistent storage
+  persist_write_data(SETTINGS_KEY, &settings, sizeof(settings));
 
   // Update watchface with new settings
-  battery_callback(battery_state_service_peek());
-  s_app_started = false; // Reset flag before initial connection check
-  bluetooth_callback(connection_service_peek_pebble_app_connection());
-  s_app_started = true; // Set flag back to true after initial connection check
-  setColours();
-
-  if (settings.TogglePowerSave) {
-    textToggle(false); // Hide
-  } else {
-    // update_time();
-    update_date(); // Always update date on config change
-    textToggle(true); // Show
-  }
-
-  if (quiet_time_is_active()) {
-    getIcon(&s_bitmap_quiet, s_layer_quiet, RESOURCE_ID_IMAGE_QUIET_TIME_BLACK, RESOURCE_ID_IMAGE_QUIET_TIME_WHITE);
-    layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false); // Visible
-  } else {
-    layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), true); // Hidden
-  }
-}
-
-void unobstructed_change(AnimationProgress progress, void* data) {
-  GRect bounds = layer_get_unobstructed_bounds(window_get_root_layer(s_window));
-
-  layer_set_frame(text_layer_get_layer(s_text_hour),  GRect(              0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
-  layer_set_frame(text_layer_get_layer(s_text_minute),GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
-  layer_set_frame(text_layer_get_layer(s_text_top),   GRect(              0, bounds.size.h / 4 - 31, bounds.size.w,   30));
-  layer_set_frame(text_layer_get_layer(s_text_bottom),GRect(              0, bounds.size.h * 3/4 -5, bounds.size.w,   30));
-}
-
-static void window_load(Window *window) {
-  setlocale(LC_ALL, "");
-
-  //Fonts
-  s_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_72));
-  s_font_date = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_28));
-
-  // Locations - Initialize text layers with dummy GRects; actual positions set by unobstructed_change
-  #if PBL_DISPLAY_HEIGHT == 180 // Chalk
-    s_text_hour     = text_layer_create(GRect(0, 0, 0, 0));
-    s_text_minute   = text_layer_create(GRect(0, 0, 0, 0));
-    s_text_top      = text_layer_create(GRect(0, 0, 0, 0));
-    s_text_bottom   = text_layer_create(GRect(0, 0, 0, 0));
-    s_layer_bluetooth = bitmap_layer_create(GRect(84, 150, 7, 11)); // Example dummy/initial pos for icons
-  #else // Aplite, Basalt, Diorite
-    s_text_hour     = text_layer_create(GRect(0, 0, 0, 0));
-    s_text_minute   = text_layer_create(GRect(0, 0, 0, 0));
-    s_text_top      = text_layer_create(GRect(0, 0, 0, 0));
-    s_text_bottom   = text_layer_create(GRect(0, 0, 0, 0));
-    s_layer_bluetooth = bitmap_layer_create(GRect(130, 3, 7, 11)); // Example dummy/initial pos for icons
-  #endif
-
-  // Icon layers - create with initial positions, will be updated by callbacks
-  if (quiet_time_is_active()) {
-    #if PBL_DISPLAY_HEIGHT == 180 // Chalk
-      s_layer_battery  = bitmap_layer_create(GRect(84, 17, 13,  6)); // battery
-      s_layer_quiet    = bitmap_layer_create(GRect(86,  3, 10, 10)); // quiet
-    #else // Aplite, Basalt, Diorite
-      s_layer_battery  = bitmap_layer_create(GRect(22, 4, 13,  6)); // battery
-      s_layer_quiet    = bitmap_layer_create(GRect( 6, 2, 10, 10)); // quiet
-    #endif
-    getIcon(&s_bitmap_quiet, s_layer_quiet, RESOURCE_ID_IMAGE_QUIET_TIME_BLACK, RESOURCE_ID_IMAGE_QUIET_TIME_WHITE);
-    layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false); // Visible
-  } else {
-    #if PBL_DISPLAY_HEIGHT == 180 // Chalk
-      s_layer_battery = bitmap_layer_create(GRect(84, 10, 13,  6)); // battery
-      s_layer_quiet   = bitmap_layer_create(GRect(86,  2, 10, 10)); // quiet
-    #else // Aplite, Basalt, Diorite
-      s_layer_battery = bitmap_layer_create(GRect(6, 4, 13,  6)); // battery
-      s_layer_quiet   = bitmap_layer_create(GRect(6, 2, 10, 10)); // quiet
-    #endif
-    layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), true); // Hidden
-  }
-
-  // Battery Icon Layer
-  layer_mark_dirty(bitmap_layer_get_layer(s_layer_battery));
-  #if defined(PBL_COLOR)
-    bitmap_layer_set_compositing_mode(s_layer_battery, GCompOpSet);
-  #endif
-  layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_layer_battery));
-
-  // Bluetooth Icon Layer
-  layer_mark_dirty(bitmap_layer_get_layer(s_layer_bluetooth));
-  #if defined(PBL_COLOR)
-    bitmap_layer_set_compositing_mode(s_layer_bluetooth, GCompOpSet);
-  #endif
-  layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_layer_bluetooth));
-
-  // Quiet Time Icon Layer
-  layer_mark_dirty(bitmap_layer_get_layer(s_layer_quiet));
-  #if defined(PBL_COLOR)
-    bitmap_layer_set_compositing_mode(s_layer_quiet, GCompOpSet);
-  #endif
-  layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_layer_quiet));
-
-  // Hour Text Layer
-  text_layer_set_font(s_text_hour, s_font_time);
-  text_layer_set_text_alignment(s_text_hour, GTextAlignmentCenter);
-  text_layer_set_background_color(s_text_hour, GColorClear);
-  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_text_hour));
-
-  // Minutes Text Layer
-  text_layer_set_font(s_text_minute, s_font_time);
-  text_layer_set_text_alignment(s_text_minute, GTextAlignmentCenter);
-  text_layer_set_background_color(s_text_minute, GColorClear);
-  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_text_minute));
-
-  // Top Text Layer
-  text_layer_set_font(s_text_top, s_font_date);
-  text_layer_set_text_alignment(s_text_top, GTextAlignmentCenter);
-  text_layer_set_background_color(s_text_top, GColorClear);
-  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_text_top));
-
-  // Bottom Text Layer
-  text_layer_set_font(s_text_bottom, s_font_date);
-  text_layer_set_text_alignment(s_text_bottom, GTextAlignmentCenter);
-  text_layer_set_background_color(s_text_bottom, GColorClear);
-  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_text_bottom));
-
-  // Initial update of content based on current state and settings
   battery_callback(battery_state_service_peek());
   s_app_started = false;
   bluetooth_callback(connection_service_peek_pebble_app_connection());
   s_app_started = true;
   setColours();
-  update_time();
-  update_date();
+
+  time_t temp = time(NULL);
+  struct tm *tick_time = localtime(&temp);
+  update_date(tick_time);
 
   if (settings.TogglePowerSave) {
-    textToggle(false); // Hide text immediately if power save is on
+    textToggle(false);
   } else {
-    textToggle(true); // Show text
+    textToggle(true);
   }
 
-  // Manually call unobstructed_change to set initial layout, in case service callback is delayed
+  if (quiet_time_is_active()) {
+    getIcon(&s_bitmap_quiet, s_layer_quiet, RESOURCE_ID_IMAGE_QUIET_TIME_BLACK, RESOURCE_ID_IMAGE_QUIET_TIME_WHITE);
+    layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false);
+  } else {
+    layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), true);
+  }
+}
+
+void unobstructed_change(AnimationProgress progress, void* data) {
+  GRect bounds = layer_get_unobstructed_bounds(window_get_root_layer(s_window));
+  layer_set_frame(text_layer_get_layer(s_text_hour),   GRect(              0, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
+  layer_set_frame(text_layer_get_layer(s_text_minute), GRect(bounds.size.w/2, bounds.size.h / 2 - 47, bounds.size.w/2, 75));
+  layer_set_frame(text_layer_get_layer(s_text_top),    GRect(              0, bounds.size.h / 4 - 31, bounds.size.w,   30));
+  layer_set_frame(text_layer_get_layer(s_text_bottom), GRect(              0, bounds.size.h * 3/4 -5, bounds.size.w,   30));
+}
+
+// --- WINDOW LOAD & UNLOAD ---
+
+static void window_load(Window *window) {
+  setlocale(LC_ALL, "");
+  Layer *window_layer = window_get_root_layer(window);
+
+  // Fonts
+  s_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_72));
+  s_font_date = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_28));
+
+  // Create layers with dummy GRects; positions will be set later
+  s_text_hour     = text_layer_create(GRectZero);
+  s_text_minute   = text_layer_create(GRectZero);
+  s_text_top      = text_layer_create(GRectZero);
+  s_text_bottom   = text_layer_create(GRectZero);
+  s_layer_battery = bitmap_layer_create(GRectZero);
+  s_layer_quiet   = bitmap_layer_create(GRectZero);
+  #if PBL_DISPLAY_HEIGHT == 180 // Chalk
+    s_layer_bluetooth = bitmap_layer_create(GRect(84, 150, 7, 11));
+  #else // Aplite, Basalt, Diorite
+    s_layer_bluetooth = bitmap_layer_create(GRect(130, 3, 7, 11));
+  #endif
+
+  // Configure text layers
+  TextLayer *text_layers[] = {s_text_hour, s_text_minute, s_text_top, s_text_bottom};
+  for (size_t i = 0; i < ARRAY_LENGTH(text_layers); i++) {
+    text_layer_set_text_alignment(text_layers[i], GTextAlignmentCenter);
+    text_layer_set_background_color(text_layers[i], GColorClear);
+    layer_add_child(window_layer, text_layer_get_layer(text_layers[i]));
+  }
+  text_layer_set_font(s_text_hour, s_font_time);
+  text_layer_set_font(s_text_minute, s_font_time);
+  text_layer_set_font(s_text_top, s_font_date);
+  text_layer_set_font(s_text_bottom, s_font_date);
+
+  // Configure icon layers
+  BitmapLayer *icon_layers[] = {s_layer_battery, s_layer_bluetooth, s_layer_quiet};
+  for (size_t i = 0; i < ARRAY_LENGTH(icon_layers); i++) {
+    #if defined(PBL_COLOR)
+      bitmap_layer_set_compositing_mode(icon_layers[i], GCompOpSet);
+    #endif
+    layer_add_child(window_layer, bitmap_layer_get_layer(icon_layers[i]));
+  }
+
+  // Initial UI state setup
+  setColours();
+  battery_callback(battery_state_service_peek());
+  s_app_started = false;
+  bluetooth_callback(connection_service_peek_pebble_app_connection());
+  s_app_started = true;
+  update_icon_positions();
+
+  time_t temp = time(NULL);
+  struct tm *tick_time = localtime(&temp);
+  update_time(tick_time);
+  update_date(tick_time);
+
+  if (settings.TogglePowerSave) {
+    textToggle(false);
+  } else {
+    textToggle(true);
+  }
+
   unobstructed_change(ANIMATION_NORMALIZED_MAX, NULL);
 }
 
@@ -501,50 +483,55 @@ static void window_unload(Window *window) {
 
   fonts_unload_custom_font(s_font_time);
   fonts_unload_custom_font(s_font_date);
-  // BitmapLayers are destroyed in deinit along with their GBitmaps
 }
+
+// --- APP INIT & DEINIT ---
 
 static void init() {
   config_load();
 
   s_window = window_create();
+  if (!s_window) {
+    APP_LOG(APP_LOG_LEVEL_ERROR, "Failed to create window!");
+    return;
+  }
+
   window_set_window_handlers(s_window, (WindowHandlers) {
     .load = window_load,
     .unload = window_unload
   });
   window_stack_push(s_window, true);
 
-  UnobstructedAreaHandlers handlers = {
-    .change = unobstructed_change,
-  };
+  UnobstructedAreaHandlers handlers = { .change = unobstructed_change };
   unobstructed_area_service_subscribe(handlers, NULL);
-
-  connection_service_subscribe((ConnectionHandlers) {
-    .pebble_app_connection_handler = bluetooth_callback
-  });
-
+  connection_service_subscribe((ConnectionHandlers) { .pebble_app_connection_handler = bluetooth_callback });
   accel_tap_service_subscribe(accel_tap_handler);
-
   app_message_register_inbox_received(inbox_received_handler);
-  app_message_open(APP_MESSAGE_INBOX_SIZE, APP_MESSAGE_OUTBOX_SIZE); // Use named constants
-
+  app_message_open(APP_MESSAGE_INBOX_SIZE, APP_MESSAGE_OUTBOX_SIZE);
   battery_state_service_subscribe(battery_callback);
-  battery_callback(battery_state_service_peek()); // Call once at init to set initial state
+  battery_callback(battery_state_service_peek());
 
   tick_timer_service_subscribe(MINUTE_UNIT | DAY_UNIT, tick_handler);
 }
 
 static void deinit() {
-  // Destroy GBitmaps first, as they are owned by the app and assigned to layers
+  // Unsubscribe from services to be tidy
+  tick_timer_service_unsubscribe();
+  battery_state_service_unsubscribe();
+  accel_tap_service_unsubscribe();
+  connection_service_unsubscribe();
+
+  // Destroy Bitmaps
   if (s_bitmap_battery) gbitmap_destroy(s_bitmap_battery);
   if (s_bitmap_bluetooth) gbitmap_destroy(s_bitmap_bluetooth);
   if (s_bitmap_quiet) gbitmap_destroy(s_bitmap_quiet);
 
+  // Destroy BitmapLayers
   if (s_layer_battery) bitmap_layer_destroy(s_layer_battery);
   if (s_layer_bluetooth) bitmap_layer_destroy(s_layer_bluetooth);
   if (s_layer_quiet) bitmap_layer_destroy(s_layer_quiet);
 
-  tick_timer_service_unsubscribe();
+  // Destroy the Window
   if (s_window) window_destroy(s_window);
 }
 
