@@ -1,3 +1,5 @@
+const packageJson = require('../../package.json');
+
 module.exports = [
   {
     "type": "heading",
@@ -192,6 +194,6 @@ module.exports = [
   },
   {
     "type": "text",
-    "defaultValue": " Version 1.9",
+    "defaultValue": `Version ${packageJson.version}`,
   },
 ];
