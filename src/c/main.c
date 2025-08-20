@@ -328,41 +328,78 @@ static void bluetooth_callback(bool connected) {
 }
 
 static void inbox_received_handler(DictionaryIterator *iter, void *context) {
+  // APP_LOG(APP_LOG_LEVEL_INFO, "Processing received settings...");
+
   // Colours
   Tuple *bg_colour_t = dict_find(iter, MESSAGE_KEY_COLOUR_BACKGROUND);
-  if (bg_colour_t) settings.ColourBackground = GColorFromHEX(bg_colour_t->value->int32);
+  if (bg_colour_t) {
+    settings.ColourBackground = GColorFromHEX(bg_colour_t->value->int32);
+    // APP_LOG(APP_LOG_LEVEL_INFO, "  Background Color = %d", settings.ColourBackground.argb);
+  }
   Tuple *hr_colour_t = dict_find(iter, MESSAGE_KEY_COLOUR_HOUR);
-  if (hr_colour_t) settings.ColourHour = GColorFromHEX(hr_colour_t->value->int32);
+  if (hr_colour_t) {
+    settings.ColourHour = GColorFromHEX(hr_colour_t->value->int32);
+    // APP_LOG(APP_LOG_LEVEL_INFO, "  Hour Color = %d", settings.ColourHour.argb);
+  }
   Tuple *mn_colour_t = dict_find(iter, MESSAGE_KEY_COLOUR_MINUTE);
-  if (mn_colour_t) settings.ColourMinute = GColorFromHEX(mn_colour_t->value->int32);
+  if (mn_colour_t) {
+    settings.ColourMinute = GColorFromHEX(mn_colour_t->value->int32);
+    // APP_LOG(APP_LOG_LEVEL_INFO, "  Minute Color = %d", settings.ColourMinute.argb);
+  }
   Tuple *dt_colour_t = dict_find(iter, MESSAGE_KEY_COLOUR_DATE);
-  if (dt_colour_t) settings.ColourDate = GColorFromHEX(dt_colour_t->value->int32);
+  if (dt_colour_t) {
+    settings.ColourDate = GColorFromHEX(dt_colour_t->value->int32);
+    // APP_LOG(APP_LOG_LEVEL_INFO, "  Date Color = %d", settings.ColourDate.argb);
+  }
 
   // Bluetooth
   Tuple *bt_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_BLUETOOTH);
-  if (bt_toggle_t) settings.ToggleBluetooth = bt_toggle_t->value->int32 == 1;
+  if (bt_toggle_t) {
+    settings.ToggleBluetooth = bt_toggle_t->value->int32 == 1;
+    // APP_LOG(APP_LOG_LEVEL_INFO, "  Bluetooth Icon Toggle = %d", settings.ToggleBluetooth);
+  }
   Tuple *bq_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_BLUETOOTH_QUIET_TIME);
-  if (bq_toggle_t) settings.ToggleBluetoothQuietTime = bq_toggle_t->value->int32 == 1;
+  if (bq_toggle_t) {
+    settings.ToggleBluetoothQuietTime = bq_toggle_t->value->int32 == 1;
+    // APP_LOG(APP_LOG_LEVEL_INFO, "  Bluetooth Quiet Time Toggle = %d", settings.ToggleBluetoothQuietTime);
+  }
   Tuple *bt_select_t = dict_find(iter, MESSAGE_KEY_SELECT_BLUETOOTH_VIBRATION);
-  if (bt_select_t) settings.SelectBluetooth = bt_select_t->value->int32;
+  if (bt_select_t) {
+    settings.SelectBluetooth = atoi(bt_select_t->value->cstring);
+    // APP_LOG(APP_LOG_LEVEL_INFO, "  Bluetooth Vibration = %d", settings.SelectBluetooth);
+  }
 
   // Battery
   Tuple *bp_select_t = dict_find(iter, MESSAGE_KEY_SELECT_BATTERY_PERCENT);
-  if (bp_select_t) settings.SelectBatteryPercent = bp_select_t->value->int32;
+  if (bp_select_t) {
+    settings.SelectBatteryPercent = atoi(bp_select_t->value->cstring);
+    // APP_LOG(APP_LOG_LEVEL_INFO, "  Battery Percent Threshold = %d", settings.SelectBatteryPercent);
+  }
+
   Tuple *bd_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_POWER_SAVE);
-  if (bd_toggle_t) settings.TogglePowerSave = bd_toggle_t->value->int32 == 1;
+  if (bd_toggle_t) {
+    settings.TogglePowerSave = bd_toggle_t->value->int32 == 1;
+    // APP_LOG(APP_LOG_LEVEL_INFO, "  Power Save Toggle = %d", settings.TogglePowerSave);
+  }
 
   // Bottom Text
   Tuple *su_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_SUFFIX);
-  if (su_toggle_t) settings.ToggleSuffix = su_toggle_t->value->int32 == 1;
+  if (su_toggle_t) {
+    settings.ToggleSuffix = su_toggle_t->value->int32 == 1;
+    // APP_LOG(APP_LOG_LEVEL_INFO, "  Date Suffix Toggle = %d", settings.ToggleSuffix);
+  }
   Tuple *wk_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_WEEK);
-  if (wk_toggle_t) settings.ToggleCalendarWeek = wk_toggle_t->value->int32 == 1;
+  if (wk_toggle_t) {
+    settings.ToggleCalendarWeek = wk_toggle_t->value->int32 == 1;
+    // APP_LOG(APP_LOG_LEVEL_INFO, "  Calendar Week Toggle = %d", settings.ToggleCalendarWeek);
+  }
 
   // Custom Text
   for (uint16_t i = 0; i < 6; ++i) {
     Tuple *dt_check_t = dict_find(iter, MESSAGE_KEY_CHECK_DATE + i);
     if (dt_check_t) {
       bool value = dt_check_t->value->uint16;
+      // APP_LOG(APP_LOG_LEVEL_INFO, "  CheckDate[%d] = %d", (int)i, value);
       switch (i) {
         case 0: settings.CheckDate0 = value; break;
         case 1: settings.CheckDate1 = value; break;
