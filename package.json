@@ -1,107 +1,120 @@
 {
-    "author": "AFSpeirs",
-    "dependencies": {
-        "pebble-clay": "^1.0.0"
-    },
-    "keywords": [],
-    "name": "simply-digital",
-    "pebble": {
-        "capabilities": [
-            "configurable"
-        ],
-        "displayName": "Simply Digital",
-        "enableMultiJS": true,
-        "messageKeys": [
-            "COLOUR_BACKGROUND",
-            "COLOUR_HOUR",
-            "COLOUR_MINUTE",
-            "COLOUR_DATE",
-            "TOGGLE_BLUETOOTH",
-            "SELECT_BLUETOOTH",
-            "TOGGLE_BLUETOOTH_QUIET_TIME",
-            "SELECT_BATTERY_PERCENT",
-            "TOGGLE_POWER_SAVE",
-            "TOGGLE_SUFFIX",
-            "TOGGLE_WEEK",
-            "CHECK_DATE[6]"
-        ],
-        "projectType": "native",
-        "resources": {
-            "media": [
-                {
-                    "file": "images/MenuImage.png",
-                    "menuIcon": true,
-                    "name": "IMAGE_MENU_IMAGE",
-                    "storageFormat": "png",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/IMG_QuietTime_White.png",
-                    "name": "IMAGE_QUIET_TIME_WHITE",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/IMG_QuietTime_Black.png",
-                    "name": "IMAGE_QUIET_TIME_BLACK",
-                    "storageFormat": "png",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/IMG_Bluetooth_White.png",
-                    "name": "IMAGE_BLUETOOTH_WHITE",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/IMG_Bluetooth_Black.png",
-                    "name": "IMAGE_BLUETOOTH_BLACK",
-                    "storageFormat": "png",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/IMG_Battery_White.png",
-                    "name": "IMAGE_BATTERY_WHITE",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "file": "images/IMG_Battery_Black.png",
-                    "name": "IMAGE_BATTERY_BLACK",
-                    "storageFormat": "png",
-                    "targetPlatforms": null,
-                    "type": "bitmap"
-                },
-                {
-                    "characterRegex": "[\\d a-zA-Z]",
-                    "file": "fonts/Bebas Neue Regular",
-                    "name": "FONT_BEBAS_NEUE_REGULAR_28",
-                    "targetPlatforms": null,
-                    "type": "font"
-                },
-                {
-                    "characterRegex": "[\\d]",
-                    "file": "fonts/Bebas Neue Bold",
-                    "name": "FONT_BEBAS_NEUE_BOLD_72",
-                    "targetPlatforms": null,
-                    "type": "font"
-                }
-            ]
+  "name": "simply-digital",
+  "version": "1.9.0",
+  "author": "AFSpeirs",
+  "keywords": [],
+  "scripts": {
+    "clean": "pebble clean",
+    "build": "pebble build",
+    "install:basalt": "pebble install --emulator basalt",
+    "install:chalk": "pebble install --emulator chalk",
+    "install:emery": "pebble install --emulator emery",
+    "install:phone": "pebble install --phone 192.168.0.30",
+    "basalt": "npm run build && npm run install:basalt",
+    "chalk": "npm run build && npm run install:chalk",
+    "emery": "npm run build && npm run install:emery",
+    "phone": "npm run build && npm run install:phone"
+  },
+  "dependencies": {
+    "pebble-clay": "^1.0.4"
+  },
+  "pebble": {
+    "capabilities": [
+      "configurable"
+    ],
+    "displayName": "Simply Digital",
+    "enableMultiJS": true,
+    "messageKeys": [
+      "COLOUR_BACKGROUND",
+      "COLOUR_HOUR",
+      "COLOUR_MINUTE",
+      "COLOUR_DATE",
+      "TOGGLE_BLUETOOTH",
+      "SELECT_BLUETOOTH_VIBRATION",
+      "TOGGLE_BLUETOOTH_QUIET_TIME",
+      "SELECT_BATTERY_PERCENT",
+      "TOGGLE_POWER_SAVE",
+      "TOGGLE_SUFFIX",
+      "TOGGLE_WEEK",
+      "CHECK_DATE"
+    ],
+    "projectType": "native",
+    "resources": {
+      "media": [
+        {
+          "file": "images/MenuImage.png",
+          "menuIcon": true,
+          "name": "IMAGE_MENU_IMAGE",
+          "storageFormat": "png",
+          "targetPlatforms": null,
+          "type": "bitmap"
         },
-        "sdkVersion": "3",
-        "targetPlatforms": [
-            "aplite",
-            "basalt",
-            "chalk",
-            "diorite"
-        ],
-        "uuid": "51c897b8-5ca6-4412-82db-11a4cf304ae1",
-        "watchapp": {
-            "watchface": true
+        {
+          "file": "images/IMG_QuietTime_White.png",
+          "name": "IMAGE_QUIET_TIME_WHITE",
+          "targetPlatforms": null,
+          "type": "bitmap"
+        },
+        {
+          "file": "images/IMG_QuietTime_Black.png",
+          "name": "IMAGE_QUIET_TIME_BLACK",
+          "storageFormat": "png",
+          "targetPlatforms": null,
+          "type": "bitmap"
+        },
+        {
+          "file": "images/IMG_Bluetooth_White.png",
+          "name": "IMAGE_BLUETOOTH_WHITE",
+          "targetPlatforms": null,
+          "type": "bitmap"
+        },
+        {
+          "file": "images/IMG_Bluetooth_Black.png",
+          "name": "IMAGE_BLUETOOTH_BLACK",
+          "storageFormat": "png",
+          "targetPlatforms": null,
+          "type": "bitmap"
+        },
+        {
+          "file": "images/IMG_Battery_White.png",
+          "name": "IMAGE_BATTERY_WHITE",
+          "targetPlatforms": null,
+          "type": "bitmap"
+        },
+        {
+          "file": "images/IMG_Battery_Black.png",
+          "name": "IMAGE_BATTERY_BLACK",
+          "storageFormat": "png",
+          "targetPlatforms": null,
+          "type": "bitmap"
+        },
+        {
+          "characterRegex": "[\\d a-zA-Z]",
+          "file": "fonts/Bebas Neue Regular",
+          "name": "FONT_BEBAS_NEUE_REGULAR_28",
+          "targetPlatforms": null,
+          "type": "font"
+        },
+        {
+          "characterRegex": "[\\d]",
+          "file": "fonts/Bebas Neue Bold",
+          "name": "FONT_BEBAS_NEUE_BOLD_72",
+          "targetPlatforms": null,
+          "type": "font"
         }
+      ]
     },
-    "version": "1.9.0"
+    "sdkVersion": "3",
+    "targetPlatforms": [
+      "aplite",
+      "basalt",
+      "chalk",
+      "diorite",
+      "emery"
+    ],
+    "uuid": "51c897b8-5ca6-4412-82db-11a4cf304ae1",
+    "watchapp": {
+      "watchface": true
+    }
+  }
 }
