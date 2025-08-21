@@ -9,10 +9,11 @@
 #define ACCEL_TAP_RESET_DATE_DELAY_MS 3500
 
 // Forward declarations
+static void getIcon(GBitmap **bitmap_ptr, BitmapLayer *bitmapLayer, int imageBlack, int imageWhite);
 static void update_time(struct tm *tick_time);
 static void update_date(struct tm *tick_time);
 static void update_icon_positions();
-static void getIcon(GBitmap **bitmap_ptr, BitmapLayer *bitmapLayer, int imageBlack, int imageWhite);
+static void update_quiet_time_icon();
 
 // Global static variables
 static Window *s_window;
@@ -99,6 +100,15 @@ void getIcon(GBitmap **bitmap_ptr, BitmapLayer *bitmapLayer, int imageBlack, int
     *bitmap_ptr = gbitmap_create_with_resource(imageWhite);
   }
   bitmap_layer_set_bitmap(bitmapLayer, *bitmap_ptr);
+}
+
+static void update_quiet_time_icon() {
+  if (quiet_time_is_active()) {
+    getIcon(&s_bitmap_quiet, s_layer_quiet, RESOURCE_ID_IMAGE_QUIET_TIME_BLACK, RESOURCE_ID_IMAGE_QUIET_TIME_WHITE);
+    layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false);
+  } else {
+    layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), true);
+  }
 }
 
 static void update_icon_positions() {
@@ -231,14 +241,14 @@ static void update_date(struct tm *tick_time) {
       strftime(temp_month_str, sizeof(temp_month_str), "%B", tick_time); // Full month
     }
   #endif
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Month string: %s", temp_month_str); // DEBUG LOG
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Month string: %s", temp_month_str);
 
   // 3. Format Calendar Week (if enabled)
   temp_week_str[0] = '\0';
   if (settings.ToggleCalendarWeek) {
     strftime(temp_week_str, sizeof(temp_week_str), " W%V", tick_time);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Week string: %s", temp_week_str);
   }
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Week string: %s", temp_week_str);
 
   // 4. Combine all parts into s_b_buffer
   int written = snprintf(s_b_buffer, sizeof(s_b_buffer), "%s  %s%s", temp_day_str, temp_month_str, temp_week_str);
@@ -265,12 +275,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
     if (!settings.TogglePowerSave) {
       update_time(tick_time);
     }
-    if (quiet_time_is_active()) {
-      getIcon(&s_bitmap_quiet, s_layer_quiet, RESOURCE_ID_IMAGE_QUIET_TIME_BLACK, RESOURCE_ID_IMAGE_QUIET_TIME_WHITE);
-      layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false);
-    } else {
-      layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), true);
-    }
+    update_quiet_time_icon();
     update_icon_positions();
   }
   if ((DAY_UNIT & units_changed) && !settings.TogglePowerSave) {
@@ -413,7 +418,6 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 
   persist_write_data(SETTINGS_KEY, &settings, sizeof(settings));
 
-  // Update watchface with new settings
   battery_callback(battery_state_service_peek());
   s_app_started = false;
   bluetooth_callback(connection_service_peek_pebble_app_connection());
@@ -430,12 +434,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
     textToggle(true);
   }
 
-  if (quiet_time_is_active()) {
-    getIcon(&s_bitmap_quiet, s_layer_quiet, RESOURCE_ID_IMAGE_QUIET_TIME_BLACK, RESOURCE_ID_IMAGE_QUIET_TIME_WHITE);
-    layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), false);
-  } else {
-    layer_set_hidden(bitmap_layer_get_layer(s_layer_quiet), true);
-  }
+  update_quiet_time_icon();
 }
 
 void unobstructed_change(AnimationProgress progress, void* data) {
@@ -496,6 +495,7 @@ static void window_load(Window *window) {
   s_app_started = false;
   bluetooth_callback(connection_service_peek_pebble_app_connection());
   s_app_started = true;
+  update_quiet_time_icon();
   update_icon_positions();
 
   time_t temp = time(NULL);
