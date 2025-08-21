@@ -1,10 +1,23 @@
 {
+  "name": "simply-digital",
+  "version": "1.9.0",
   "author": "AFSpeirs",
+  "keywords": [],
+  "scripts": {
+    "clean": "pebble clean",
+    "build": "pebble build",
+    "install:basalt": "pebble install --emulator basalt",
+    "install:chalk": "pebble install --emulator chalk",
+    "install:emery": "pebble install --emulator emery",
+    "install:phone": "pebble install --phone 192.168.0.30",
+    "basalt": "npm run build && npm run install:basalt",
+    "chalk": "npm run build && npm run install:chalk",
+    "emery": "npm run build && npm run install:emery",
+    "phone": "npm run build && npm run install:phone"
+  },
   "dependencies": {
     "pebble-clay": "^1.0.4"
   },
-  "keywords": [],
-  "name": "simply-digital",
   "pebble": {
     "capabilities": [
       "configurable"
@@ -103,6 +116,5 @@
     "watchapp": {
       "watchface": true
     }
-  },
-  "version": "1.9.0"
+  }
 }
