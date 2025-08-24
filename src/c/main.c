@@ -30,9 +30,9 @@ typedef struct ClaySettings {
   GColor ColourHour;
   GColor ColourMinute;
   GColor ColourDate;
-  bool ToggleBluetooth;
+  bool ToggleBluetoothIcon;
+  int SelectBluetoothVibration;
   bool ToggleBluetoothQuietTime;
-  int SelectBluetooth;
   int SelectBatteryPercent;
   bool TogglePowerSave;
   bool ToggleSuffix;
@@ -61,9 +61,9 @@ static void config_default() {
   settings.ColourHour               = PBL_IF_BW_ELSE(GColorWhite, GColorChromeYellow);
   settings.ColourMinute             = GColorWhite;
   settings.ColourDate               = GColorWhite;
-  settings.ToggleBluetooth          = true;
+  settings.ToggleBluetoothIcon      = true;
+  settings.SelectBluetoothVibration = 2;
   settings.ToggleBluetoothQuietTime = false;
-  settings.SelectBluetooth          = 2;
   settings.SelectBatteryPercent     = 0;
   settings.TogglePowerSave          = false;
   settings.ToggleSuffix             = false;
@@ -317,7 +317,7 @@ static void battery_callback(BatteryChargeState state) {
 static void bluetooth_callback(bool connected) {
   if (!connected) {
     if (s_app_started && !(quiet_time_is_active() && !settings.ToggleBluetoothQuietTime)) {
-      switch (settings.SelectBluetooth) {
+      switch (settings.SelectBluetoothVibration) {
         case 0: /* No vibration */ break;
         case 1: vibes_short_pulse(); break;
         case 2: vibes_long_pulse(); break;
@@ -325,7 +325,7 @@ static void bluetooth_callback(bool connected) {
         default: vibes_long_pulse(); break;
       }
     }
-    if (settings.ToggleBluetooth) {
+    if (settings.ToggleBluetoothIcon) {
       getIcon(&s_bitmap_bluetooth, s_layer_bluetooth, RESOURCE_ID_IMAGE_BLUETOOTH_BLACK, RESOURCE_ID_IMAGE_BLUETOOTH_WHITE);
       layer_set_hidden(bitmap_layer_get_layer(s_layer_bluetooth), false);
     }
@@ -360,20 +360,20 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
   }
 
   // Bluetooth
-  Tuple *bt_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_BLUETOOTH);
+  Tuple *bt_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_BLUETOOTH_ICON);
   if (bt_toggle_t) {
-    settings.ToggleBluetooth = bt_toggle_t->value->int32 == 1;
-    // APP_LOG(APP_LOG_LEVEL_INFO, "  Bluetooth Icon Toggle = %d", settings.ToggleBluetooth);
+    settings.ToggleBluetoothIcon = bt_toggle_t->value->int32 == 1;
+    // APP_LOG(APP_LOG_LEVEL_INFO, "  Bluetooth Icon Toggle = %d", settings.ToggleBluetoothIcon);
+  }
+  Tuple *bt_select_t = dict_find(iter, MESSAGE_KEY_SELECT_BLUETOOTH_VIBRATION);
+  if (bt_select_t) {
+    settings.SelectBluetoothVibration = atoi(bt_select_t->value->cstring);
+    // APP_LOG(APP_LOG_LEVEL_INFO, "  Bluetooth Vibration = %d", settings.SelectBluetoothVibration);
   }
   Tuple *bq_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_BLUETOOTH_QUIET_TIME);
   if (bq_toggle_t) {
     settings.ToggleBluetoothQuietTime = bq_toggle_t->value->int32 == 1;
     // APP_LOG(APP_LOG_LEVEL_INFO, "  Bluetooth Quiet Time Toggle = %d", settings.ToggleBluetoothQuietTime);
-  }
-  Tuple *bt_select_t = dict_find(iter, MESSAGE_KEY_SELECT_BLUETOOTH_VIBRATION);
-  if (bt_select_t) {
-    settings.SelectBluetooth = atoi(bt_select_t->value->cstring);
-    // APP_LOG(APP_LOG_LEVEL_INFO, "  Bluetooth Vibration = %d", settings.SelectBluetooth);
   }
 
   // Battery
@@ -382,7 +382,6 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
     settings.SelectBatteryPercent = atoi(bp_select_t->value->cstring);
     // APP_LOG(APP_LOG_LEVEL_INFO, "  Battery Percent Threshold = %d", settings.SelectBatteryPercent);
   }
-
   Tuple *bd_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_POWER_SAVE);
   if (bd_toggle_t) {
     settings.TogglePowerSave = bd_toggle_t->value->int32 == 1;
@@ -395,7 +394,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
     settings.ToggleSuffix = su_toggle_t->value->int32 == 1;
     // APP_LOG(APP_LOG_LEVEL_INFO, "  Date Suffix Toggle = %d", settings.ToggleSuffix);
   }
-  Tuple *wk_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_WEEK);
+  Tuple *wk_toggle_t = dict_find(iter, MESSAGE_KEY_TOGGLE_CALENDAR_WEEK);
   if (wk_toggle_t) {
     settings.ToggleCalendarWeek = wk_toggle_t->value->int32 == 1;
     // APP_LOG(APP_LOG_LEVEL_INFO, "  Calendar Week Toggle = %d", settings.ToggleCalendarWeek);

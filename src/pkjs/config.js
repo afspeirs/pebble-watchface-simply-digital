@@ -42,7 +42,7 @@ module.exports = [
         "defaultValue": "FFFFFF",
         "sunlight": true,
         "capabilities": ["NOT_BW"],
-      }
+      },
     ]
   },
   {
@@ -54,7 +54,7 @@ module.exports = [
       },
       {
         "type": "toggle",
-        "messageKey": "TOGGLE_BLUETOOTH",
+        "messageKey": "TOGGLE_BLUETOOTH_ICON",
         "label": "Show Bluetooth icon on disconnection",
         "defaultValue": true,
       },
@@ -85,12 +85,11 @@ module.exports = [
       {
         "type": "toggle",
         "messageKey": "TOGGLE_BLUETOOTH_QUIET_TIME",
-        "label": "Vibrate during Quiet Time",
+        "label": "Vibrate when Bluetooth disconnects during Quiet Time",
         "defaultValue": false,
-      }
+      },
     ]
-   },
-
+  },
   {
     "type": "section",
     "items": [
@@ -156,12 +155,12 @@ module.exports = [
         "label": "Enable \"Power Save\" mode",
         "description": "Turn off the display until a flick/shake/tap of the watch",
         "defaultValue": false,
-      }
+      },
     ]
-   },
-   {
-     "type": "section",
-     "items": [
+  },
+  {
+    "type": "section",
+    "items": [
       {
         "type": "heading",
         "defaultValue": "Bottom text"
@@ -174,7 +173,7 @@ module.exports = [
       },
       {
         "type": "toggle",
-        "messageKey": "TOGGLE_WEEK",
+        "messageKey": "TOGGLE_CALENDAR_WEEK",
         "label": "Show calendar week (W52)",
         "defaultValue": false,
         "capabilities": ["NOT_ROUND"],
@@ -185,7 +184,7 @@ module.exports = [
         "label": "Select events to be displayed:",
         "defaultValue": [false, false, false, false, false, false],
         "options": ["New Year's Day", "Burns Night", "Halloween", "Christmas Eve", "Christmas Day", "Boxing Day"]
-      }
+      },
     ]
   },
   {
