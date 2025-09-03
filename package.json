@@ -6,6 +6,7 @@
   "scripts": {
     "clean": "pebble clean",
     "build": "pebble build",
+    "release": "npm run clean && npm run build",
     "install:basalt": "pebble install --emulator basalt",
     "install:chalk": "pebble install --emulator chalk",
     "install:emery": "pebble install --emulator emery",
