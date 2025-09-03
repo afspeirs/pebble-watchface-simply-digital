@@ -209,7 +209,7 @@ static void update_date(struct tm *tick_time) {
 
   // --- Main Date Formatting (Day, Suffix, Month, Week) ---
   char temp_day_str[6]; // e.g., "1st", "23rd"
-  char temp_month_str[8]; // e.g., "Sep", "September" (up to 7 chars + null for short)
+  char temp_month_str[10]; // e.g., "Sep", "September" (up to 9 chars + null for short)
   char temp_week_str[5]; // e.g., " W30"
 
   // 1. Format Day with Suffix
@@ -231,17 +231,9 @@ static void update_date(struct tm *tick_time) {
 
   // 2. Format Month (short or full)
   #if defined(PBL_ROUND)
-    if (strlen(month_full_name) > 5) {
-      strftime(temp_month_str, sizeof(temp_month_str), "%b", tick_time); // Abbreviated month
-    } else {
-      strftime(temp_month_str, sizeof(temp_month_str), "%B", tick_time); // Full month
-    }
+    strftime(temp_month_str, sizeof(temp_month_str), (strlen(month_full_name) > 5) ? "%b" : "%B", tick_time);
   #else
-    if (strlen(month_full_name) > 7 || settings.ToggleCalendarWeek) {
-      strftime(temp_month_str, sizeof(temp_month_str), "%b", tick_time); // Abbreviated month
-    } else {
-      strftime(temp_month_str, sizeof(temp_month_str), "%B", tick_time); // Full month
-    }
+    strftime(temp_month_str, sizeof(temp_month_str), settings.ToggleCalendarWeek ? "%b" : "%B", tick_time);
   #endif
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Month string: %s", temp_month_str);
 
@@ -493,6 +485,7 @@ static void window_load(Window *window) {
   s_text_bottom   = text_layer_create(GRectZero);
   s_layer_battery = bitmap_layer_create(GRectZero);
   s_layer_quiet   = bitmap_layer_create(GRectZero);
+
   #if defined(PBL_ROUND)
     s_layer_bluetooth = bitmap_layer_create(GRect(84, 150, 7, 11));
   #else
