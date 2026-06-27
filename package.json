@@ -105,7 +105,7 @@
         {
           "characterRegex": "[\\d a-zA-Z]",
           "file": "fonts/Bebas Neue Regular.ttf",
-          "name": "FONT_BEBAS_NEUE_REGULAR_38",
+          "name": "FONT_BEBAS_NEUE_REGULAR_32",
           "targetPlatforms": [
             "emery"
           ],
@@ -127,7 +127,7 @@
         {
           "characterRegex": "[\\d]",
           "file": "fonts/Bebas Neue Bold.ttf",
-          "name": "FONT_BEBAS_NEUE_BOLD_100",
+          "name": "FONT_BEBAS_NEUE_BOLD_96",
           "targetPlatforms": [
             "emery"
           ],

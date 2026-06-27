@@ -444,9 +444,9 @@ void unobstructed_change(AnimationProgress progress, void* data) {
     time_height = 102;
     date_height = 40;
 
-    time_offset = 65;
-    date_offset_top = 42;
-    date_offset_bottom = 7;
+    time_offset = 63;
+    date_offset_top = 38;
+    date_offset_bottom = 3;
   #else // Aplite, Basalt, Diorite, Chalk
     time_height = 74;
     date_height = 30;
@@ -471,8 +471,8 @@ static void window_load(Window *window) {
 
   // Fonts
   #if PBL_DISPLAY_HEIGHT == 228 // Emery
-    s_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_100));
-    s_font_date = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_38));
+    s_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_96));
+    s_font_date = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_32));
   #else // Aplite, Basalt, Diorite, Chalk
     s_font_time = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_BOLD_72));
     s_font_date = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_BEBAS_NEUE_REGULAR_28));
@@ -486,7 +486,9 @@ static void window_load(Window *window) {
   s_layer_battery = bitmap_layer_create(GRectZero);
   s_layer_quiet   = bitmap_layer_create(GRectZero);
 
-  #if defined(PBL_ROUND)
+  #if PBL_PLATFORM_EMERY
+    s_layer_bluetooth = bitmap_layer_create(GRect(188, 3, 7, 11));
+  #elif defined(PBL_ROUND)
     s_layer_bluetooth = bitmap_layer_create(GRect(84, 150, 7, 11));
   #else
     s_layer_bluetooth = bitmap_layer_create(GRect(130, 3, 7, 11));
